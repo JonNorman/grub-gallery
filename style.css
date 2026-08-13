@@ -29,6 +29,16 @@
 
 * { box-sizing: border-box; }
 
+/*
+ * The hidden attribute must always win. The UA sheet's [hidden] rule loses to
+ * any author rule that sets display at equal specificity — a plain `.thing
+ * { display: flex }` is enough to leave a "hidden" element on screen, with
+ * nothing raising an error and the JavaScript toggling it looking correct.
+ * Declared once here with !important rather than guarded per selector, so a
+ * new component cannot reintroduce it by forgetting.
+ */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   background: var(--bg);
@@ -101,7 +111,6 @@ a { color: inherit; }
   box-shadow: var(--shadow);
   transition: transform .18s ease, box-shadow .18s ease;
 }
-.card[hidden] { display: none; }
 .card__link { display: block; height: 100%; text-decoration: none; color: #fff; }
 
 .card__img { position: absolute; inset: 0; }

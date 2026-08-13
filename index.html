@@ -743,6 +743,17 @@ function load() {
 
 let state = planFromUrl() || load();
 
+// A shared link identical to what is already stored has nothing to adopt and
+// nothing to back out of, so it is not treated as shared at all — otherwise the
+// banner offers a choice between two identical weeks.
+if (state.shared) {
+  const stored = load();
+  if (stored.startDay === state.startDay &&
+      stored.plan.every((slug, i) => slug === state.plan[i])) {
+    state.shared = false;
+  }
+}
+
 function save() {
   state.shared = false;
   localStorage.setItem(STORE,
