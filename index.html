@@ -3,14 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Recipes</title>
+<title>Grub Gallery</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A5%98%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="style.css">
 
 </head>
 <body>
 <main class="index">
 <header class="masthead">
-<h1>Recipes</h1>
+<h1>Grub Gallery</h1>
 <p class="sub">56 recipes. Type what you have in — or pick a tag.</p>
 <input id="q" type="search" placeholder="chickpeas feta&hellip;" autocomplete="off"
        aria-label="Filter by ingredient">
@@ -25,8 +26,13 @@
       <select id="startDay"><option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6" selected>Saturday</option></select>
     </label>
     <button type="button" id="toggleList" class="btn">Shopping list</button>
+    <button type="button" id="sharePlan" class="btn btn--quiet">Share week</button>
     <button type="button" id="clearPlan" class="btn btn--quiet">Clear</button>
   </div>
+  <p class="planner__note" id="planNote" hidden>
+    <span id="planNoteText"></span>
+    <button type="button" id="dismissShared" class="btn btn--quiet">Use mine instead</button>
+  </p>
   <ol class="days" id="days"></ol>
   <div class="shopping" id="shopping" hidden></div>
 </section>
@@ -652,7 +658,30 @@ document.querySelectorAll('.chip').forEach(chip => {
 
 /* ── week plan ─────────────────────────────────────────────────────────── */
 
-let state = load();
+/* A plan in the URL wins over the stored one, so opening a shared link shows
+   that week. It is deliberately NOT saved on load — viewing someone's week
+   should not silently overwrite your own. Any edit calls save() and adopts it. */
+function planFromUrl() {
+  const params = new URLSearchParams(location.search);
+  if (!params.has('plan')) return null;
+  const plan = Array(7).fill(null);
+  params.get('plan').split(',').slice(0, 7).forEach((slug, i) => {
+    // Unknown slugs (a recipe renamed or removed since the link was made) leave
+    // the day empty rather than breaking the whole plan.
+    if (slug && BY_SLUG.has(slug)) plan[i] = slug;
+  });
+  // Guard missing and empty explicitly: Number(null) and Number('') are both 0,
+  // which would pass the range check below and silently start a shared week on
+  // Sunday. An explicit start=0 still means Sunday.
+  const raw = params.get('start');
+  const start = raw === null || raw.trim() === '' ? NaN : Number(raw);
+  return {
+    plan,
+    startDay: Number.isInteger(start) && start >= 0 && start <= 6
+      ? start : 6,
+    shared: true,
+  };
+}
 
 function load() {
   try {
@@ -662,7 +691,68 @@ function load() {
   return { startDay: 6, plan: Array(7).fill(null) };
 }
 
-function save() { localStorage.setItem(STORE, JSON.stringify(state)); }
+let state = planFromUrl() || load();
+
+function save() {
+  state.shared = false;
+  localStorage.setItem(STORE,
+    JSON.stringify({ startDay: state.startDay, plan: state.plan }));
+  // Once the shared week has been adopted, drop it from the URL. Leaving it
+  // there means a refresh re-applies the original link and silently discards
+  // the edit that just adopted it.
+  if (new URLSearchParams(location.search).has('plan')) {
+    history.replaceState(null, '', location.pathname + location.hash);
+  }
+  showNote();
+}
+
+function shareUrl() {
+  const url = new URL(location.href);
+  // Built by hand rather than via searchParams, which percent-encodes the
+  // commas. Slugs are [a-z0-9-] so nothing here needs escaping, and the link
+  // stays readable when it is pasted into a message.
+  url.search = '?plan=' + state.plan.map(s => s || '').join(',') +
+    '&start=' + state.startDay;
+  return url.toString();
+}
+
+function showNote() {
+  const note = document.getElementById('planNote');
+  note.hidden = !state.shared;
+  if (state.shared) {
+    document.getElementById('planNoteText').textContent =
+      'Showing a shared week. Change anything to make it yours.';
+  }
+}
+
+// Back out of a shared week without touching storage: the shared plan was
+// never saved, so this just re-reads what was already there.
+function dropShared() {
+  state = load();
+  if (new URLSearchParams(location.search).has('plan')) {
+    history.replaceState(null, '', location.pathname + location.hash);
+  }
+  startSel.value = state.startDay;
+  showNote();
+  renderPlan();
+}
+
+document.getElementById('dismissShared').addEventListener('click', dropShared);
+
+document.getElementById('sharePlan').addEventListener('click', async () => {
+  if (!state.plan.some(Boolean)) { alert('Add some recipes to the week first.'); return; }
+  const url = shareUrl();
+  try {
+    await navigator.clipboard.writeText(url);
+    const btn = document.getElementById('sharePlan');
+    const original = btn.textContent;
+    btn.textContent = 'Link copied';
+    setTimeout(() => { btn.textContent = original; }, 1800);
+  } catch (e) {
+    // clipboard needs a secure context; file:// and older browsers land here
+    window.prompt('Copy this link to share the week:', url);
+  }
+});
 
 // First occurrence of the chosen weekday on or after today, so the plan always
 // opens on the coming week rather than a week that has already gone.
@@ -829,6 +919,14 @@ startSel.addEventListener('change', () => {
 });
 
 document.getElementById('clearPlan').addEventListener('click', () => {
+  // While a shared week is on screen, Clear would save an empty plan over the
+  // viewer's own stored one — they came here to look at someone else's week,
+  // not to lose theirs. Confirm, and point at the non-destructive way out.
+  if (state.shared && !confirm(
+      'This clears the week and replaces your own saved plan with an empty one.\n\n' +
+      'To go back to your plan instead, use "Use mine instead".')) {
+    return;
+  }
   state.plan = Array(7).fill(null);
   save();
   renderPlan();
@@ -876,6 +974,7 @@ function escapeHtml(s) {
 }
 
 startSel.value = state.startDay;
+showNote();
 renderPlan();
 apply();
 </script>
