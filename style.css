@@ -183,6 +183,27 @@ a { color: inherit; }
   .card, .card__detail, .card__add { transition: none; }
 }
 
+/*
+ * On a phone the 190px auto-fill minimum leaves room for exactly one column,
+ * which turns 56 recipes into a very long scroll and wastes the tile's square
+ * shape. Two fixed columns instead: at 560px the auto-fill rule already
+ * resolves to two, so the layout carries straight on across the breakpoint
+ * rather than jumping. Three would put tiles under 130px, too small to read a
+ * title over a photo.
+ *
+ * This block must stay below the base .card rules. A media query adds no
+ * specificity, so declared earlier it would lose to the very rules it is
+ * meant to override — the columns would change and the type would not.
+ */
+@media (max-width: 560px) {
+  .index { padding: 14px; }
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .card__body { padding: 26px 9px 9px; }
+  .card__body h2 { font-size: 13px; line-height: 1.25; }
+  .card__meta { font-size: 11px; margin-top: 2px; }
+  .card__add { top: 6px; right: 6px; width: 28px; height: 28px; font-size: 17px; }
+}
+
 /* ── Week plan ─────────────────────────────────────────────────────────── */
 
 .planner {
