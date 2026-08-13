@@ -45,6 +45,9 @@ a { color: inherit; }
 .index { max-width: 1180px; margin: 0 auto; padding: clamp(20px, 4vw, 48px); }
 
 .masthead { margin-bottom: 28px; }
+.masthead__top {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+}
 .masthead h1 { font-size: clamp(30px, 6vw, 46px); margin: 0 0 6px; }
 .masthead .sub { color: var(--muted); margin: 0 0 18px; }
 
@@ -435,6 +438,22 @@ ol.method strong { font-weight: 620; }
 .modal__body .hero { max-height: 300px; }
 .modal__body .ing { position: static; }
 .modal__body .columns { margin-top: 24px; }
+
+/* Prose wants a shorter line than a recipe's two columns do, so the help
+   dialog is narrowed rather than the text being capped inside a wide one —
+   capping the text just leaves dead space down the right-hand side. */
+.modal--help { width: min(660px, 94vw); }
+.help h2 { font-size: 22px; margin: 4px 0 10px; }
+.help h3 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: .07em;
+  color: var(--muted); margin: 26px 0 6px;
+}
+.help p { margin: 0; }
+.help__lede { color: var(--muted); font-size: 17px; }
+.help code {
+  font-size: .9em; padding: 1px 5px; border-radius: 5px;
+  background: var(--accent-soft); color: var(--accent);
+}
 
 .card__link { -webkit-user-drag: none; }
 .card[draggable="true"] { cursor: grab; }

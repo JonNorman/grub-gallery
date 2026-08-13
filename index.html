@@ -11,7 +11,10 @@
 <body>
 <main class="index">
 <header class="masthead">
+<div class="masthead__top">
 <h1>Grub Gallery</h1>
+<button type="button" id="helpBtn" class="btn btn--quiet">Help</button>
+</div>
 <p class="sub">56 recipes. Type what you have in — or pick a tag.</p>
 <input id="q" type="search" placeholder="chickpeas feta&hellip;" autocomplete="off"
        aria-label="Filter by ingredient">
@@ -609,6 +612,53 @@
   <div class="recipe modal__body" id="modalBody"></div>
 </dialog>
 
+<dialog class="modal modal--help" id="helpModal" aria-labelledby="helpTitle">
+  <div class="modal__bar">
+    <button type="button" class="btn btn--quiet" id="helpClose">Close</button>
+  </div>
+  <div class="modal__body help">
+<h2 id="helpTitle">About Grub Gallery</h2>
+<p class="help__lede">A collection of recipes gathered over the years — family
+recipes, cookbook favourites and things worth keeping from the internet. They
+live as plain notes and are published here so they can be cooked from, planned
+with and shared.</p>
+
+<h3>Finding something to cook</h3>
+<p>Type what you have into the search box. Terms narrow together, so
+<code>chickpeas feta</code> shows only recipes needing both. The tag buttons
+filter by meal and diet, and combine with whatever you have typed.</p>
+
+<h3>Reading a recipe</h3>
+<p>Click or tap any card to open the recipe over the page, so you never lose
+your place — or your half-built week. Ingredients tick off as you cook. On a
+computer, hovering a card previews its main ingredients.</p>
+
+<h3>Planning a week</h3>
+<p>Press <strong>+</strong> on a card to drop it into the next free day, or drag
+a card onto a particular day. The week starts on Saturday unless you change
+<strong>Starts</strong>. As soon as something is planned the week pins to the
+top of the page, so it stays in reach while you browse.</p>
+
+<h3>Moving meals around</h3>
+<p>Drag a planned day onto another to move it. If that day is already taken the
+two swap places, so nothing gets quietly overwritten. <strong>×</strong> clears
+a single day. Dragging needs a mouse — on a phone, use <strong>+</strong>.</p>
+
+<h3>The shopping list</h3>
+<p><strong>Shopping list</strong> gathers every ingredient across the planned
+meals and groups them, so three recipes wanting Parmesan appear together with
+each amount. Quantities are listed rather than added up — easier to eye up at
+the shop than to trust a total built from “a good pinch”. Salt, pepper, oil and
+water are left out.</p>
+
+<h3>Sharing a week</h3>
+<p><strong>Share week</strong> copies a link with the plan inside it — send it to
+whoever is cooking or doing the shop. Opening someone else's link shows their
+week without touching yours: change anything to make it your own, or press
+<strong>Use mine instead</strong> to go back to what you had.</p>
+</div>
+</dialog>
+
 <script src="recipes-data.js"></script>
 <script>
 const DATA = window.RECIPES;
@@ -844,6 +894,9 @@ function openModal(slug) {
   modalSlug = slug;
   modalBody.innerHTML = rec.html;
   modalBody.scrollTop = 0;
+  // Named on open rather than via aria-labelledby: the heading only exists once
+  // the body has been injected, and the label changes with every recipe.
+  modal.setAttribute('aria-label', rec.name);
   modal.showModal();
 }
 
@@ -853,6 +906,11 @@ document.getElementById('modalAdd').addEventListener('click', () => {
 });
 // Click on the backdrop (the dialog itself, outside its content) closes it.
 modal.addEventListener('click', e => { if (e.target === modal) modal.close(); });
+
+const helpModal = document.getElementById('helpModal');
+document.getElementById('helpBtn').addEventListener('click', () => helpModal.showModal());
+document.getElementById('helpClose').addEventListener('click', () => helpModal.close());
+helpModal.addEventListener('click', e => { if (e.target === helpModal) helpModal.close(); });
 
 /* ── drag and drop ─────────────────────────────────────────────────────────
    Desktop only — the HTML5 drag API does not fire on touch. The + button on
