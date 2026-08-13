@@ -1,0 +1,427 @@
+/* Recipe site — vanilla CSS, no build step, no framework. */
+
+:root {
+  --bg: #fbf8f3;
+  --surface: #ffffff;
+  --ink: #23201c;
+  --muted: #6d6459;
+  --line: #e7e0d5;
+  --accent: #b4451f;
+  --accent-soft: #f6e9e2;
+  --radius: 14px;
+  --shadow: 0 1px 2px rgb(35 32 28 / 8%), 0 8px 24px rgb(35 32 28 / 6%);
+  --shadow-lift: 0 2px 6px rgb(35 32 28 / 10%), 0 18px 40px rgb(35 32 28 / 14%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #16140f;
+    --surface: #201d18;
+    --ink: #f0ebe3;
+    --muted: #a89e91;
+    --line: #332e26;
+    --accent: #f0855a;
+    --accent-soft: #3a251c;
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 30%);
+    --shadow-lift: 0 2px 6px rgb(0 0 0 / 45%), 0 18px 40px rgb(0 0 0 / 45%);
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.6 ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+h1, h2, h3 { line-height: 1.2; font-weight: 650; letter-spacing: -0.01em; }
+a { color: inherit; }
+
+/* ── Index ─────────────────────────────────────────────────────────────── */
+
+.index { max-width: 1180px; margin: 0 auto; padding: clamp(20px, 4vw, 48px); }
+
+.masthead { margin-bottom: 28px; }
+.masthead h1 { font-size: clamp(30px, 6vw, 46px); margin: 0 0 6px; }
+.masthead .sub { color: var(--muted); margin: 0 0 18px; }
+
+#q {
+  width: 100%;
+  max-width: 460px;
+  padding: 13px 16px;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+}
+#q:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+.chip {
+  font: inherit;
+  font-size: 14px;
+  padding: 6px 14px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.chip:hover { color: var(--ink); border-color: var(--accent); }
+.chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.count { color: var(--muted); font-size: 14px; margin: 14px 0 0; min-height: 1.2em; }
+.empty { color: var(--muted); text-align: center; padding: 60px 0; }
+
+.grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+
+/*
+ * Square tiles. The title sits over the image rather than under it, so the card
+ * is genuinely square and hovering can reveal more without resizing the tile —
+ * growing a grid item on hover reflows every card after it.
+ */
+.card {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--accent-soft);
+  box-shadow: var(--shadow);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.card[hidden] { display: none; }
+.card__link { display: block; height: 100%; text-decoration: none; color: #fff; }
+
+.card__img { position: absolute; inset: 0; }
+.card__img img {
+  width: 100%; height: 100%;
+  object-fit: cover;      /* centre crop — keeps the middle of the photo */
+  object-position: center;
+  display: block;
+}
+.noimg {
+  width: 100%; height: 100%;
+  background:
+    repeating-linear-gradient(45deg, var(--accent-soft) 0 12px, transparent 12px 24px);
+}
+
+.card__body {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 34px 13px 12px;
+  background: linear-gradient(to top,
+    rgb(0 0 0 / 88%) 0%, rgb(0 0 0 / 66%) 45%, rgb(0 0 0 / 0%) 100%);
+}
+.card__body h2 {
+  font-size: 15px; margin: 0; color: #fff;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 60%);
+}
+.card__meta { color: rgb(255 255 255 / 75%); font-size: 12px; margin: 3px 0 0; }
+.card__ing {
+  margin: 7px 0 0; font-size: 12px; line-height: 1.45;
+  color: rgb(255 255 255 / 82%);
+}
+
+.card__add {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  font: 600 19px/1 system-ui, sans-serif;
+  color: var(--ink);
+  background: rgb(255 255 255 / 92%);
+  border: none; border-radius: 50%;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .15s ease, transform .15s ease;
+}
+.card__add:hover { transform: scale(1.1); }
+.card__add:focus-visible { opacity: 1; outline: 2px solid var(--accent); }
+.card.is-planned .card__add { opacity: 1; background: var(--accent); color: #fff; }
+.card.is-planned { outline: 3px solid var(--accent); outline-offset: -3px; }
+
+/*
+ * Hover is an enhancement, never the only way in. Where there is no hover the
+ * add button is always visible and the ingredient preview is left off — on a
+ * square tile it would cover the photo, and the recipe page has it anyway.
+ */
+@media (hover: hover) {
+  .card__detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows .22s ease, opacity .22s ease;
+  }
+  .card__detail > * { overflow: hidden; }
+  .card:hover, .card:focus-within {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lift);
+  }
+  .card:hover .card__detail,
+  .card:focus-within .card__detail { grid-template-rows: 1fr; opacity: 1; }
+  .card:hover .card__add { opacity: 1; }
+}
+
+@media (hover: none) {
+  .card__detail { display: none; }
+  .card__add { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card, .card__detail, .card__add { transition: none; }
+}
+
+/* ── Week plan ─────────────────────────────────────────────────────────── */
+
+.planner {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin: 24px 0;
+  box-shadow: var(--shadow);
+}
+.planner__head {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  margin-bottom: 12px;
+}
+.planner__head h2 { font-size: 15px; margin: 0; flex: 1 1 auto; }
+.planner__n { color: var(--muted); font-weight: 400; }
+.planner__start { font-size: 13px; color: var(--muted); }
+.planner__start select {
+  font: inherit; font-size: 13px; padding: 4px 6px;
+  color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 7px;
+}
+
+.btn {
+  font: inherit; font-size: 13px; padding: 6px 13px;
+  color: #fff; background: var(--accent);
+  border: none; border-radius: 999px; cursor: pointer;
+}
+.btn--quiet { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+.btn:hover { filter: brightness(1.08); }
+
+.days {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 8px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+@media (max-width: 780px) { .days { grid-template-columns: repeat(2, 1fr); } }
+
+.day {
+  position: relative;
+  min-height: 74px;
+  padding: 8px 9px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  font-size: 13px;
+}
+.day--full { border-style: solid; background: var(--accent-soft); border-color: transparent; }
+.day__name { display: block; color: var(--muted); font-size: 11px;
+             text-transform: uppercase; letter-spacing: .05em; }
+.day__recipe { display: block; margin-top: 4px; color: var(--ink);
+               text-decoration: none; font-weight: 550; line-height: 1.3; }
+.day__recipe:hover { color: var(--accent); }
+.day__empty { color: var(--line); font-size: 20px; }
+.day__x {
+  position: absolute; top: 4px; right: 4px;
+  width: 20px; height: 20px; line-height: 1;
+  font-size: 15px; color: var(--muted);
+  background: none; border: none; cursor: pointer;
+}
+.day__x:hover { color: var(--accent); }
+
+/*
+ * Planning mode. Pinning the plan keeps it as a drop target while you scroll
+ * the grid, so it compacts at the same time: day cells lose their min-height,
+ * and the shopping list scrolls inside a cap rather than pushing the grid off
+ * screen. Without the compaction this eats most of a phone viewport.
+ */
+.planner--pinned {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  margin-top: 0;
+  border-radius: 0 0 var(--radius) var(--radius);
+  border-top-color: transparent;
+  box-shadow: 0 6px 24px rgb(35 32 28 / 12%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .planner--pinned {
+    box-shadow: 0 6px 24px rgb(0 0 0 / 50%);
+  }
+}
+.planner--pinned .planner__head { margin-bottom: 9px; }
+.planner--pinned .day { min-height: 0; padding: 6px 8px; }
+.planner--pinned .day__recipe { font-size: 12.5px; }
+.planner--pinned .day__empty { font-size: 15px; line-height: 1; }
+.planner--pinned .shopping { max-height: 40vh; overflow-y: auto; }
+
+/* Pinned on a narrow screen, seven days become one scrollable strip rather
+   than a four-row grid that would leave no room for the recipes below. */
+@media (max-width: 780px) {
+  .planner--pinned .days {
+    grid-template-columns: repeat(7, minmax(88px, 1fr));
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding-bottom: 4px;
+  }
+  .planner--pinned .day { scroll-snap-align: start; }
+}
+
+.day--over { border-color: var(--accent); border-style: solid; background: var(--accent-soft); }
+.day[draggable="true"] { cursor: grab; }
+.day[draggable="true"]:active { cursor: grabbing; }
+
+.shopping { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 14px; }
+.shopping h3 { font-size: 14px; margin: 0 0 10px; }
+.shopping__n { color: var(--muted); font-weight: 400; font-size: 13px; }
+.shopping__empty { color: var(--muted); font-size: 14px; margin: 0; }
+.shopping > ul { list-style: none; margin: 0; padding: 0;
+                 columns: 2; column-gap: 32px; }
+@media (max-width: 700px) { .shopping > ul { columns: 1; } }
+.shopping__group { break-inside: avoid; margin-bottom: 12px; }
+.shopping__group > label {
+  display: flex; gap: 8px; align-items: baseline;
+  font-weight: 600; font-size: 14px; cursor: pointer;
+}
+.shopping__group input { accent-color: var(--accent); }
+.shopping__group input:checked + span { color: var(--muted); text-decoration: line-through; }
+.shopping__group ul { list-style: none; margin: 2px 0 0 22px; padding: 0; }
+.shopping__line { font-size: 13px; color: var(--muted); }
+.shopping__from { opacity: .7; font-size: 11.5px; }
+
+/* ── Recipe page ───────────────────────────────────────────────────────── */
+
+.recipe { max-width: 940px; margin: 0 auto; padding: clamp(20px, 4vw, 48px); }
+
+.back { color: var(--muted); text-decoration: none; font-size: 14px; }
+.back:hover { color: var(--accent); }
+
+.recipe h1 { font-size: clamp(27px, 5vw, 40px); margin: 14px 0 8px; }
+.recipe .meta { color: var(--muted); margin: 0 0 10px; }
+.recipe .lede { font-size: 18px; color: var(--muted); margin: 12px 0 0; max-width: 62ch; }
+
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; }
+.tag {
+  font-size: 12px; padding: 3px 10px; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent);
+}
+
+.hero {
+  width: 100%;
+  max-height: 460px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  margin: 24px 0 8px;
+  display: block;
+}
+
+.before {
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 16px;
+  margin: 20px 0 0;
+}
+.before strong { color: var(--accent); display: block; font-size: 13px;
+                 text-transform: uppercase; letter-spacing: .06em; }
+
+.columns {
+  display: grid;
+  gap: clamp(24px, 4vw, 48px);
+  grid-template-columns: minmax(240px, 1fr) minmax(0, 1.6fr);
+  margin-top: 32px;
+  align-items: start;
+}
+@media (max-width: 760px) { .columns { grid-template-columns: 1fr; } }
+
+.columns h2 {
+  font-size: 13px; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--muted); margin: 0 0 12px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.columns h3 { font-size: 15px; margin: 20px 0 8px; }
+
+.ing { position: sticky; top: 24px; }
+@media (max-width: 760px) { .ing { position: static; } }
+
+ul.ingredients { list-style: none; margin: 0; padding: 0; }
+ul.ingredients li { border-bottom: 1px solid var(--line); }
+ul.ingredients label {
+  display: flex; gap: 10px; align-items: baseline;
+  padding: 9px 2px; cursor: pointer;
+}
+ul.ingredients input { margin: 0; accent-color: var(--accent); flex: none; }
+ul.ingredients input:checked + span { color: var(--muted); text-decoration: line-through; }
+
+ol.method { margin: 0; padding-left: 1.4em; }
+ol.method li { margin-bottom: 16px; padding-left: 4px; }
+ol.method li::marker { color: var(--accent); font-weight: 650; }
+ol.method strong { font-weight: 620; }
+
+.notes {
+  margin-top: 44px; padding: 20px 24px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.notes h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em;
+            color: var(--muted); margin: 0 0 10px; }
+.notes p { margin: 0 0 10px; }
+.notes p:last-child { margin-bottom: 0; }
+
+.source { color: var(--muted); font-size: 13px; margin-top: 24px; word-break: break-word; }
+
+/* ── Modal ─────────────────────────────────────────────────────────────── */
+
+.modal {
+  width: min(940px, 94vw);
+  max-height: 90vh;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: var(--shadow-lift);
+  overflow: hidden;
+}
+.modal::backdrop { background: rgb(0 0 0 / 55%); backdrop-filter: blur(2px); }
+
+.modal__bar {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.modal__body {
+  max-height: calc(90vh - 56px);
+  overflow-y: auto;
+  padding: 4px clamp(16px, 4vw, 36px) clamp(20px, 4vw, 36px);
+  -webkit-overflow-scrolling: touch;
+}
+.modal__body h1 { margin-top: 8px; }
+.modal__body .hero { max-height: 300px; }
+.modal__body .ing { position: static; }
+.modal__body .columns { margin-top: 24px; }
+
+.card__link { -webkit-user-drag: none; }
+.card[draggable="true"] { cursor: grab; }
+.card[draggable="true"]:active { cursor: grabbing; }
+
+@media print {
+  .back, .chips, #q, .hero { display: none; }
+  .columns { grid-template-columns: 1fr 1.6fr; }
+  body { background: #fff; }
+}

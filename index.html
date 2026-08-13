@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recipes</title>
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+<main class="index">
+<header class="masthead">
+<h1>Recipes</h1>
+<p class="sub">56 recipes. Type what you have in — or pick a tag.</p>
+<input id="q" type="search" placeholder="chickpeas feta&hellip;" autocomplete="off"
+       aria-label="Filter by ingredient">
+<div class="chips"><button class="chip" data-tag="breakfast">breakfast</button><button class="chip" data-tag="lunch">lunch</button><button class="chip" data-tag="dinner">dinner</button><button class="chip" data-tag="snack">snack</button><button class="chip" data-tag="dessert">dessert</button><button class="chip" data-tag="one-pot">one-pot</button><button class="chip" data-tag="vegan">vegan</button><button class="chip" data-tag="vegetarian">vegetarian</button><button class="chip" data-tag="pescatarian">pescatarian</button></div>
+<p class="count" id="count"></p>
+</header>
+
+<section class="planner" id="planner" aria-label="Week plan">
+  <div class="planner__head">
+    <h2>Week plan <span class="planner__n" id="planN"></span></h2>
+    <label class="planner__start">Starts
+      <select id="startDay"><option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6" selected>Saturday</option></select>
+    </label>
+    <button type="button" id="toggleList" class="btn">Shopping list</button>
+    <button type="button" id="clearPlan" class="btn btn--quiet">Clear</button>
+  </div>
+  <ol class="days" id="days"></ol>
+  <div class="shopping" id="shopping" hidden></div>
+</section>
+
+<div class="grid" id="grid"><article class="card" data-slug="asparagus-risotto" draggable="true">
+<a class="card__link" href="asparagus-risotto.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/asparagus-risotto-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Asparagus Risotto</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">asparagus, butter, garlic, onion, parmesan, rice, stock, white wine</p></div>
+</div></a>
+<button class="card__add" data-slug="asparagus-risotto" type="button"
+        aria-label="Add Asparagus Risotto to the week plan">+</button>
+</article><article class="card" data-slug="aubergine-bulgar-roast" draggable="true">
+<a class="card__link" href="aubergine-bulgar-roast.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/aubergine-bulgar-roast-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Aubergine Bulgar Roast</h2>
+<p class="card__meta">Serves 3</p>
+<div class="card__detail"><p class="card__ing">aubergine, bulgur wheat, cinnamon, feta, lemon, nutmeg, olives, onion, parsley</p></div>
+</div></a>
+<button class="card__add" data-slug="aubergine-bulgar-roast" type="button"
+        aria-label="Add Aubergine Bulgar Roast to the week plan">+</button>
+</article><article class="card" data-slug="black-bean-birria" draggable="true">
+<a class="card__link" href="black-bean-birria.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/black-bean-birria-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Black Bean Birria</h2>
+<p class="card__meta">Serves 3 · 45m</p>
+<div class="card__detail"><p class="card__ing">avocado, black beans, celery, chilli, chilli flakes, cinnamon, coriander, cumin, feta</p></div>
+</div></a>
+<button class="card__add" data-slug="black-bean-birria" type="button"
+        aria-label="Add Black Bean Birria to the week plan">+</button>
+</article><article class="card" data-slug="black-chickpea-paneer-curry" draggable="true">
+<a class="card__link" href="black-chickpea-paneer-curry.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/black-chickpea-paneer-curry-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Black Chickpea + Paneer Curry</h2>
+<p class="card__meta">Serves 4 · 30m</p>
+<div class="card__detail"><p class="card__ing">black chickpeas, chilli, coriander, cumin, garam masala, garlic, ginger, ground coriander, mango chutney</p></div>
+</div></a>
+<button class="card__add" data-slug="black-chickpea-paneer-curry" type="button"
+        aria-label="Add Black Chickpea + Paneer Curry to the week plan">+</button>
+</article><article class="card" data-slug="bubbling-one-pan-cheesy-tomato-butter-beans" draggable="true">
+<a class="card__link" href="bubbling-one-pan-cheesy-tomato-butter-beans.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/bubbling-one-pan-cheesy-tomato-butter-beans-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Bubbling One-Pan Cheesy Tomato Butter Beans</h2>
+<p class="card__meta">Serves 2 · 30m</p>
+<div class="card__detail"><p class="card__ing">basil, bread, butter beans, cheddar, garlic, mozzarella, onion, oregano, parsley</p></div>
+</div></a>
+<button class="card__add" data-slug="bubbling-one-pan-cheesy-tomato-butter-beans" type="button"
+        aria-label="Add Bubbling One-Pan Cheesy Tomato Butter Beans to the week plan">+</button>
+</article><article class="card" data-slug="butterfly-cakes" draggable="true">
+<a class="card__link" href="butterfly-cakes.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/butterfly-cakes-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Butterfly Cakes</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">baking powder, butter, eggs, flour, sugar</p></div>
+</div></a>
+<button class="card__add" data-slug="butterfly-cakes" type="button"
+        aria-label="Add Butterfly Cakes to the week plan">+</button>
+</article><article class="card" data-slug="carlin-pea-ragu" draggable="true">
+<a class="card__link" href="carlin-pea-ragu.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/carlin-pea-ragu-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Carlin Pea Ragu</h2>
+<p class="card__meta">Serves 4 · 40m</p>
+<div class="card__detail"><p class="card__ing">bread, carlin peas, carrot, celery, garlic, marmite, mixed herbs, onion, parmesan</p></div>
+</div></a>
+<button class="card__add" data-slug="carlin-pea-ragu" type="button"
+        aria-label="Add Carlin Pea Ragu to the week plan">+</button>
+</article><article class="card" data-slug="charred-courgette-sumac-chickpea-salad-with-garlicky-lemon-yoghurt" draggable="true">
+<a class="card__link" href="charred-courgette-sumac-chickpea-salad-with-garlicky-lemon-yoghurt.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/charred-courgette-sumac-chickpea-salad-with-garlicky-lemon-yoghurt-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Charred Courgette + Sumac Chickpea Salad with Garlicky Lemon Yoghurt</h2>
+<p class="card__meta">Serves 3-4 · 20m</p>
+<div class="card__detail"><p class="card__ing">basil, chickpeas, chilli flakes, courgette, garlic, lemon, lettuce, mint, peas</p></div>
+</div></a>
+<button class="card__add" data-slug="charred-courgette-sumac-chickpea-salad-with-garlicky-lemon-yoghurt" type="button"
+        aria-label="Add Charred Courgette + Sumac Chickpea Salad with Garlicky Lemon Yoghurt to the week plan">+</button>
+</article><article class="card" data-slug="cheesy-butter-bean-tomato-garlic-pasta-bake" draggable="true">
+<a class="card__link" href="cheesy-butter-bean-tomato-garlic-pasta-bake.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/cheesy-butter-bean-tomato-garlic-pasta-bake-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Cheesy Butter Bean, Tomato + Garlic Pasta Bake</h2>
+<p class="card__meta">Serves 3 · 40m</p>
+<div class="card__detail"><p class="card__ing">basil, bread, butter beans, cheddar, chilli flakes, garlic, lemon, mozzarella, onion</p></div>
+</div></a>
+<button class="card__add" data-slug="cheesy-butter-bean-tomato-garlic-pasta-bake" type="button"
+        aria-label="Add Cheesy Butter Bean, Tomato + Garlic Pasta Bake to the week plan">+</button>
+</article><article class="card" data-slug="chicken-and-posh-ham" draggable="true">
+<a class="card__link" href="chicken-and-posh-ham.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/chicken-and-posh-ham-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Chicken and Posh Ham</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">chicken, lemon, parmesan, prosciutto, thyme</p></div>
+</div></a>
+<button class="card__add" data-slug="chicken-and-posh-ham" type="button"
+        aria-label="Add Chicken and Posh Ham to the week plan">+</button>
+</article><article class="card" data-slug="chickpea-caesar-salad" draggable="true">
+<a class="card__link" href="chickpea-caesar-salad.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/chickpea-caesar-salad-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Chickpea Caesar Salad</h2>
+<p class="card__meta">Serves 4 · 30m</p>
+<div class="card__detail"><p class="card__ing">anchovies, bread, chickpeas, garlic, lemon, lettuce, mayonnaise, mustard, parmesan</p></div>
+</div></a>
+<button class="card__add" data-slug="chickpea-caesar-salad" type="button"
+        aria-label="Add Chickpea Caesar Salad to the week plan">+</button>
+</article><article class="card" data-slug="chickpeas-alla-vodka-with-charred-tenderstem-broccoli" draggable="true">
+<a class="card__link" href="chickpeas-alla-vodka-with-charred-tenderstem-broccoli.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/chickpeas-alla-vodka-with-charred-tenderstem-broccoli-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Chickpeas alla Vodka with Charred Tenderstem Broccoli</h2>
+<p class="card__meta">Serves 2 · 30m</p>
+<div class="card__detail"><p class="card__ing">basil, bread, broccoli, chickpeas, chilli flakes, crème fraîche, double cream, garlic, lemon</p></div>
+</div></a>
+<button class="card__add" data-slug="chickpeas-alla-vodka-with-charred-tenderstem-broccoli" type="button"
+        aria-label="Add Chickpeas alla Vodka with Charred Tenderstem Broccoli to the week plan">+</button>
+</article><article class="card" data-slug="chickpeas-and-macaroni" draggable="true">
+<a class="card__link" href="chickpeas-and-macaroni.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/chickpeas-and-macaroni-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Chickpeas and Macaroni</h2>
+<p class="card__meta">Serves 2</p>
+<div class="card__detail"><p class="card__ing">basil, bay leaves, chickpeas, chilli flakes, cinnamon, double cream, garlic, onion, parsley</p></div>
+</div></a>
+<button class="card__add" data-slug="chickpeas-and-macaroni" type="button"
+        aria-label="Add Chickpeas and Macaroni to the week plan">+</button>
+</article><article class="card" data-slug="chilli-prawn-pasta" draggable="true">
+<a class="card__link" href="chilli-prawn-pasta.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/chilli-prawn-pasta-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Chilli Prawn Pasta</h2>
+<p class="card__meta">Serves 4</p>
+<div class="card__detail"><p class="card__ing">basil, chilli flakes, coriander, garlic, lime, onion, passata, pasta, prawns</p></div>
+</div></a>
+<button class="card__add" data-slug="chilli-prawn-pasta" type="button"
+        aria-label="Add Chilli Prawn Pasta to the week plan">+</button>
+</article><article class="card" data-slug="chipotle-roasted-squash-black-bean-traybake" draggable="true">
+<a class="card__link" href="chipotle-roasted-squash-black-bean-traybake.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/chipotle-roasted-squash-black-bean-traybake-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Chipotle Roasted Squash + Black Bean Traybake</h2>
+<p class="card__meta">Serves 4 · 50m</p>
+<div class="card__detail"><p class="card__ing">avocado, black beans, butternut squash, chilli powder, chipotle, cinnamon, coriander, garlic, honey</p></div>
+</div></a>
+<button class="card__add" data-slug="chipotle-roasted-squash-black-bean-traybake" type="button"
+        aria-label="Add Chipotle Roasted Squash + Black Bean Traybake to the week plan">+</button>
+</article><article class="card" data-slug="chocolate-bread-and-butter-pudding" draggable="true">
+<a class="card__link" href="chocolate-bread-and-butter-pudding.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/chocolate-bread-and-butter-pudding-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Chocolate Bread and Butter Pudding</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">bread, butter, cinnamon, dark chocolate, dark rum, double cream, eggs, sugar</p></div>
+</div></a>
+<button class="card__add" data-slug="chocolate-bread-and-butter-pudding" type="button"
+        aria-label="Add Chocolate Bread and Butter Pudding to the week plan">+</button>
+</article><article class="card" data-slug="chocolate-snowballs" draggable="true">
+<a class="card__link" href="chocolate-snowballs.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/chocolate-snowballs-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Chocolate Snowballs</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">butter, cocoa powder, digestive biscuits, milk, sugar</p></div>
+</div></a>
+<button class="card__add" data-slug="chocolate-snowballs" type="button"
+        aria-label="Add Chocolate Snowballs to the week plan">+</button>
+</article><article class="card" data-slug="citrus-and-cashew-nut-salad" draggable="true">
+<a class="card__link" href="citrus-and-cashew-nut-salad.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/citrus-and-cashew-nut-salad-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Citrus and Cashew Nut Salad</h2>
+<p class="card__meta">Serves 4</p>
+<div class="card__detail"><p class="card__ing">beetroot, cabbage, cashews, celeriac, chilli, coriander, fennel, ginger, grapefruit</p></div>
+</div></a>
+<button class="card__add" data-slug="citrus-and-cashew-nut-salad" type="button"
+        aria-label="Add Citrus and Cashew Nut Salad to the week plan">+</button>
+</article><article class="card" data-slug="clares-avocado-and-goats-cheese-salad" draggable="true">
+<a class="card__link" href="clares-avocado-and-goats-cheese-salad.html" draggable="false">
+<div class="card__img"><div class="noimg"></div></div>
+<div class="card__body">
+<h2>Clare&#x27;s Avocado and Goat&#x27;s Cheese Salad</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">avocado, beetroot, goat&#x27;s cheese, salad leaves, vinegar</p></div>
+</div></a>
+<button class="card__add" data-slug="clares-avocado-and-goats-cheese-salad" type="button"
+        aria-label="Add Clare&#x27;s Avocado and Goat&#x27;s Cheese Salad to the week plan">+</button>
+</article><article class="card" data-slug="clares-chicken-and-ham-pie" draggable="true">
+<a class="card__link" href="clares-chicken-and-ham-pie.html" draggable="false">
+<div class="card__img"><div class="noimg"></div></div>
+<div class="card__body">
+<h2>Clare&#x27;s Chicken and Ham Pie</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">butter, carrot, chicken, chips, flour, ham, milk, mushroom, puff pastry</p></div>
+</div></a>
+<button class="card__add" data-slug="clares-chicken-and-ham-pie" type="button"
+        aria-label="Add Clare&#x27;s Chicken and Ham Pie to the week plan">+</button>
+</article><article class="card" data-slug="creamy-courgette-beanotto" draggable="true">
+<a class="card__link" href="creamy-courgette-beanotto.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/creamy-courgette-beanotto-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Creamy Courgette Beanotto</h2>
+<p class="card__meta">Serves 2-3 · 30m</p>
+<div class="card__detail"><p class="card__ing">basil, courgette, crème fraîche, garlic, lemon, parmesan, parsley, pine nuts, stock</p></div>
+</div></a>
+<button class="card__add" data-slug="creamy-courgette-beanotto" type="button"
+        aria-label="Add Creamy Courgette Beanotto to the week plan">+</button>
+</article><article class="card" data-slug="creamy-courgette-lasagne" draggable="true">
+<a class="card__link" href="creamy-courgette-lasagne.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/creamy-courgette-lasagne-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Creamy Courgette Lasagne</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">cheddar, courgette, garlic, onion, pasta, pasta sauce, ricotta, tomato</p></div>
+</div></a>
+<button class="card__add" data-slug="creamy-courgette-lasagne" type="button"
+        aria-label="Add Creamy Courgette Lasagne to the week plan">+</button>
+</article><article class="card" data-slug="creamy-halloumi-pea-butter-bean-curry" draggable="true">
+<a class="card__link" href="creamy-halloumi-pea-butter-bean-curry.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/creamy-halloumi-pea-butter-bean-curry-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Creamy Halloumi, Pea + Butter Bean Curry</h2>
+<p class="card__meta">Serves 3 · 35m</p>
+<div class="card__detail"><p class="card__ing">butter beans, chilli flakes, chilli powder, coriander, cumin, garam masala, garlic, ginger, ground coriander</p></div>
+</div></a>
+<button class="card__add" data-slug="creamy-halloumi-pea-butter-bean-curry" type="button"
+        aria-label="Add Creamy Halloumi, Pea + Butter Bean Curry to the week plan">+</button>
+</article><article class="card" data-slug="crispy-kale-and-bulgar-wheat-salad" draggable="true">
+<a class="card__link" href="crispy-kale-and-bulgar-wheat-salad.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/crispy-kale-and-bulgar-wheat-salad-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Crispy Kale and Bulgar Wheat Salad</h2>
+<p class="card__meta">Serves 2</p>
+<div class="card__detail"><p class="card__ing">almonds, bulgur wheat, coriander, ginger, goat&#x27;s cheese, kale, lemon, pomegranate, yoghurt</p></div>
+</div></a>
+<button class="card__add" data-slug="crispy-kale-and-bulgar-wheat-salad" type="button"
+        aria-label="Add Crispy Kale and Bulgar Wheat Salad to the week plan">+</button>
+</article><article class="card" data-slug="cucumber-melon-and-feta-salad" draggable="true">
+<a class="card__link" href="cucumber-melon-and-feta-salad.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/cucumber-melon-and-feta-salad-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Cucumber, Melon &amp; Feta Salad</h2>
+<p class="card__meta">Serves 4</p>
+<div class="card__detail"><p class="card__ing">chilli, cucumber, feta, honey, melon, mint, vinegar</p></div>
+</div></a>
+<button class="card__add" data-slug="cucumber-melon-and-feta-salad" type="button"
+        aria-label="Add Cucumber, Melon &amp; Feta Salad to the week plan">+</button>
+</article><article class="card" data-slug="dads-chicken-and-ham-pie" draggable="true">
+<a class="card__link" href="dads-chicken-and-ham-pie.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/dads-chicken-and-ham-pie-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Dad&#x27;s Chicken and Ham Pie</h2>
+<p class="card__meta">Serves 4</p>
+<div class="card__detail"><p class="card__ing">butter, carrot, chicken, chips, flour, ham, milk, mushroom, puff pastry</p></div>
+</div></a>
+<button class="card__add" data-slug="dads-chicken-and-ham-pie" type="button"
+        aria-label="Add Dad&#x27;s Chicken and Ham Pie to the week plan">+</button>
+</article><article class="card" data-slug="delias-char-grilled-aubergine-salad" draggable="true">
+<a class="card__link" href="delias-char-grilled-aubergine-salad.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/delias-char-grilled-aubergine-salad-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Delia&#x27;s Char-grilled Aubergine Salad</h2>
+<p class="card__meta">Serves 4</p>
+<div class="card__detail"><p class="card__ing">aubergine, basil, crème fraîche, feta, paprika, salad leaves, spinach, tomato, vinegar</p></div>
+</div></a>
+<button class="card__add" data-slug="delias-char-grilled-aubergine-salad" type="button"
+        aria-label="Add Delia&#x27;s Char-grilled Aubergine Salad to the week plan">+</button>
+</article><article class="card" data-slug="fusilli-a-la-vodka-with-basil-and-parmesan" draggable="true">
+<a class="card__link" href="fusilli-a-la-vodka-with-basil-and-parmesan.html" draggable="false">
+<div class="card__img"><div class="noimg"></div></div>
+<div class="card__body">
+<h2>Fusilli a la Vodka with Basil and Parmesan</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">basil, butter, chilli flakes, double cream, garlic, parmesan, pasta, shallot, tomato purée</p></div>
+</div></a>
+<button class="card__add" data-slug="fusilli-a-la-vodka-with-basil-and-parmesan" type="button"
+        aria-label="Add Fusilli a la Vodka with Basil and Parmesan to the week plan">+</button>
+</article><article class="card" data-slug="gorgonzola-risotto" draggable="true">
+<a class="card__link" href="gorgonzola-risotto.html" draggable="false">
+<div class="card__img"><div class="noimg"></div></div>
+<div class="card__body">
+<h2>Gorgonzola Risotto</h2>
+<p class="card__meta">Serves 3</p>
+<div class="card__detail"><p class="card__ing">butter, garlic, gorgonzola, leek, rice, stock, tarragon, white wine</p></div>
+</div></a>
+<button class="card__add" data-slug="gorgonzola-risotto" type="button"
+        aria-label="Add Gorgonzola Risotto to the week plan">+</button>
+</article><article class="card" data-slug="harissa-chickpeas" draggable="true">
+<a class="card__link" href="harissa-chickpeas.html" draggable="false">
+<div class="card__img"><div class="noimg"></div></div>
+<div class="card__body">
+<h2>Harissa Chickpeas</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">chickpeas, cumin, fennel seeds, harissa, lemon</p></div>
+</div></a>
+<button class="card__add" data-slug="harissa-chickpeas" type="button"
+        aria-label="Add Harissa Chickpeas to the week plan">+</button>
+</article><article class="card" data-slug="honey-mustard-chicken-pasta" draggable="true">
+<a class="card__link" href="honey-mustard-chicken-pasta.html" draggable="false">
+<div class="card__img"><div class="noimg"></div></div>
+<div class="card__body">
+<h2>Honey Mustard Chicken Pasta</h2>
+<p class="card__meta">Serves 3</p>
+<div class="card__detail"><p class="card__ing">basil, chicken, honey, mayonnaise, mustard, pasta, spring onion, tomato</p></div>
+</div></a>
+<button class="card__add" data-slug="honey-mustard-chicken-pasta" type="button"
+        aria-label="Add Honey Mustard Chicken Pasta to the week plan">+</button>
+</article><article class="card" data-slug="huevos-rancheros" draggable="true">
+<a class="card__link" href="huevos-rancheros.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/huevos-rancheros-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Huevos Rancheros</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">bay leaves, cheddar, chilli, cloves, eggs, garlic, onion, red pepper, tomato</p></div>
+</div></a>
+<button class="card__add" data-slug="huevos-rancheros" type="button"
+        aria-label="Add Huevos Rancheros to the week plan">+</button>
+</article><article class="card" data-slug="kale-salad-bk" draggable="true">
+<a class="card__link" href="kale-salad-bk.html" draggable="false">
+<div class="card__img"><div class="noimg"></div></div>
+<div class="card__body">
+<h2>Kale Salad (BK)</h2>
+<p class="card__meta">Serves 6-8</p>
+<div class="card__detail"><p class="card__ing">breadcrumbs, chilli flakes, garlic, kale, lemon, parmesan</p></div>
+</div></a>
+<button class="card__add" data-slug="kale-salad-bk" type="button"
+        aria-label="Add Kale Salad (BK) to the week plan">+</button>
+</article><article class="card" data-slug="masala-baked-beans-with-pickled-red-onion-fresh-coriander" draggable="true">
+<a class="card__link" href="masala-baked-beans-with-pickled-red-onion-fresh-coriander.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/masala-baked-beans-with-pickled-red-onion-fresh-coriander-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Masala Baked Beans with Pickled Red Onion + Fresh Coriander</h2>
+<p class="card__meta">Serves 2 · 10m</p>
+<div class="card__detail"><p class="card__ing">agave, baked beans, bread, coriander, honey, onion, vinegar</p></div>
+</div></a>
+<button class="card__add" data-slug="masala-baked-beans-with-pickled-red-onion-fresh-coriander" type="button"
+        aria-label="Add Masala Baked Beans with Pickled Red Onion + Fresh Coriander to the week plan">+</button>
+</article><article class="card" data-slug="miso-mushroom-beanotto" draggable="true">
+<a class="card__link" href="miso-mushroom-beanotto.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/miso-mushroom-beanotto-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Miso Mushroom Beanotto</h2>
+<p class="card__meta">Serves 2 · 35m</p>
+<div class="card__detail"><p class="card__ing">bread, butter, miso, mushroom, parmesan, stock, white beans</p></div>
+</div></a>
+<button class="card__add" data-slug="miso-mushroom-beanotto" type="button"
+        aria-label="Add Miso Mushroom Beanotto to the week plan">+</button>
+</article><article class="card" data-slug="mums-baked-lemon-cheesecake" draggable="true">
+<a class="card__link" href="mums-baked-lemon-cheesecake.html" draggable="false">
+<div class="card__img"><div class="noimg"></div></div>
+<div class="card__body">
+<h2>Mum&#x27;s Baked Lemon Cheesecake</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">butter, digestive biscuits, eggs, flour, lemon, quark, soured cream, sugar, vanilla extract</p></div>
+</div></a>
+<button class="card__add" data-slug="mums-baked-lemon-cheesecake" type="button"
+        aria-label="Add Mum&#x27;s Baked Lemon Cheesecake to the week plan">+</button>
+</article><article class="card" data-slug="mums-chicken-mooli" draggable="true">
+<a class="card__link" href="mums-chicken-mooli.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/mums-chicken-mooli-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Mum&#x27;s Chicken Mooli</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">cardamom, chicken, chilli, cinnamon, cloves, coconut milk, garlic, ginger, lemon</p></div>
+</div></a>
+<button class="card__add" data-slug="mums-chicken-mooli" type="button"
+        aria-label="Add Mum&#x27;s Chicken Mooli to the week plan">+</button>
+</article><article class="card" data-slug="mums-curry-mince-cobbler" draggable="true">
+<a class="card__link" href="mums-curry-mince-cobbler.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/mums-curry-mince-cobbler-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Mum&#x27;s Curry Mince Cobbler</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">baked beans, beef, butter, curry paste, flour, milk, mushroom, onion, stock</p></div>
+</div></a>
+<button class="card__add" data-slug="mums-curry-mince-cobbler" type="button"
+        aria-label="Add Mum&#x27;s Curry Mince Cobbler to the week plan">+</button>
+</article><article class="card" data-slug="mums-german-cheesecake" draggable="true">
+<a class="card__link" href="mums-german-cheesecake.html" draggable="false">
+<div class="card__img"><div class="noimg"></div></div>
+<div class="card__body">
+<h2>Mum&#x27;s German Cheesecake</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">butter, digestive biscuits, eggs, quark, sugar, vanilla extract</p></div>
+</div></a>
+<button class="card__add" data-slug="mums-german-cheesecake" type="button"
+        aria-label="Add Mum&#x27;s German Cheesecake to the week plan">+</button>
+</article><article class="card" data-slug="mums-lemon-drizzle-cake" draggable="true">
+<a class="card__link" href="mums-lemon-drizzle-cake.html" draggable="false">
+<div class="card__img"><div class="noimg"></div></div>
+<div class="card__body">
+<h2>Mum&#x27;s Lemon Drizzle Cake</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">baking powder, butter, eggs, flour, lemon, milk, sugar</p></div>
+</div></a>
+<button class="card__add" data-slug="mums-lemon-drizzle-cake" type="button"
+        aria-label="Add Mum&#x27;s Lemon Drizzle Cake to the week plan">+</button>
+</article><article class="card" data-slug="mums-lemon-trifle" draggable="true">
+<a class="card__link" href="mums-lemon-trifle.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/mums-lemon-trifle-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Mum&#x27;s Lemon Trifle</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">butter, double cream, eggs, lemon, sugar, trifle sponges</p></div>
+</div></a>
+<button class="card__add" data-slug="mums-lemon-trifle" type="button"
+        aria-label="Add Mum&#x27;s Lemon Trifle to the week plan">+</button>
+</article><article class="card" data-slug="nigellas-quick-chilli" draggable="true">
+<a class="card__link" href="nigellas-quick-chilli.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/nigellas-quick-chilli-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Nigella&#x27;s Quick Chilli</h2>
+<p class="card__meta">Serves 4</p>
+<div class="card__detail"><p class="card__ing">beef, cardamom, chilli flakes, chorizo, cinnamon, cumin, ground coriander, mixed beans, pasta sauce</p></div>
+</div></a>
+<button class="card__add" data-slug="nigellas-quick-chilli" type="button"
+        aria-label="Add Nigella&#x27;s Quick Chilli to the week plan">+</button>
+</article><article class="card" data-slug="paneer-butter-masala" draggable="true">
+<a class="card__link" href="paneer-butter-masala.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/paneer-butter-masala-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Paneer Butter Masala</h2>
+<p class="card__meta">Serves 4</p>
+<div class="card__detail"><p class="card__ing">butter, chilli powder, cinnamon, cloves, double cream, fenugreek, garlic, ginger, honey</p></div>
+</div></a>
+<button class="card__add" data-slug="paneer-butter-masala" type="button"
+        aria-label="Add Paneer Butter Masala to the week plan">+</button>
+</article><article class="card" data-slug="quick-cinnamon-buns" draggable="true">
+<a class="card__link" href="quick-cinnamon-buns.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/quick-cinnamon-buns-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Quick Cinnamon Buns</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">baking powder, butter, cardamom, cinnamon, flour, milk, sugar</p></div>
+</div></a>
+<button class="card__add" data-slug="quick-cinnamon-buns" type="button"
+        aria-label="Add Quick Cinnamon Buns to the week plan">+</button>
+</article><article class="card" data-slug="roast-pumpkin-curry" draggable="true">
+<a class="card__link" href="roast-pumpkin-curry.html" draggable="false">
+<div class="card__img"><div class="noimg"></div></div>
+<div class="card__body">
+<h2>Roast Pumpkin Curry</h2>
+<p class="card__meta">Serves 4</p>
+<div class="card__detail"><p class="card__ing">cardamom, chilli powder, coconut milk, cumin, curry leaves, garlic, ginger, lime, mustard seeds</p></div>
+</div></a>
+<button class="card__add" data-slug="roast-pumpkin-curry" type="button"
+        aria-label="Add Roast Pumpkin Curry to the week plan">+</button>
+</article><article class="card" data-slug="roast-spiced-winter-roots-with-haricot-mash" draggable="true">
+<a class="card__link" href="roast-spiced-winter-roots-with-haricot-mash.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/roast-spiced-winter-roots-with-haricot-mash-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Roast Spiced Winter Roots with Haricot Mash</h2>
+<p class="card__meta">Serves 4</p>
+<div class="card__detail"><p class="card__ing">beetroot, butter beans, carrot, chilli flakes, cumin, garlic, ground coriander, lemon, parsley</p></div>
+</div></a>
+<button class="card__add" data-slug="roast-spiced-winter-roots-with-haricot-mash" type="button"
+        aria-label="Add Roast Spiced Winter Roots with Haricot Mash to the week plan">+</button>
+</article><article class="card" data-slug="roasted-aubergine-hispi-cabbage-zaatar-chickpeas-with-spicy-aubergine-tahini" draggable="true">
+<a class="card__link" href="roasted-aubergine-hispi-cabbage-zaatar-chickpeas-with-spicy-aubergine-tahini.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/roasted-aubergine-hispi-cabbage-zaatar-chickpeas-with-spicy-aubergine-tahini-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Roasted Aubergine, Hispi Cabbage + Za&#x27;atar Chickpeas with Spicy Aubergine Tahini</h2>
+<p class="card__meta">Serves 4 · 1h15m</p>
+<div class="card__detail"><p class="card__ing">aubergine, cabbage, chickpeas, chilli, cumin, lemon, parsley, sumac, tahini</p></div>
+</div></a>
+<button class="card__add" data-slug="roasted-aubergine-hispi-cabbage-zaatar-chickpeas-with-spicy-aubergine-tahini" type="button"
+        aria-label="Add Roasted Aubergine, Hispi Cabbage + Za&#x27;atar Chickpeas with Spicy Aubergine Tahini to the week plan">+</button>
+</article><article class="card" data-slug="roasted-chickpea-and-kale-salad-with-a-creamy-tahini-yoghurt-dressing" draggable="true">
+<a class="card__link" href="roasted-chickpea-and-kale-salad-with-a-creamy-tahini-yoghurt-dressing.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/roasted-chickpea-and-kale-salad-with-a-creamy-tahini-yoghurt-dressing-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Roasted Chickpea and Kale Salad with a Creamy Tahini + Yoghurt Dressing</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">chickpeas, cumin, garlic, kale, lemon, onion powder, parmesan, tahini, yoghurt</p></div>
+</div></a>
+<button class="card__add" data-slug="roasted-chickpea-and-kale-salad-with-a-creamy-tahini-yoghurt-dressing" type="button"
+        aria-label="Add Roasted Chickpea and Kale Salad with a Creamy Tahini + Yoghurt Dressing to the week plan">+</button>
+</article><article class="card" data-slug="ruby-chicken" draggable="true">
+<a class="card__link" href="ruby-chicken.html" draggable="false">
+<div class="card__img"><div class="noimg"></div></div>
+<div class="card__body">
+<h2>Ruby Chicken</h2>
+<p class="card__meta">Serves 4</p>
+<div class="card__detail"><p class="card__ing">bay leaves, butter, cardamom, chicken, chilli powder, cinnamon, coriander, cumin, dill</p></div>
+</div></a>
+<button class="card__add" data-slug="ruby-chicken" type="button"
+        aria-label="Add Ruby Chicken to the week plan">+</button>
+</article><article class="card" data-slug="salmon-with-coriander-dahl-and-rice" draggable="true">
+<a class="card__link" href="salmon-with-coriander-dahl-and-rice.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/salmon-with-coriander-dahl-and-rice-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Salmon with Coriander Dahl and Rice</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">chilli flakes, coriander, garam masala, naan, onion, red lentils, rice, salmon, stock</p></div>
+</div></a>
+<button class="card__add" data-slug="salmon-with-coriander-dahl-and-rice" type="button"
+        aria-label="Add Salmon with Coriander Dahl and Rice to the week plan">+</button>
+</article><article class="card" data-slug="sausage-casserole-hairy-bikers" draggable="true">
+<a class="card__link" href="sausage-casserole-hairy-bikers.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/sausage-casserole-hairy-bikers-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Sausage Casserole (Hairy Bikers)</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">bacon, bay leaves, butter beans, chilli powder, garlic, mixed beans, mixed herbs, onion, paprika</p></div>
+</div></a>
+<button class="card__add" data-slug="sausage-casserole-hairy-bikers" type="button"
+        aria-label="Add Sausage Casserole (Hairy Bikers) to the week plan">+</button>
+</article><article class="card" data-slug="smoky-aubergine-red-kidney-bean-tacos-with-crunchy-tahini-slaw" draggable="true">
+<a class="card__link" href="smoky-aubergine-red-kidney-bean-tacos-with-crunchy-tahini-slaw.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/smoky-aubergine-red-kidney-bean-tacos-with-crunchy-tahini-slaw-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Smoky Aubergine + Red Kidney Bean Tacos with Crunchy Tahini Slaw</h2>
+<p class="card__meta">Serves 3 · 30m</p>
+<div class="card__detail"><p class="card__ing">aubergine, cabbage, coriander, dill, garlic, jalapeño, lime, mixed herbs, paprika</p></div>
+</div></a>
+<button class="card__add" data-slug="smoky-aubergine-red-kidney-bean-tacos-with-crunchy-tahini-slaw" type="button"
+        aria-label="Add Smoky Aubergine + Red Kidney Bean Tacos with Crunchy Tahini Slaw to the week plan">+</button>
+</article><article class="card" data-slug="sweet-potato-shakshuka" draggable="true">
+<a class="card__link" href="sweet-potato-shakshuka.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/sweet-potato-shakshuka-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Sweet Potato Shakshuka</h2>
+<p class="card__meta"></p>
+<div class="card__detail"><p class="card__ing">butter, cheddar, coriander, cumin, eggs, garlic, lemon, onion, sriracha</p></div>
+</div></a>
+<button class="card__add" data-slug="sweet-potato-shakshuka" type="button"
+        aria-label="Add Sweet Potato Shakshuka to the week plan">+</button>
+</article><article class="card" data-slug="the-ultimate-smoky-double-bean-chilli" draggable="true">
+<a class="card__link" href="the-ultimate-smoky-double-bean-chilli.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/the-ultimate-smoky-double-bean-chilli-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>The Ultimate Smoky Double-Bean Chilli</h2>
+<p class="card__meta">Serves 6-8 · 1h</p>
+<div class="card__detail"><p class="card__ing">avocado, black beans, cheddar, chilli, chilli powder, chipotle, cinnamon, coriander, cumin</p></div>
+</div></a>
+<button class="card__add" data-slug="the-ultimate-smoky-double-bean-chilli" type="button"
+        aria-label="Add The Ultimate Smoky Double-Bean Chilli to the week plan">+</button>
+</article><article class="card" data-slug="toms-salmon-wellington" draggable="true">
+<a class="card__link" href="toms-salmon-wellington.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/toms-salmon-wellington-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Tom&#x27;s Salmon Wellington</h2>
+<p class="card__meta">Serves 4</p>
+<div class="card__detail"><p class="card__ing">cream cheese, green beans, onion, potato, puff pastry, salmon, spinach, white wine</p></div>
+</div></a>
+<button class="card__add" data-slug="toms-salmon-wellington" type="button"
+        aria-label="Add Tom&#x27;s Salmon Wellington to the week plan">+</button>
+</article><article class="card" data-slug="tomato-couscous-with-harissa" draggable="true">
+<a class="card__link" href="tomato-couscous-with-harissa.html" draggable="false">
+<div class="card__img"><img loading="lazy" src="img/tomato-couscous-with-harissa-card.jpg" alt=""></div>
+<div class="card__body">
+<h2>Tomato Couscous with Harissa</h2>
+<p class="card__meta">Serves 3-4</p>
+<div class="card__detail"><p class="card__ing">couscous, cumin, garlic, ground coriander, harissa, mint, onion, parsley, stock</p></div>
+</div></a>
+<button class="card__add" data-slug="tomato-couscous-with-harissa" type="button"
+        aria-label="Add Tomato Couscous with Harissa to the week plan">+</button>
+</article></div>
+<p class="empty" id="empty" hidden>Nothing matches all of those. Try fewer.</p>
+</main>
+
+<dialog class="modal" id="modal">
+  <div class="modal__bar">
+    <button type="button" class="btn" id="modalAdd">+ Add to week</button>
+    <button type="button" class="btn btn--quiet" id="modalClose">Close</button>
+  </div>
+  <div class="recipe modal__body" id="modalBody"></div>
+</dialog>
+
+<script src="recipes-data.js"></script>
+<script>
+const DATA = window.RECIPES;
+const BY_SLUG = new Map(DATA.map(r => [r.slug, r]));
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const STORE = 'recipe-plan-v1';
+
+const grid = document.getElementById('grid');
+const q = document.getElementById('q');
+const count = document.getElementById('count');
+const empty = document.getElementById('empty');
+const planner = document.getElementById('planner');
+const daysEl = document.getElementById('days');
+const shoppingEl = document.getElementById('shopping');
+const startSel = document.getElementById('startDay');
+const planN = document.getElementById('planN');
+const cards = new Map([...grid.children].map(el => [el.dataset.slug, el]));
+let activeTags = new Set();
+
+/* ── filtering ─────────────────────────────────────────────────────────── */
+
+function apply() {
+  const words = q.value.toLowerCase().split(/[\s,]+/).filter(Boolean);
+  let shown = 0;
+  for (const rec of DATA) {
+    const hay = rec.terms.join(' ') + ' ' + rec.title;
+    const okWords = words.every(w => hay.includes(w));
+    const okTags = [...activeTags].every(t => rec.tags.includes(t));
+    const show = okWords && okTags;
+    cards.get(rec.slug).hidden = !show;
+    if (show) shown++;
+  }
+  count.textContent = (words.length || activeTags.size)
+    ? shown + ' of ' + DATA.length : '';
+  empty.hidden = shown !== 0;
+}
+
+q.addEventListener('input', apply);
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const t = chip.dataset.tag;
+    activeTags.has(t) ? activeTags.delete(t) : activeTags.add(t);
+    chip.classList.toggle('on');
+    apply();
+  });
+});
+
+/* ── week plan ─────────────────────────────────────────────────────────── */
+
+let state = load();
+
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STORE));
+    if (s && Array.isArray(s.plan) && s.plan.length === 7) return s;
+  } catch (e) { /* fall through to a fresh plan */ }
+  return { startDay: 6, plan: Array(7).fill(null) };
+}
+
+function save() { localStorage.setItem(STORE, JSON.stringify(state)); }
+
+// First occurrence of the chosen weekday on or after today, so the plan always
+// opens on the coming week rather than a week that has already gone.
+function weekStart() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + ((state.startDay - d.getDay() + 7) % 7));
+  return d;
+}
+
+function renderPlan() {
+  const start = weekStart();
+  daysEl.innerHTML = '';
+  state.plan.forEach((slug, i) => {
+    const date = new Date(start);
+    date.setDate(start.getDate() + i);
+    const rec = slug ? BY_SLUG.get(slug) : null;
+    const li = document.createElement('li');
+    li.className = 'day' + (rec ? ' day--full' : '');
+    li.dataset.i = i;
+    li.draggable = Boolean(rec);
+    const label = DAY_NAMES[date.getDay()].slice(0, 3) + ' ' + date.getDate() + ' ' +
+      date.toLocaleString('en-GB', { month: 'short' });
+    li.innerHTML = '<span class="day__name">' + label + '</span>';
+    if (rec) {
+      const a = document.createElement('a');
+      a.className = 'day__recipe';
+      a.href = rec.slug + '.html';
+      a.textContent = rec.name;
+      a.draggable = false;
+      a.addEventListener('click', ev => {
+        if (ev.metaKey || ev.ctrlKey || ev.shiftKey) return;
+        ev.preventDefault();
+        openModal(rec.slug);
+      });
+      li.appendChild(a);
+      const x = document.createElement('button');
+      x.className = 'day__x';
+      x.type = 'button';
+      x.textContent = '×';
+      x.setAttribute('aria-label', 'Remove ' + rec.name);
+      x.addEventListener('click', () => { state.plan[i] = null; save(); renderPlan(); });
+      li.appendChild(x);
+    } else {
+      li.insertAdjacentHTML('beforeend', '<span class="day__empty">—</span>');
+    }
+    daysEl.appendChild(li);
+  });
+  const n = state.plan.filter(Boolean).length;
+  planN.textContent = n ? n + '/7' : '';
+  // Planning mode: once anything is in the week, the plan pins to the top so
+  // you can keep dropping onto it while scrolling the grid. It compacts when
+  // pinned — a full-height planner would swallow a phone screen.
+  planner.classList.toggle('planner--pinned', n > 0);
+  cards.forEach((el, slug) => el.classList.toggle('is-planned',
+    state.plan.includes(slug)));
+  if (!shoppingEl.hidden) renderShopping();
+}
+
+function addToPlan(slug) {
+  const i = state.plan.indexOf(null);
+  if (i === -1) { alert('The week is full — remove a day first.'); return; }
+  state.plan[i] = slug;
+  save();
+  renderPlan();
+}
+
+grid.addEventListener('click', e => {
+  const btn = e.target.closest('.card__add');
+  if (btn) { e.preventDefault(); addToPlan(btn.dataset.slug); return; }
+  // Open in a modal rather than navigating — losing the week plan mid-plan is
+  // the whole thing we are avoiding. Modified clicks still open the real page.
+  const link = e.target.closest('.card__link');
+  if (link && !e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) {
+    e.preventDefault();
+    openModal(e.target.closest('.card').dataset.slug);
+  }
+});
+
+/* ── modal ─────────────────────────────────────────────────────────────── */
+
+const modal = document.getElementById('modal');
+const modalBody = document.getElementById('modalBody');
+let modalSlug = null;
+
+function openModal(slug) {
+  const rec = BY_SLUG.get(slug);
+  if (!rec) return;
+  modalSlug = slug;
+  modalBody.innerHTML = rec.html;
+  modalBody.scrollTop = 0;
+  modal.showModal();
+}
+
+document.getElementById('modalClose').addEventListener('click', () => modal.close());
+document.getElementById('modalAdd').addEventListener('click', () => {
+  if (modalSlug) addToPlan(modalSlug);
+});
+// Click on the backdrop (the dialog itself, outside its content) closes it.
+modal.addEventListener('click', e => { if (e.target === modal) modal.close(); });
+
+/* ── drag and drop ─────────────────────────────────────────────────────────
+   Desktop only — the HTML5 drag API does not fire on touch. The + button on
+   every card is the touch path, so nothing here is the only way to do a thing.
+*/
+
+function payload(e) {
+  try { return JSON.parse(e.dataTransfer.getData('text/plain')); }
+  catch (err) { return null; }
+}
+
+grid.addEventListener('dragstart', e => {
+  const card = e.target.closest('.card');
+  if (!card) return;
+  e.dataTransfer.setData('text/plain',
+    JSON.stringify({ type: 'card', slug: card.dataset.slug }));
+  e.dataTransfer.effectAllowed = 'copy';
+});
+
+daysEl.addEventListener('dragstart', e => {
+  const day = e.target.closest('.day');
+  if (!day || !day.classList.contains('day--full')) return;
+  e.dataTransfer.setData('text/plain',
+    JSON.stringify({ type: 'day', from: Number(day.dataset.i) }));
+  e.dataTransfer.effectAllowed = 'move';
+});
+
+daysEl.addEventListener('dragover', e => {
+  const day = e.target.closest('.day');
+  if (!day) return;
+  e.preventDefault();
+  day.classList.add('day--over');
+});
+
+daysEl.addEventListener('dragleave', e => {
+  const day = e.target.closest('.day');
+  if (day) day.classList.remove('day--over');
+});
+
+daysEl.addEventListener('drop', e => {
+  const day = e.target.closest('.day');
+  if (!day) return;
+  e.preventDefault();
+  day.classList.remove('day--over');
+  const to = Number(day.dataset.i);
+  const data = payload(e);
+  if (!data) return;
+  if (data.type === 'card') {
+    state.plan[to] = data.slug;
+  } else if (data.type === 'day' && data.from !== to) {
+    // Swap, so dropping onto an occupied day never silently discards a meal.
+    const moved = state.plan[data.from];
+    state.plan[data.from] = state.plan[to];
+    state.plan[to] = moved;
+  }
+  save();
+  renderPlan();
+});
+
+startSel.addEventListener('change', () => {
+  state.startDay = Number(startSel.value);
+  save();
+  renderPlan();
+});
+
+document.getElementById('clearPlan').addEventListener('click', () => {
+  state.plan = Array(7).fill(null);
+  save();
+  renderPlan();
+});
+
+document.getElementById('toggleList').addEventListener('click', () => {
+  shoppingEl.hidden = !shoppingEl.hidden;
+  if (!shoppingEl.hidden) renderShopping();
+});
+
+/* Quantities are free text ("a good pinch", "1 x 400g tin"), so they cannot be
+   summed. The list groups every line under its shared ingredient instead and
+   shows which recipe each came from, which is what you need at the shelf. */
+function renderShopping() {
+  const planned = state.plan.filter(Boolean).map(s => BY_SLUG.get(s));
+  if (!planned.length) {
+    shoppingEl.innerHTML = '<p class="shopping__empty">Add some recipes first.</p>';
+    return;
+  }
+  const groups = new Map();
+  for (const rec of planned) {
+    for (const item of rec.items) {
+      const key = item.k || 'Other';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push({ text: item.t, from: rec.name });
+    }
+  }
+  const keys = [...groups.keys()].sort((a, b) =>
+    a === 'Other' ? 1 : b === 'Other' ? -1 : a.localeCompare(b));
+  let html = '<h3>Shopping list <span class="shopping__n">' + keys.length +
+    ' ingredients across ' + planned.length + ' meals</span></h3><ul>';
+  for (const key of keys) {
+    const lines = groups.get(key).map(l =>
+      '<li class="shopping__line">' + escapeHtml(l.text) +
+      ' <span class="shopping__from">' + escapeHtml(l.from) + '</span></li>').join('');
+    html += '<li class="shopping__group"><label><input type="checkbox"><span>' +
+      escapeHtml(key) + '</span></label><ul>' + lines + '</ul></li>';
+  }
+  shoppingEl.innerHTML = html + '</ul>';
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"]/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+}
+
+startSel.value = state.startDay;
+renderPlan();
+apply();
+</script>
+</body>
+</html>
