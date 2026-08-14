@@ -663,8 +663,11 @@ a single day. Dragging needs a mouse — on a phone, use <strong>+</strong>.</p>
 meals and groups them, so three recipes wanting Parmesan appear together with
 each amount. Quantities are listed rather than added up — easier to eye up at
 the shop than to trust a total built from “a good pinch”. Salt, pepper, oil and
-water are left out. Tick items off as you go, <strong>Print</strong> it on its
-own for a paper copy, or <strong>Copy</strong> it as plain text to paste into a
+water are left out. Every amount is listed separately rather than added up — two
+recipes each wanting 45g of something means 90g, and you can see both.</p>
+<p>Tick items off as you shop and they drop into <strong>Completed</strong> at
+the bottom, so what is left stays short. <strong>Print</strong> gives a paper
+copy, and <strong>Copy</strong> puts it on the clipboard as plain text for a
 message or a notes app.</p>
 
 <h3>Printing the week</h3>
@@ -1072,10 +1075,45 @@ async function copyList(btn) {
    rather than re-wired each time. Print styles are gated on a class, cleared on
    afterprint — without that the class would outlive the dialog and quietly
    blank the next print of anything else. */
+/* Ticked ingredients drop into a Completed section so the working list stays
+   short. Ephemeral by design: this is shopping state, not plan state, and the
+   plan is the thing that gets shared and stored. */
+const doneKeys = new Set();
+const pendingTicks = new Map();
+let doneOpen = false;
+
+shoppingEl.addEventListener('change', e => {
+  const box = e.target.closest('input[type="checkbox"]');
+  if (!box) return;
+  const key = box.closest('.shopping__group').dataset.key;
+  const ticked = box.checked;
+  /* Deliberately delayed. Moving the row the instant it is ticked slides the
+     next one under the finger that just tapped it, which is how you tick the
+     wrong thing in a shop — and then have to hunt through Completed to undo it.
+     The pause is long enough to see the tick land where you put it. */
+  // Any pending move for this ingredient is cancelled first, so toggling twice
+  // inside the window collapses to a single move carrying the final state
+  // rather than two that visibly send the row to Completed and back.
+  clearTimeout(pendingTicks.get(key));
+  pendingTicks.set(key, setTimeout(() => {
+    pendingTicks.delete(key);
+    ticked ? doneKeys.add(key) : doneKeys.delete(key);
+    renderShopping();
+  }, 300));
+});
+
+shoppingEl.addEventListener('toggle', e => {
+  if (e.target.id === 'doneWrap') doneOpen = e.target.open;
+}, true);  // toggle does not bubble
+
 shoppingEl.addEventListener('click', e => {
   const copy = e.target.closest('#copyList');
   if (copy) { copyList(copy); return; }
   if (!e.target.closest('#printList')) return;
+  // A collapsed <details> prints nothing, and a printed list missing whatever
+  // you already ticked is worse than useless.
+  const wrap = document.getElementById('doneWrap');
+  if (wrap) wrap.open = true;
   document.documentElement.classList.add('printing-list');
   window.print();
 });
@@ -1142,21 +1180,37 @@ function renderShopping() {
     return;
   }
   const { groups, keys } = shoppingGroups(planned);
-  let html = '<h3>Shopping list <span class="shopping__n">' + keys.length +
-    ' ingredients across ' + planned.length + ' meals</span>' +
+  const todo = keys.filter(k => !doneKeys.has(k));
+  const done = keys.filter(k => doneKeys.has(k));
+
+  const item = key => {
+    const lines = groups.get(key).map(l =>
+      '<li class="shopping__line">' + escapeHtml(l.text) +
+      ' <span class="shopping__from">' + escapeHtml(l.from) + '</span></li>').join('');
+    return '<li class="shopping__group" data-key="' + escapeHtml(key) + '">' +
+      '<label><input type="checkbox"' + (doneKeys.has(key) ? ' checked' : '') +
+      '><span>' + escapeHtml(key) + '</span></label><ul>' + lines + '</ul></li>';
+  };
+
+  let html = '<h3>Shopping list <span class="shopping__n">' + todo.length +
+    ' of ' + keys.length + ' left across ' + planned.length + ' meals</span>' +
     '<span class="shopping__acts">' +
     '<button type="button" class="btn btn--quiet" id="copyList">' +
     COPY_ICON + 'Copy</button>' +
     '<button type="button" class="btn btn--quiet" id="printList">' +
-    PRINT_ICON + 'Print</button></span></h3><ul>';
-  for (const key of keys) {
-    const lines = groups.get(key).map(l =>
-      '<li class="shopping__line">' + escapeHtml(l.text) +
-      ' <span class="shopping__from">' + escapeHtml(l.from) + '</span></li>').join('');
-    html += '<li class="shopping__group"><label><input type="checkbox"><span>' +
-      escapeHtml(key) + '</span></label><ul>' + lines + '</ul></li>';
+    PRINT_ICON + 'Print</button></span></h3>';
+
+  html += '<ul>' + todo.map(item).join('') + '</ul>';
+  if (!todo.length) html += '<p class="shopping__cleared">Everything ticked off.</p>';
+
+  // <details> rather than a scripted panel: the open/closed state is native,
+  // keyboard-operable and prints correctly when forced open.
+  if (done.length) {
+    html += '<details class="shopping__done" id="doneWrap"' +
+      (doneOpen ? ' open' : '') + '><summary>Completed (' + done.length +
+      ')</summary><ul>' + done.map(item).join('') + '</ul></details>';
   }
-  shoppingEl.innerHTML = html + '</ul>';
+  shoppingEl.innerHTML = html;
 }
 
 function escapeHtml(s) {
