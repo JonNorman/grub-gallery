@@ -261,26 +261,6 @@ a { color: inherit; }
   .btn--toggle .icon--state { transition: none; }
 }
 
-.planner__note {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 10px;
-  font-size: 12.5px;
-  color: var(--accent);
-  background: var(--accent-soft);
-  border-radius: 8px;
-  padding: 6px 8px 6px 10px;
-}
-.planner__note .btn {
-  font-size: 12px;
-  padding: 4px 10px;
-  background: var(--surface);
-  border: 1px solid var(--accent);
-  color: var(--accent);
-}
-
 .days {
   list-style: none; margin: 0; padding: 0;
   display: grid; gap: 8px;

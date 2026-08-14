@@ -34,15 +34,9 @@
     </button>
     <button type="button" id="printWeek" class="btn btn--quiet">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>Print week</button>
-    <button type="button" id="sharePlan" class="btn btn--quiet">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 3.9M15.4 6.6l-6.8 3.9"/></svg>Share week</button>
     <button type="button" id="clearPlan" class="btn btn--quiet">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5"/></svg>Clear</button>
   </div>
-  <p class="planner__note" id="planNote" hidden>
-    <span id="planNoteText"></span>
-    <button type="button" id="dismissShared" class="btn btn--quiet">Use mine instead</button>
-  </p>
   <ol class="days" id="days"></ol>
   <div class="shopping" id="shopping" hidden></div>
 </section>
@@ -667,10 +661,11 @@ the shop than to trust a total built from “a good pinch”. Salt, pepper, oil 
 water are left out.</p>
 
 <h3>Sharing a week</h3>
-<p><strong>Share week</strong> copies a link with the plan inside it — send it to
-whoever is cooking or doing the shop. Opening someone else's link shows their
-week without touching yours: change anything to make it your own, or press
-<strong>Use mine instead</strong> to go back to what you had.</p>
+<p>The address bar always holds the current plan, so there is nothing to press:
+copy the URL and send it to whoever is cooking or doing the shop. Opening
+someone else's link simply shows their week, and editing it makes it yours.</p>
+<p>Come back later without a link — a bookmark, or just the address — and the
+last week you had is restored.</p>
 </div>
 </dialog>
 
@@ -679,7 +674,7 @@ week without touching yours: change anything to make it your own, or press
 const DATA = window.RECIPES;
 const BY_SLUG = new Map(DATA.map(r => [r.slug, r]));
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const STORE = 'recipe-plan-v1';
+const STORE = 'recipe-plan-v2';  // v1 held JSON; this holds a query string
 
 const grid = document.getElementById('grid');
 const q = document.getElementById('q');
@@ -723,9 +718,11 @@ document.querySelectorAll('.chip').forEach(chip => {
 
 /* ── week plan ─────────────────────────────────────────────────────────── */
 
-/* A plan in the URL wins over the stored one, so opening a shared link shows
-   that week. It is deliberately NOT saved on load — viewing someone's week
-   should not silently overwrite your own. Any edit calls save() and adopts it. */
+/* The URL is the plan. localStorage holds nothing but the last query string —
+   it is a memory of the URL you had, not a second copy of the week, so the two
+   cannot disagree and there is nothing to reconcile. On a bare arrival the
+   remembered query is put back before anything reads it, so from that point on
+   there is exactly one source of truth and one parser. */
 function planFromUrl() {
   const params = new URLSearchParams(location.search);
   if (!params.has('plan')) return null;
@@ -744,91 +741,52 @@ function planFromUrl() {
     plan,
     startDay: Number.isInteger(start) && start >= 0 && start <= 6
       ? start : 6,
-    shared: true,
   };
 }
 
-function load() {
-  try {
-    const s = JSON.parse(localStorage.getItem(STORE));
-    if (s && Array.isArray(s.plan) && s.plan.length === 7) return s;
-  } catch (e) { /* fall through to a fresh plan */ }
-  return { startDay: 6, plan: Array(7).fill(null) };
-}
+// Arriving with no plan in the URL — a bookmark, the bare domain, a home-screen
+// icon — restores the last one, so you come back to where you left off. A link
+// with ?plan= is simply used: nothing to compare, nothing to ask.
+/* Storage access can throw outright, not just return null — private browsing
+   and blocked site data both do it. These run at the top level, so an unguarded
+   throw would take the whole page's JavaScript with it and leave no filter, no
+   planner and no modals. Remember nothing rather than break everything. */
+const remember = {
+  read() {
+    try { return localStorage.getItem(STORE); } catch (e) { return null; }
+  },
+  write(value) {
+    try { localStorage.setItem(STORE, value); } catch (e) { /* not fatal */ }
+  },
+};
 
-let state = planFromUrl() || load();
-
-// A shared link identical to what is already stored has nothing to adopt and
-// nothing to back out of, so it is not treated as shared at all — otherwise the
-// banner offers a choice between two identical weeks.
-if (state.shared) {
-  const stored = load();
-  if (stored.startDay === state.startDay &&
-      stored.plan.every((slug, i) => slug === state.plan[i])) {
-    state.shared = false;
+if (!new URLSearchParams(location.search).has('plan')) {
+  const remembered = remember.read();
+  if (remembered) {
+    history.replaceState(null, '', location.pathname + remembered + location.hash);
   }
 }
 
-function save() {
-  state.shared = false;
-  localStorage.setItem(STORE,
-    JSON.stringify({ startDay: state.startDay, plan: state.plan }));
-  // Once the shared week has been adopted, drop it from the URL. Leaving it
-  // there means a refresh re-applies the original link and silently discards
-  // the edit that just adopted it.
-  if (new URLSearchParams(location.search).has('plan')) {
-    history.replaceState(null, '', location.pathname + location.hash);
-  }
-  showNote();
-}
+let state = planFromUrl() || { startDay: 6, plan: Array(7).fill(null) };
 
-function shareUrl() {
+function save() { syncUrl(); }
+
+/* The address bar mirrors the plan, so the link is always the current week and
+   the mechanism is visible rather than hidden behind a button. replaceState,
+   never pushState: adding a meal should not put an entry in the back stack.
+
+   The remembered value is the query string itself rather than a serialised
+   plan. Storing the same thing twice in two shapes is what created every
+   reconciliation bug this had. */
+function syncUrl() {
   const url = new URL(location.href);
-  // Built by hand rather than via searchParams, which percent-encodes the
-  // commas. Slugs are [a-z0-9-] so nothing here needs escaping, and the link
-  // stays readable when it is pasted into a message.
-  url.search = '?plan=' + state.plan.map(s => s || '').join(',') +
-    '&start=' + state.startDay;
-  return url.toString();
+  // An empty week gets a clean URL rather than "?plan=,,,,,,&start=6".
+  url.search = state.plan.some(Boolean)
+    ? '?plan=' + state.plan.map(s => s || '').join(',') + '&start=' + state.startDay
+    : '';
+  history.replaceState(null, '', url.toString());
+  remember.write(url.search);
 }
-
-function showNote() {
-  const note = document.getElementById('planNote');
-  note.hidden = !state.shared;
-  if (state.shared) {
-    document.getElementById('planNoteText').textContent =
-      'Showing a shared week. Change anything to make it yours.';
-  }
-}
-
-// Back out of a shared week without touching storage: the shared plan was
-// never saved, so this just re-reads what was already there.
-function dropShared() {
-  state = load();
-  if (new URLSearchParams(location.search).has('plan')) {
-    history.replaceState(null, '', location.pathname + location.hash);
-  }
-  startSel.value = state.startDay;
-  showNote();
-  renderPlan();
-}
-
-document.getElementById('dismissShared').addEventListener('click', dropShared);
-
-document.getElementById('sharePlan').addEventListener('click', async () => {
-  if (!state.plan.some(Boolean)) { alert('Add some recipes to the week first.'); return; }
-  const url = shareUrl();
-  try {
-    await navigator.clipboard.writeText(url);
-    const btn = document.getElementById('sharePlan');
-    const original = btn.textContent;
-    btn.textContent = 'Link copied';
-    setTimeout(() => { btn.textContent = original; }, 1800);
-  } catch (e) {
-    // clipboard needs a secure context; file:// and older browsers land here
-    window.prompt('Copy this link to share the week:', url);
-  }
-});
 
 // First occurrence of the chosen weekday on or after today, so the plan always
 // opens on the coming week rather than a week that has already gone.
@@ -1003,14 +961,6 @@ startSel.addEventListener('change', () => {
 });
 
 document.getElementById('clearPlan').addEventListener('click', () => {
-  // While a shared week is on screen, Clear would save an empty plan over the
-  // viewer's own stored one — they came here to look at someone else's week,
-  // not to lose theirs. Confirm, and point at the non-destructive way out.
-  if (state.shared && !confirm(
-      'This clears the week and replaces your own saved plan with an empty one.\n\n' +
-      'To go back to your plan instead, use "Use mine instead".')) {
-    return;
-  }
   state.plan = Array(7).fill(null);
   save();
   renderPlan();
@@ -1032,7 +982,7 @@ toggleListBtn.addEventListener('click', () => {
    recipe it came from, which is what you need at the shelf. Shared by the
    on-page list and the printable summary so the two cannot diverge. */
 // Filtered after the lookup, not before it. A stored plan can hold a slug for a
-// recipe since renamed or removed — load() takes localStorage at its word,
+// recipe since renamed or removed — a remembered URL is taken at its word,
 // unlike planFromUrl() — and filtering the slugs alone lets an undefined
 // through to be dereferenced.
 function plannedRecipes() {
@@ -1163,7 +1113,8 @@ weekModal.addEventListener('close',
   () => document.documentElement.classList.remove('printing-week'));
 
 startSel.value = state.startDay;
-showNote();
+// Reflect the restored plan straight away, so the URL is the week on arrival.
+if (state.plan.some(Boolean)) syncUrl();
 renderPlan();
 apply();
 </script>
