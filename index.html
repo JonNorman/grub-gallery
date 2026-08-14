@@ -615,7 +615,8 @@
 
 <dialog class="modal modal--week" id="weekModal" aria-label="Week summary">
   <div class="modal__bar">
-    <button type="button" class="btn" id="weekPrint">Print</button>
+    <button type="button" class="btn" id="weekCopy"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy image</button>
+    <button type="button" class="btn btn--quiet" id="weekPrint"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>Print</button>
     <button type="button" class="btn btn--quiet" id="weekClose">Close</button>
   </div>
   <div class="modal__body week" id="weekBody"></div>
@@ -670,10 +671,11 @@ the bottom, so what is left stays short. <strong>Print</strong> gives a paper
 copy, and <strong>Copy</strong> puts it on the clipboard as plain text for a
 message or a notes app.</p>
 
-<h3>Printing the week</h3>
-<p><strong>Print week</strong> gives you the meals — seven days with their
-photos, for the fridge. The shopping list prints separately from its own panel,
-so each sheet does one job.</p>
+<h3>The week as a picture</h3>
+<p><strong>Print week</strong> draws the seven days and their photos as a single
+image. <strong>Copy image</strong> puts it on the clipboard to paste into a
+message, or right-click it to save. <strong>Print</strong> puts it on the fridge.
+The shopping list is separate, from its own panel, so each sheet does one job.</p>
 
 <h3>Sharing a week</h3>
 <p>The address bar always holds the current plan, so there is nothing to press:
@@ -1226,48 +1228,176 @@ function escapeHtml(s) {
 const weekModal = document.getElementById('weekModal');
 const weekBody = document.getElementById('weekBody');
 
-function renderWeek() {
+/* ── the week as an image ──────────────────────────────────────────────────
+   Drawn to a canvas rather than laid out in the DOM, because the point of this
+   sheet is to leave the site: an image pastes into a message, a modal full of
+   text does not. Nothing here is a link, so nothing is lost by flattening it.
+
+   Drawn at 2x and displayed at 1x, which keeps it sharp on a retina screen and
+   prints at roughly 270dpi on A4. */
+
+const SHEET = {
+  w: 900, pad: 48, row: 92, thumb: 68, radius: 10, scale: 2,
+  bg: '#fbf8f3', ink: '#23201c', muted: '#6d6459',
+  line: '#e7e0d5', accent: '#b4451f',
+};
+
+function loadImage(src) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);   // a missing photo just draws blank
+    img.src = src;
+  });
+}
+
+function ellipsise(ctx, text, maxWidth) {
+  if (ctx.measureText(text).width <= maxWidth) return text;
+  let cut = text;
+  while (cut.length > 1 && ctx.measureText(cut + '…').width > maxWidth) {
+    cut = cut.slice(0, -1);
+  }
+  return cut.trimEnd() + '…';
+}
+
+async function drawWeek() {
   const days = plannedDays();
-  const planned = plannedRecipes();
   const first = days[0].date, last = days[6].date;
   const sameMonth = first.getMonth() === last.getMonth();
   const range = formatDate(first, { day: 'numeric', month: sameMonth ? undefined : 'long' }) +
     ' – ' + formatDate(last, { day: 'numeric', month: 'long', year: 'numeric' });
 
-  let html = '<header class="week__head"><h2>Grub Gallery</h2>' +
-    '<p class="week__range">Week of ' + escapeHtml(range) + '</p></header>';
+  const thumbs = await Promise.all(days.map(d =>
+    d.rec && d.rec.image ? loadImage('img/' + d.rec.slug + '-card-320.jpg') : null));
 
-  html += '<ol class="week__days">';
-  for (const { date, rec, skipped } of days) {
-    const label = formatDate(date, { weekday: 'long' }) + ' ' + date.getDate();
-    const thumb = rec && rec.image
-      ? '<img src="img/' + rec.slug + '-card-320.jpg" alt="">'
-      : '<span class="week__nothumb"></span>';
-    const meta = rec ? [rec.serves ? 'Serves ' + rec.serves : '', rec.time || '']
-      .filter(Boolean).join(' · ') : '';
-    html += '<li class="week__day' +
-      (rec ? '' : skipped ? ' week__day--skipped' : ' week__day--empty') + '">' +
-      thumb +
-      '<div><span class="week__dayname">' + escapeHtml(label) + '</span>' +
-      '<span class="week__meal">' +
-        (rec ? escapeHtml(rec.name) : skipped ? 'Skipped' : '—') + '</span>' +
-      (meta ? '<span class="week__meta">' + escapeHtml(meta) + '</span>' : '') +
-      '</div></li>';
-  }
-  html += '</ol>';
+  const headH = 104;
+  const height = SHEET.pad + headH + days.length * SHEET.row + SHEET.pad;
+  const canvas = document.createElement('canvas');
+  canvas.width = SHEET.w * SHEET.scale;
+  canvas.height = height * SHEET.scale;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(SHEET.scale, SHEET.scale);
+  const font = (size, weight) =>
+    weight + ' ' + size + 'px ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif';
 
-  // No shopping list here. This sheet is the meals — what goes on the fridge —
-  // and the list is printed from its own panel, where it is already grouped and
-  // tickable. One sheet per job beats one sheet doing both badly.
-  weekBody.innerHTML = html;
+  ctx.fillStyle = SHEET.bg;
+  ctx.fillRect(0, 0, SHEET.w, height);
+
+  let y = SHEET.pad;
+  ctx.fillStyle = SHEET.ink;
+  ctx.font = font(34, '700');
+  ctx.textBaseline = 'top';
+  ctx.fillText('Grub Gallery', SHEET.pad, y);
+  ctx.fillStyle = SHEET.muted;
+  ctx.font = font(18, '400');
+  ctx.fillText('Week of ' + range, SHEET.pad, y + 44);
+  y += headH - 20;
+  ctx.strokeStyle = SHEET.ink;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(SHEET.pad, y); ctx.lineTo(SHEET.w - SHEET.pad, y); ctx.stroke();
+  y += 20;
+
+  const textX = SHEET.pad + SHEET.thumb + 20;
+  const textW = SHEET.w - SHEET.pad - textX;
+  days.forEach(({ date, rec, skipped }, i) => {
+    const top = y + i * SHEET.row;
+    const mid = top + (SHEET.row - SHEET.thumb) / 2;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(SHEET.pad, mid, SHEET.thumb, SHEET.thumb, SHEET.radius);
+    ctx.clip();
+    if (thumbs[i]) {
+      ctx.drawImage(thumbs[i], SHEET.pad, mid, SHEET.thumb, SHEET.thumb);
+    } else {
+      ctx.fillStyle = SHEET.line;
+      ctx.fillRect(SHEET.pad, mid, SHEET.thumb, SHEET.thumb);
+    }
+    ctx.restore();
+
+    ctx.fillStyle = SHEET.muted;
+    ctx.font = font(13, '600');
+    ctx.fillText(formatDate(date, { weekday: 'long' }).toUpperCase() + ' ' + date.getDate(),
+      textX, mid + 2);
+
+    ctx.fillStyle = rec ? SHEET.ink : SHEET.muted;
+    ctx.font = font(21, rec ? '600' : '400');
+    const title = rec ? rec.name : skipped ? 'Skipped' : 'Nothing planned';
+    ctx.fillText(ellipsise(ctx, title, textW), textX, mid + 24);
+
+    if (rec) {
+      const meta = [rec.serves ? 'Serves ' + rec.serves : '', rec.time || '']
+        .filter(Boolean).join('  ·  ');
+      if (meta) {
+        ctx.fillStyle = SHEET.muted;
+        ctx.font = font(15, '400');
+        ctx.fillText(meta, textX, mid + 50);
+      }
+    }
+
+    if (i < days.length - 1) {
+      ctx.strokeStyle = SHEET.line;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(textX, top + SHEET.row - 0.5);
+      ctx.lineTo(SHEET.w - SHEET.pad, top + SHEET.row - 0.5);
+      ctx.stroke();
+    }
+  });
+
+  return canvas;
 }
 
-document.getElementById('printWeek').addEventListener('click', () => {
+async function renderWeek() {
+  weekBody.innerHTML = '<p class="week__wait">Drawing…</p>';
+  const canvas = await drawWeek();
+  weekCanvas = canvas;
+  weekBody.innerHTML = '';
+  try {
+    /* An <img> rather than the canvas itself, because right-click → Copy image
+       works on one and not reliably on the other. */
+    const img = new Image();
+    img.className = 'week__img';
+    img.alt = 'Meals planned for the week';
+    img.src = canvas.toDataURL('image/png');
+    weekBody.appendChild(img);
+  } catch (e) {
+    /* Reading the canvas back needs same-origin pixels. Opening the built site
+       from file:// taints it with its own photos, so show the canvas directly —
+       it looks identical, it just cannot be exported. Deployed, this path never
+       runs. */
+    canvas.className = 'week__img';
+    weekBody.appendChild(canvas);
+  }
+}
+
+let weekCanvas = null;
+
+async function copyWeekImage(btn) {
+  if (!weekCanvas) return;
+  const label = btn.dataset.label || (btn.dataset.label = btn.innerHTML);
+  try {
+    const blob = await new Promise(r => weekCanvas.toBlob(r, 'image/png'));
+    // toBlob hands back null on an export failure, and a null reaches
+    // ClipboardItem as an opaque TypeError rather than anything readable.
+    if (!blob) throw new Error('canvas could not be exported');
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    btn.textContent = 'Copied';
+  } catch (e) {
+    // Reading pixels back needs a same-origin canvas, so opening the built site
+    // from file:// taints it and this throws. Works on the deployed site.
+    btn.textContent = 'Right-click the image';
+  }
+  setTimeout(() => { btn.innerHTML = label; }, 2200);
+}
+
+document.getElementById('printWeek').addEventListener('click', async () => {
   if (!state.plan.some(Boolean)) {
     alert('Add some recipes to the week first.');
     return;
   }
-  renderWeek();
+  await renderWeek();
   // Print styles key off this rather than the dialog's [open] state, so that
   // printing the index without the summary open still prints the index.
   document.documentElement.classList.add('printing-week');
@@ -1275,6 +1405,8 @@ document.getElementById('printWeek').addEventListener('click', () => {
 });
 document.getElementById('weekClose').addEventListener('click', () => weekModal.close());
 document.getElementById('weekPrint').addEventListener('click', () => window.print());
+document.getElementById('weekCopy').addEventListener('click', e =>
+  copyWeekImage(e.currentTarget));
 weekModal.addEventListener('click', e => { if (e.target === weekModal) weekModal.close(); });
 // Fires for the close button, Escape and the backdrop alike.
 weekModal.addEventListener('close',

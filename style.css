@@ -525,33 +525,12 @@ ol.method strong { font-weight: 620; }
 
 /* ── Week summary ──────────────────────────────────────────────────────── */
 
-.modal--week { width: min(720px, 94vw); }
+.modal--week { width: min(760px, 94vw); }
 
-.week__head { border-bottom: 2px solid var(--ink); padding-bottom: 10px; margin-bottom: 18px; }
-.week__head h2 { font-size: 20px; margin: 0; }
-.week__range { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+/* The sheet is a single drawn image now, so it only needs sizing. */
+.week__img { display: block; width: 100%; height: auto; border-radius: 10px; }
+.week__wait { color: var(--muted); padding: 40px 0; text-align: center; }
 
-.week__days { list-style: none; margin: 0; padding: 0; }
-.week__day {
-  display: flex; align-items: center; gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--line);
-}
-.week__day img, .week__nothumb {
-  width: 46px; height: 46px; flex: none;
-  border-radius: 8px; object-fit: cover;
-  background: var(--accent-soft);
-}
-.week__day div { display: flex; flex-direction: column; min-width: 0; }
-.week__dayname {
-  font-size: 11px; text-transform: uppercase; letter-spacing: .07em;
-  color: var(--muted);
-}
-.week__meal { font-weight: 600; font-size: 15px; }
-.week__meta { font-size: 12px; color: var(--muted); }
-.week__day--empty .week__meal { color: var(--line); font-weight: 400; }
-.week__day--skipped .week__meal { color: var(--muted); font-weight: 400; }
-.week__day--skipped { opacity: .7; }
 
 /*
  * Printing happens with the summary open, so everything else is hidden and the
@@ -607,7 +586,11 @@ ol.method strong { font-weight: 620; }
   }
   .printing-week .modal--week::backdrop { display: none; }
   .printing-week .week { max-height: none; overflow: visible; padding: 0; }
-  .week__day { break-inside: avoid; }
+  /* The sheet is one image, so it must not be split across pages. */
+  .printing-week .week__img {
+    max-height: 100vh; object-fit: contain;
+    break-inside: avoid; page-break-inside: avoid;
+  }
   @page { margin: 14mm; }
 }
 
