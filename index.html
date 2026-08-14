@@ -29,6 +29,7 @@
       <select id="startDay"><option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6" selected>Saturday</option></select>
     </label>
     <button type="button" id="toggleList" class="btn">Shopping list</button>
+    <button type="button" id="printWeek" class="btn btn--quiet">Print week</button>
     <button type="button" id="sharePlan" class="btn btn--quiet">Share week</button>
     <button type="button" id="clearPlan" class="btn btn--quiet">Clear</button>
   </div>
@@ -612,6 +613,14 @@
   <div class="recipe modal__body" id="modalBody"></div>
 </dialog>
 
+<dialog class="modal modal--week" id="weekModal" aria-label="Week summary">
+  <div class="modal__bar">
+    <button type="button" class="btn" id="weekPrint">Print</button>
+    <button type="button" class="btn btn--quiet" id="weekClose">Close</button>
+  </div>
+  <div class="modal__body week" id="weekBody"></div>
+</dialog>
+
 <dialog class="modal modal--help" id="helpModal" aria-labelledby="helpTitle">
   <div class="modal__bar">
     <button type="button" class="btn btn--quiet" id="helpClose">Close</button>
@@ -1007,14 +1016,18 @@ document.getElementById('toggleList').addEventListener('click', () => {
 });
 
 /* Quantities are free text ("a good pinch", "1 x 400g tin"), so they cannot be
-   summed. The list groups every line under its shared ingredient instead and
-   shows which recipe each came from, which is what you need at the shelf. */
-function renderShopping() {
-  const planned = state.plan.filter(Boolean).map(s => BY_SLUG.get(s));
-  if (!planned.length) {
-    shoppingEl.innerHTML = '<p class="shopping__empty">Add some recipes first.</p>';
-    return;
-  }
+   summed. Every line is grouped under its shared ingredient instead, with the
+   recipe it came from, which is what you need at the shelf. Shared by the
+   on-page list and the printable summary so the two cannot diverge. */
+// Filtered after the lookup, not before it. A stored plan can hold a slug for a
+// recipe since renamed or removed — load() takes localStorage at its word,
+// unlike planFromUrl() — and filtering the slugs alone lets an undefined
+// through to be dereferenced.
+function plannedRecipes() {
+  return state.plan.filter(Boolean).map(s => BY_SLUG.get(s)).filter(Boolean);
+}
+
+function shoppingGroups(planned) {
   const groups = new Map();
   for (const rec of planned) {
     for (const item of rec.items) {
@@ -1025,6 +1038,28 @@ function renderShopping() {
   }
   const keys = [...groups.keys()].sort((a, b) =>
     a === 'Other' ? 1 : b === 'Other' ? -1 : a.localeCompare(b));
+  return { groups, keys };
+}
+
+// The dates the current plan covers, as { date, rec } for all seven days.
+function plannedDays() {
+  const start = weekStart();
+  return state.plan.map((slug, i) => {
+    const date = new Date(start);
+    date.setDate(start.getDate() + i);
+    return { date, rec: slug ? BY_SLUG.get(slug) : null };
+  });
+}
+
+function formatDate(d, opts) { return d.toLocaleDateString('en-GB', opts); }
+
+function renderShopping() {
+  const planned = plannedRecipes();
+  if (!planned.length) {
+    shoppingEl.innerHTML = '<p class="shopping__empty">Add some recipes first.</p>';
+    return;
+  }
+  const { groups, keys } = shoppingGroups(planned);
   let html = '<h3>Shopping list <span class="shopping__n">' + keys.length +
     ' ingredients across ' + planned.length + ' meals</span></h3><ul>';
   for (const key of keys) {
@@ -1041,6 +1076,79 @@ function escapeHtml(s) {
   return s.replace(/[&<>"]/g, c =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 }
+
+/* ── printable week summary ────────────────────────────────────────────────
+   One sheet: the seven days, then the shopping list. Built from the same
+   grouping the on-page list uses. Print styles hide everything else on the
+   page, so what is printed is exactly what is shown here. */
+
+const weekModal = document.getElementById('weekModal');
+const weekBody = document.getElementById('weekBody');
+
+function renderWeek() {
+  const days = plannedDays();
+  const planned = plannedRecipes();
+  const first = days[0].date, last = days[6].date;
+  const sameMonth = first.getMonth() === last.getMonth();
+  const range = formatDate(first, { day: 'numeric', month: sameMonth ? undefined : 'long' }) +
+    ' – ' + formatDate(last, { day: 'numeric', month: 'long', year: 'numeric' });
+
+  let html = '<header class="week__head"><h2>Grub Gallery</h2>' +
+    '<p class="week__range">Week of ' + escapeHtml(range) + '</p></header>';
+
+  html += '<ol class="week__days">';
+  for (const { date, rec } of days) {
+    const label = formatDate(date, { weekday: 'long' }) + ' ' + date.getDate();
+    const thumb = rec && rec.image
+      ? '<img src="img/' + rec.slug + '-card-320.jpg" alt="">'
+      : '<span class="week__nothumb"></span>';
+    const meta = rec ? [rec.serves ? 'Serves ' + rec.serves : '', rec.time || '']
+      .filter(Boolean).join(' · ') : '';
+    html += '<li class="week__day' + (rec ? '' : ' week__day--empty') + '">' +
+      thumb +
+      '<div><span class="week__dayname">' + escapeHtml(label) + '</span>' +
+      '<span class="week__meal">' + (rec ? escapeHtml(rec.name) : '—') + '</span>' +
+      (meta ? '<span class="week__meta">' + escapeHtml(meta) + '</span>' : '') +
+      '</div></li>';
+  }
+  html += '</ol>';
+
+  if (planned.length) {
+    const { groups, keys } = shoppingGroups(planned);
+    html += '<section class="week__shop"><h3>Shopping list</h3><ul>';
+    for (const key of keys) {
+      const lines = groups.get(key)
+        .map(l => escapeHtml(l.text)).join('<br>');
+      // A drawn box rather than a checkbox input: this sheet is for ticking
+      // with a pen, and an unchecked input prints as an empty box anyway on
+      // some browsers and as nothing on others.
+      html += '<li><span class="week__tick" aria-hidden="true"></span>' +
+        '<div><strong>' + escapeHtml(key) + '</strong><span>' + lines +
+        '</span></div></li>';
+    }
+    html += '</ul></section>';
+  }
+
+  weekBody.innerHTML = html;
+}
+
+document.getElementById('printWeek').addEventListener('click', () => {
+  if (!state.plan.some(Boolean)) {
+    alert('Add some recipes to the week first.');
+    return;
+  }
+  renderWeek();
+  // Print styles key off this rather than the dialog's [open] state, so that
+  // printing the index without the summary open still prints the index.
+  document.documentElement.classList.add('printing-week');
+  weekModal.showModal();
+});
+document.getElementById('weekClose').addEventListener('click', () => weekModal.close());
+document.getElementById('weekPrint').addEventListener('click', () => window.print());
+weekModal.addEventListener('click', e => { if (e.target === weekModal) weekModal.close(); });
+// Fires for the close button, Escape and the backdrop alike.
+weekModal.addEventListener('close',
+  () => document.documentElement.classList.remove('printing-week'));
 
 startSel.value = state.startDay;
 showNote();
