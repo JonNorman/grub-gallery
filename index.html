@@ -28,10 +28,16 @@
     <label class="planner__start">Starts
       <select id="startDay"><option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6" selected>Saturday</option></select>
     </label>
-    <button type="button" id="toggleList" class="btn">Shopping list</button>
-    <button type="button" id="printWeek" class="btn btn--quiet">Print week</button>
-    <button type="button" id="sharePlan" class="btn btn--quiet">Share week</button>
-    <button type="button" id="clearPlan" class="btn btn--quiet">Clear</button>
+    <button type="button" id="toggleList" class="btn btn--quiet btn--toggle"
+            aria-expanded="false" aria-controls="shopping">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Shopping list<svg class="icon icon--state" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <button type="button" id="printWeek" class="btn btn--quiet">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>Print week</button>
+    <button type="button" id="sharePlan" class="btn btn--quiet">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 3.9M15.4 6.6l-6.8 3.9"/></svg>Share week</button>
+    <button type="button" id="clearPlan" class="btn btn--quiet">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5"/></svg>Clear</button>
   </div>
   <p class="planner__note" id="planNote" hidden>
     <span id="planNoteText"></span>
@@ -1010,9 +1016,15 @@ document.getElementById('clearPlan').addEventListener('click', () => {
   renderPlan();
 });
 
-document.getElementById('toggleList').addEventListener('click', () => {
+const toggleListBtn = document.getElementById('toggleList');
+toggleListBtn.addEventListener('click', () => {
   shoppingEl.hidden = !shoppingEl.hidden;
-  if (!shoppingEl.hidden) renderShopping();
+  // aria-expanded is the part screen readers use; the rotated chevron is the
+  // same fact drawn for everyone else. Both come off the one source of truth.
+  const open = !shoppingEl.hidden;
+  toggleListBtn.setAttribute('aria-expanded', String(open));
+  toggleListBtn.classList.toggle('is-open', open);
+  if (open) renderShopping();
 });
 
 /* Quantities are free text ("a good pinch", "1 x 400g tin"), so they cannot be

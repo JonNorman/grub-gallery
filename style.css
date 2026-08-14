@@ -237,12 +237,29 @@ a { color: inherit; }
 }
 
 .btn {
+  display: inline-flex; align-items: center; gap: 6px;
   font: inherit; font-size: 13px; padding: 6px 13px;
   color: #fff; background: var(--accent);
   border: none; border-radius: 999px; cursor: pointer;
 }
 .btn--quiet { background: transparent; color: var(--muted); border: 1px solid var(--line); }
 .btn:hover { filter: brightness(1.08); }
+.btn--quiet:hover { color: var(--ink); border-color: var(--accent); filter: none; }
+
+.icon { width: 14px; height: 14px; flex: none; }
+
+/*
+ * Shopping list is a disclosure, not an action, so it carries a chevron that
+ * turns rather than the accent fill an action button gets — the colour was
+ * reading as "this is the important one" when it only expands a panel.
+ */
+.btn--toggle .icon--state { transition: transform .18s ease; }
+.btn--toggle.is-open .icon--state { transform: rotate(180deg); }
+.btn--toggle.is-open { color: var(--ink); border-color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn--toggle .icon--state { transition: none; }
+}
 
 .planner__note {
   display: flex;
