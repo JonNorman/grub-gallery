@@ -283,6 +283,23 @@ a { color: inherit; }
                text-decoration: none; font-weight: 550; line-height: 1.3; }
 .day__recipe:hover { color: var(--accent); }
 .day__empty { color: var(--line); font-size: 20px; }
+
+/* A skipped day reads as deliberately set aside rather than merely unfilled:
+   solid instead of dashed, muted, and labelled. Empty and skipped must not
+   look alike or the toggle has no visible effect. */
+.day--skipped {
+  border-style: solid;
+  background: var(--line);
+  border-color: transparent;
+  opacity: .65;
+}
+.day__skip {
+  display: block; margin-top: 4px;
+  font-size: 12.5px; font-weight: 550; color: var(--muted);
+}
+.day[role="button"] { cursor: pointer; }
+.day[role="button"]:hover { border-color: var(--accent); }
+.day[role="button"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .day__x {
   position: absolute; top: 4px; right: 4px;
   width: 20px; height: 20px; line-height: 1;
@@ -517,6 +534,8 @@ ol.method strong { font-weight: 620; }
 .week__meal { font-weight: 600; font-size: 15px; }
 .week__meta { font-size: 12px; color: var(--muted); }
 .week__day--empty .week__meal { color: var(--line); font-weight: 400; }
+.week__day--skipped .week__meal { color: var(--muted); font-weight: 400; }
+.week__day--skipped { opacity: .7; }
 
 /*
  * Printing happens with the summary open, so everything else is hidden and the

@@ -648,6 +648,11 @@ a card onto a particular day. The week starts on Saturday unless you change
 <strong>Starts</strong>. As soon as something is planned the week pins to the
 top of the page, so it stays in reach while you browse.</p>
 
+<h3>Skipping a day</h3>
+<p>Tap an empty day to mark it <strong>Skipped</strong> — eating out, leftovers,
+away. Tap again to free it. <strong>+</strong> then fills the next day that is
+neither planned nor skipped, so a skipped Friday stays skipped.</p>
+
 <h3>Moving meals around</h3>
 <p>Drag a planned day onto another to move it. If that day is already taken the
 two swap places, so nothing gets quietly overwritten. <strong>×</strong> clears
@@ -680,6 +685,7 @@ last week you had is restored.</p>
 const DATA = window.RECIPES;
 const BY_SLUG = new Map(DATA.map(r => [r.slug, r]));
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const SKIPPED = '-';  // a day deliberately left without a meal
 const STORE = 'recipe-plan-v2';  // v1 held JSON; this holds a query string
 
 const grid = document.getElementById('grid');
@@ -734,9 +740,12 @@ function planFromUrl() {
   if (!params.has('plan')) return null;
   const plan = Array(7).fill(null);
   params.get('plan').split(',').slice(0, 7).forEach((slug, i) => {
+    // "-" is a day deliberately skipped: eating out, leftovers, away. Distinct
+    // from an empty day, which is simply not planned yet.
+    if (slug === SKIPPED) plan[i] = SKIPPED;
     // Unknown slugs (a recipe renamed or removed since the link was made) leave
     // the day empty rather than breaking the whole plan.
-    if (slug && BY_SLUG.has(slug)) plan[i] = slug;
+    else if (slug && BY_SLUG.has(slug)) plan[i] = slug;
   });
   // Guard missing and empty explicitly: Number(null) and Number('') are both 0,
   // which would pass the range check below and silently start a shared week on
@@ -809,9 +818,10 @@ function renderPlan() {
   state.plan.forEach((slug, i) => {
     const date = new Date(start);
     date.setDate(start.getDate() + i);
-    const rec = slug ? BY_SLUG.get(slug) : null;
+    const skipped = slug === SKIPPED;
+    const rec = slug && !skipped ? BY_SLUG.get(slug) : null;
     const li = document.createElement('li');
-    li.className = 'day' + (rec ? ' day--full' : '');
+    li.className = 'day' + (rec ? ' day--full' : skipped ? ' day--skipped' : '');
     li.dataset.i = i;
     li.draggable = Boolean(rec);
     const label = DAY_NAMES[date.getDay()].slice(0, 3) + ' ' + date.getDate() + ' ' +
@@ -837,11 +847,30 @@ function renderPlan() {
       x.addEventListener('click', () => { state.plan[i] = null; save(); renderPlan(); });
       li.appendChild(x);
     } else {
-      li.insertAdjacentHTML('beforeend', '<span class="day__empty">—</span>');
+      // An unfilled day toggles between free and skipped. A day with a meal in
+      // it does not — removing that is what the × is for, so a stray tap cannot
+      // silently drop a planned meal.
+      li.insertAdjacentHTML('beforeend', skipped
+        ? '<span class="day__skip">Skipped</span>'
+        : '<span class="day__empty">—</span>');
+      li.tabIndex = 0;
+      li.setAttribute('role', 'button');
+      li.setAttribute('aria-pressed', String(skipped));
+      li.setAttribute('aria-label',
+        (skipped ? 'Unskip ' : 'Skip ') + label);
+      const toggle = () => {
+        state.plan[i] = skipped ? null : SKIPPED;
+        save();
+        renderPlan();
+      };
+      li.addEventListener('click', toggle);
+      li.addEventListener('keydown', ev => {
+        if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); toggle(); }
+      });
     }
     daysEl.appendChild(li);
   });
-  const n = state.plan.filter(Boolean).length;
+  const n = state.plan.filter(s => s && s !== SKIPPED).length;
   planN.textContent = n ? n + '/7' : '';
   // Planning mode: once anything is in the week, the plan pins to the top so
   // you can keep dropping onto it while scrolling the grid. It compacts when
@@ -853,8 +882,13 @@ function renderPlan() {
 }
 
 function addToPlan(slug) {
+  // indexOf(null) skips over both filled days and skipped ones, since a skipped
+  // day holds SKIPPED rather than null.
   const i = state.plan.indexOf(null);
-  if (i === -1) { alert('The week is full — remove a day first.'); return; }
+  if (i === -1) {
+    alert('No free days left — remove a meal or unskip a day first.');
+    return;
+  }
   state.plan[i] = slug;
   save();
   renderPlan();
@@ -1029,7 +1063,11 @@ function plannedDays() {
   return state.plan.map((slug, i) => {
     const date = new Date(start);
     date.setDate(start.getDate() + i);
-    return { date, rec: slug ? BY_SLUG.get(slug) : null };
+    return {
+      date,
+      skipped: slug === SKIPPED,
+      rec: slug && slug !== SKIPPED ? BY_SLUG.get(slug) : null,
+    };
   });
 }
 
@@ -1081,17 +1119,19 @@ function renderWeek() {
     '<p class="week__range">Week of ' + escapeHtml(range) + '</p></header>';
 
   html += '<ol class="week__days">';
-  for (const { date, rec } of days) {
+  for (const { date, rec, skipped } of days) {
     const label = formatDate(date, { weekday: 'long' }) + ' ' + date.getDate();
     const thumb = rec && rec.image
       ? '<img src="img/' + rec.slug + '-card-320.jpg" alt="">'
       : '<span class="week__nothumb"></span>';
     const meta = rec ? [rec.serves ? 'Serves ' + rec.serves : '', rec.time || '']
       .filter(Boolean).join(' · ') : '';
-    html += '<li class="week__day' + (rec ? '' : ' week__day--empty') + '">' +
+    html += '<li class="week__day' +
+      (rec ? '' : skipped ? ' week__day--skipped' : ' week__day--empty') + '">' +
       thumb +
       '<div><span class="week__dayname">' + escapeHtml(label) + '</span>' +
-      '<span class="week__meal">' + (rec ? escapeHtml(rec.name) : '—') + '</span>' +
+      '<span class="week__meal">' +
+        (rec ? escapeHtml(rec.name) : skipped ? 'Skipped' : '—') + '</span>' +
       (meta ? '<span class="week__meta">' + escapeHtml(meta) + '</span>' : '') +
       '</div></li>';
   }
