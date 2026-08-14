@@ -561,21 +561,23 @@ ol.method strong { font-weight: 620; }
 
 /* ── Week summary ──────────────────────────────────────────────────────── */
 
+/*
+ * The picture is shown rather than hidden, because showing it is what makes the
+ * browser's own menus work — right-click for Copy image or Save image, Cmd-P to
+ * print. Bespoke copy and print buttons were the same capability with an
+ * opinion attached.
+ */
 .modal--week { width: min(760px, 94vw); }
-
-/* The sheet is a single drawn image now, so it only needs sizing. */
+.week-sheet { padding: 0 clamp(12px, 3vw, 24px) clamp(16px, 3vw, 24px); }
 .week__img { display: block; width: 100%; height: auto; border-radius: 10px; }
-.week__wait { color: var(--muted); padding: 40px 0; text-align: center; }
 
 
 /*
- * Printing happens with the summary open, so everything else is hidden and the
- * dialog is unpinned from its fixed overlay position. What prints is exactly
- * what is on screen — there is no second layout to keep in step.
+ * Printing the week reveals the off-page sheet and hides everything else. The
+ * sheet is never on screen, so this is the only rule that makes it visible.
  *
- * Gated on a class the script sets while that dialog is open, not on the
- * dialog's own [open] state: hiding .index unconditionally would make Cmd-P on
- * the index produce a blank sheet.
+ * Gated on a class the script sets around the print call: hiding .index
+ * unconditionally would make Cmd-P anywhere on the page produce a blank sheet.
  */
 /*
  * Printing the shopping list on its own. Same class-gated approach as the week
@@ -621,8 +623,8 @@ ol.method strong { font-weight: 620; }
     box-shadow: none; background: none;
   }
   .printing-week .modal--week::backdrop { display: none; }
-  .printing-week .week { max-height: none; overflow: visible; padding: 0; }
-  /* The sheet is one image, so it must not be split across pages. */
+  .printing-week .week-sheet { padding: 0; max-height: none; overflow: visible; }
+  /* One image, so it must not be split across pages. */
   .printing-week .week__img {
     max-height: 100vh; object-fit: contain;
     break-inside: avoid; page-break-inside: avoid;

@@ -32,8 +32,8 @@
             aria-expanded="false" aria-controls="shopping">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Shopping list<svg class="icon icon--state" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
     </button>
-    <button type="button" id="printWeek" class="btn btn--quiet">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>Print week</button>
+    <button type="button" id="weekView" class="btn btn--quiet">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>Print view</button>
     <button type="button" id="clearPlan" class="btn btn--quiet">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5"/></svg>Clear</button>
   </div>
@@ -613,13 +613,11 @@
   <div class="recipe modal__body" id="modalBody"></div>
 </dialog>
 
-<dialog class="modal modal--week" id="weekModal" aria-label="Week summary">
+<dialog class="modal modal--week" id="weekModal" aria-label="The week as a picture">
   <div class="modal__bar">
-    <button type="button" class="btn" id="weekCopy"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy image</button>
-    <button type="button" class="btn btn--quiet" id="weekPrint"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>Print</button>
     <button type="button" class="btn btn--quiet" id="weekClose">Close</button>
   </div>
-  <div class="modal__body week" id="weekBody"></div>
+  <div class="modal__body week-sheet" id="weekSheet"></div>
 </dialog>
 
 <dialog class="modal modal--help" id="helpModal" aria-labelledby="helpTitle">
@@ -673,11 +671,11 @@ the bottom, so what is left stays short. <strong>Print</strong> gives a paper
 copy, and <strong>Copy</strong> puts it on the clipboard as plain text for a
 message or a notes app.</p>
 
-<h3>The week as a picture</h3>
-<p><strong>Print week</strong> draws the seven days and their photos as a single
-image. <strong>Copy image</strong> puts it on the clipboard to paste into a
-message, or right-click it to save. <strong>Print</strong> puts it on the fridge.
-The shopping list is separate, from its own panel, so each sheet does one job.</p>
+<h3>Sending the week to someone</h3>
+<p><strong>Print view</strong> draws the seven days and their photos as one
+picture. From there it is whatever you want it to be: right-click to copy or
+save it for a message, or print it for the fridge. The shopping list is
+separate, from its own panel, so each sheet does one job.</p>
 
 <h3>Sharing a week</h3>
 <p>The address bar always holds the current plan, so there is nothing to press:
@@ -1229,18 +1227,13 @@ function escapeHtml(s) {
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 }
 
-/* ── printable week summary ────────────────────────────────────────────────
-   One sheet: the seven days, then the shopping list. Built from the same
-   grouping the on-page list uses. Print styles hide everything else on the
-   page, so what is printed is exactly what is shown here. */
-
 const weekModal = document.getElementById('weekModal');
-const weekBody = document.getElementById('weekBody');
+const weekSheet = document.getElementById('weekSheet');
 
 /* ── the week as an image ──────────────────────────────────────────────────
    Drawn to a canvas rather than laid out in the DOM, because the point of this
-   sheet is to leave the site: an image pastes into a message, a modal full of
-   text does not. Nothing here is a link, so nothing is lost by flattening it.
+   sheet is to leave the site: an image pastes into a message, a web page does
+   not. Nothing here is a link, so nothing is lost by flattening it.
 
    Drawn at 2x and displayed at 1x, which keeps it sharp on a retina screen and
    prints at roughly 270dpi on A4. */
@@ -1279,8 +1272,12 @@ async function drawWeek() {
   const thumbs = await Promise.all(days.map(d =>
     d.rec && d.rec.image ? loadImage('img/' + d.rec.slug + '-card-320.jpg') : null));
 
-  const headH = 104;
-  const height = SHEET.pad + headH + days.length * SHEET.row + SHEET.pad;
+  // The date range is the title. The site name is what the sheet is *from*,
+  // not what it is about — nobody sends a week plan to say where it came from.
+  const headH = 66;
+  const footH = 34;
+  const height =
+    SHEET.pad + headH + days.length * SHEET.row + footH + SHEET.pad;
   const canvas = document.createElement('canvas');
   canvas.width = SHEET.w * SHEET.scale;
   canvas.height = height * SHEET.scale;
@@ -1294,12 +1291,9 @@ async function drawWeek() {
 
   let y = SHEET.pad;
   ctx.fillStyle = SHEET.ink;
-  ctx.font = font(34, '700');
+  ctx.font = font(32, '700');
   ctx.textBaseline = 'top';
-  ctx.fillText('Grub Gallery', SHEET.pad, y);
-  ctx.fillStyle = SHEET.muted;
-  ctx.font = font(18, '400');
-  ctx.fillText('Week of ' + range, SHEET.pad, y + 44);
+  ctx.fillText(range, SHEET.pad, y);
   y += headH - 20;
   ctx.strokeStyle = SHEET.ink;
   ctx.lineWidth = 2;
@@ -1355,67 +1349,54 @@ async function drawWeek() {
     }
   });
 
+  // Quietly at the foot, so the sheet says where it came from without opening
+  // with it.
+  ctx.fillStyle = SHEET.muted;
+  ctx.font = font(13, '500');
+  ctx.fillText('Grub Gallery', SHEET.pad, y + days.length * SHEET.row + 12);
+
   return canvas;
 }
 
+/* One view, and the browser does the rest. Showing the picture means right-click
+   offers Copy image and Save image, and Cmd-P prints it — all of them the
+   affordances people already know. A pair of bespoke Copy and Print buttons was
+   the same capability with an opinion attached. */
 async function renderWeek() {
-  weekBody.innerHTML = '<p class="week__wait">Drawing…</p>';
-  const canvas = await drawWeek();
-  weekCanvas = canvas;
-  weekBody.innerHTML = '';
+  weekCanvas = await drawWeek();
+  weekSheet.innerHTML = '';
   try {
-    /* An <img> rather than the canvas itself, because right-click → Copy image
-       works on one and not reliably on the other. */
     const img = new Image();
     img.className = 'week__img';
     img.alt = 'Meals planned for the week';
-    img.src = canvas.toDataURL('image/png');
-    weekBody.appendChild(img);
+    img.src = weekCanvas.toDataURL('image/png');
+    weekSheet.appendChild(img);
   } catch (e) {
-    /* Reading the canvas back needs same-origin pixels. Opening the built site
-       from file:// taints it with its own photos, so show the canvas directly —
-       it looks identical, it just cannot be exported. Deployed, this path never
-       runs. */
-    canvas.className = 'week__img';
-    weekBody.appendChild(canvas);
+    /* Reading the canvas back needs same-origin pixels, and opening the built
+       site from file:// taints it with its own photos. A canvas element still
+       displays and prints; it just does not offer Copy image. Deployed, this
+       never runs. */
+    weekCanvas.className = 'week__img';
+    weekSheet.appendChild(weekCanvas);
   }
 }
 
 let weekCanvas = null;
 
-async function copyWeekImage(btn) {
-  if (!weekCanvas) return;
-  const label = btn.dataset.label || (btn.dataset.label = btn.innerHTML);
-  try {
-    const blob = await new Promise(r => weekCanvas.toBlob(r, 'image/png'));
-    // toBlob hands back null on an export failure, and a null reaches
-    // ClipboardItem as an opaque TypeError rather than anything readable.
-    if (!blob) throw new Error('canvas could not be exported');
-    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-    btn.textContent = 'Copied';
-  } catch (e) {
-    // Reading pixels back needs a same-origin canvas, so opening the built site
-    // from file:// taints it and this throws. Works on the deployed site.
-    btn.textContent = 'Right-click the image';
-  }
-  setTimeout(() => { btn.innerHTML = label; }, 2200);
-}
-
-document.getElementById('printWeek').addEventListener('click', async () => {
+document.getElementById('weekView').addEventListener('click', async () => {
   if (!state.plan.some(Boolean)) {
     alert('Add some recipes to the week first.');
     return;
   }
   await renderWeek();
-  // Print styles key off this rather than the dialog's [open] state, so that
-  // printing the index without the summary open still prints the index.
+  /* Set while the view is open so Cmd-P prints the picture rather than the
+     page. Without the guard, printing anywhere else on the index would come
+     out blank. */
   document.documentElement.classList.add('printing-week');
   weekModal.showModal();
 });
+
 document.getElementById('weekClose').addEventListener('click', () => weekModal.close());
-document.getElementById('weekPrint').addEventListener('click', () => window.print());
-document.getElementById('weekCopy').addEventListener('click', e =>
-  copyWeekImage(e.currentTarget));
 weekModal.addEventListener('click', e => { if (e.target === weekModal) weekModal.close(); });
 // Fires for the close button, Escape and the backdrop alike.
 weekModal.addEventListener('close',
