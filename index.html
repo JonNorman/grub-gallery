@@ -663,8 +663,9 @@ a single day. Dragging needs a mouse — on a phone, use <strong>+</strong>.</p>
 meals and groups them, so three recipes wanting Parmesan appear together with
 each amount. Quantities are listed rather than added up — easier to eye up at
 the shop than to trust a total built from “a good pinch”. Salt, pepper, oil and
-water are left out. Tick items off as you go, or <strong>Print</strong> the list
-on its own to take a paper copy.</p>
+water are left out. Tick items off as you go, <strong>Print</strong> it on its
+own for a paper copy, or <strong>Copy</strong> it as plain text to paste into a
+message or a notes app.</p>
 
 <h3>Printing the week</h3>
 <p><strong>Print week</strong> gives you the meals — seven days with their
@@ -1007,12 +1008,73 @@ document.getElementById('clearPlan').addEventListener('click', () => {
 });
 
 const PRINT_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>';
+const COPY_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+
+/* The list as plain text, for pasting into a message or a notes app.
+
+   The on-screen list nests quantities under an ingredient, which does not
+   survive a paste — but the nesting is only ever two deep, so each ingredient
+   flattens onto one line with its quantities joined by semicolons. Identical
+   lines from different recipes are collapsed; two recipes both wanting "45g
+   Parmesan" should not print it twice.
+
+   Recipe names are dropped here although the panel shows them: at the shelf you
+   need the amount, not which dish it came from, and they double the length. */
+function shoppingText() {
+  const planned = plannedRecipes();
+  if (!planned.length) return '';
+  const { groups, keys } = shoppingGroups(planned);
+  const days = plannedDays();
+  const first = days[0].date, last = days[6].date;
+  const sameMonth = first.getMonth() === last.getMonth();
+  const range = formatDate(first, { day: 'numeric', month: sameMonth ? undefined : 'short' }) +
+    '–' + formatDate(last, { day: 'numeric', month: 'short' });
+
+  const lines = ['Shopping list — ' + range +
+    ' (' + planned.length + (planned.length === 1 ? ' meal)' : ' meals)'), ''];
+  for (const key of keys) {
+    // Every line is kept, including identical ones. Quantities are not summed,
+    // so the repetition is the total: two recipes each wanting 45g Parmesan
+    // means 90g, and collapsing them to one line says 45g.
+    const amounts = groups.get(key).map(l => l.text);
+    // Vocabulary terms are lowercase, which is right for a styled UI list and
+    // wrong for a plain-text document being pasted somewhere else.
+    const name = key.charAt(0).toUpperCase() + key.slice(1);
+    lines.push('- ' + name + ': ' + amounts.join('; '));
+  }
+  return lines.join('\n');
+}
+
+let copyResetTimer = null;
+
+async function copyList(btn) {
+  const text = shoppingText();
+  if (!text) return;
+  const done = () => {
+    // Stash the pristine label once. Reading it at click time means a second
+    // click inside the feedback window captures "Copied" as the thing to
+    // restore, and the icon never comes back.
+    if (!btn.dataset.label) btn.dataset.label = btn.innerHTML;
+    btn.textContent = 'Copied';
+    clearTimeout(copyResetTimer);
+    copyResetTimer = setTimeout(() => { btn.innerHTML = btn.dataset.label; }, 1800);
+  };
+  try {
+    await navigator.clipboard.writeText(text);
+    done();
+  } catch (e) {
+    // clipboard needs a secure context, which file:// is not
+    window.prompt('Copy the shopping list:', text);
+  }
+}
 
 /* The list is rebuilt on every open, so its Print button is bound by delegation
    rather than re-wired each time. Print styles are gated on a class, cleared on
    afterprint — without that the class would outlive the dialog and quietly
    blank the next print of anything else. */
 shoppingEl.addEventListener('click', e => {
+  const copy = e.target.closest('#copyList');
+  if (copy) { copyList(copy); return; }
   if (!e.target.closest('#printList')) return;
   document.documentElement.classList.add('printing-list');
   window.print();
@@ -1082,8 +1144,11 @@ function renderShopping() {
   const { groups, keys } = shoppingGroups(planned);
   let html = '<h3>Shopping list <span class="shopping__n">' + keys.length +
     ' ingredients across ' + planned.length + ' meals</span>' +
-    '<button type="button" class="btn btn--quiet shopping__print" id="printList">' +
-    PRINT_ICON + 'Print</button></h3><ul>';
+    '<span class="shopping__acts">' +
+    '<button type="button" class="btn btn--quiet" id="copyList">' +
+    COPY_ICON + 'Copy</button>' +
+    '<button type="button" class="btn btn--quiet" id="printList">' +
+    PRINT_ICON + 'Print</button></span></h3><ul>';
   for (const key of keys) {
     const lines = groups.get(key).map(l =>
       '<li class="shopping__line">' + escapeHtml(l.text) +
