@@ -658,7 +658,13 @@ a single day. Dragging needs a mouse — on a phone, use <strong>+</strong>.</p>
 meals and groups them, so three recipes wanting Parmesan appear together with
 each amount. Quantities are listed rather than added up — easier to eye up at
 the shop than to trust a total built from “a good pinch”. Salt, pepper, oil and
-water are left out.</p>
+water are left out. Tick items off as you go, or <strong>Print</strong> the list
+on its own to take a paper copy.</p>
+
+<h3>Printing the week</h3>
+<p><strong>Print week</strong> gives you the meals — seven days with their
+photos, for the fridge. The shopping list prints separately from its own panel,
+so each sheet does one job.</p>
 
 <h3>Sharing a week</h3>
 <p>The address bar always holds the current plan, so there is nothing to press:
@@ -966,6 +972,20 @@ document.getElementById('clearPlan').addEventListener('click', () => {
   renderPlan();
 });
 
+const PRINT_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>';
+
+/* The list is rebuilt on every open, so its Print button is bound by delegation
+   rather than re-wired each time. Print styles are gated on a class, cleared on
+   afterprint — without that the class would outlive the dialog and quietly
+   blank the next print of anything else. */
+shoppingEl.addEventListener('click', e => {
+  if (!e.target.closest('#printList')) return;
+  document.documentElement.classList.add('printing-list');
+  window.print();
+});
+window.addEventListener('afterprint',
+  () => document.documentElement.classList.remove('printing-list'));
+
 const toggleListBtn = document.getElementById('toggleList');
 toggleListBtn.addEventListener('click', () => {
   shoppingEl.hidden = !shoppingEl.hidden;
@@ -1023,7 +1043,9 @@ function renderShopping() {
   }
   const { groups, keys } = shoppingGroups(planned);
   let html = '<h3>Shopping list <span class="shopping__n">' + keys.length +
-    ' ingredients across ' + planned.length + ' meals</span></h3><ul>';
+    ' ingredients across ' + planned.length + ' meals</span>' +
+    '<button type="button" class="btn btn--quiet shopping__print" id="printList">' +
+    PRINT_ICON + 'Print</button></h3><ul>';
   for (const key of keys) {
     const lines = groups.get(key).map(l =>
       '<li class="shopping__line">' + escapeHtml(l.text) +
@@ -1075,22 +1097,9 @@ function renderWeek() {
   }
   html += '</ol>';
 
-  if (planned.length) {
-    const { groups, keys } = shoppingGroups(planned);
-    html += '<section class="week__shop"><h3>Shopping list</h3><ul>';
-    for (const key of keys) {
-      const lines = groups.get(key)
-        .map(l => escapeHtml(l.text)).join('<br>');
-      // A drawn box rather than a checkbox input: this sheet is for ticking
-      // with a pen, and an unchecked input prints as an empty box anyway on
-      // some browsers and as nothing on others.
-      html += '<li><span class="week__tick" aria-hidden="true"></span>' +
-        '<div><strong>' + escapeHtml(key) + '</strong><span>' + lines +
-        '</span></div></li>';
-    }
-    html += '</ul></section>';
-  }
-
+  // No shopping list here. This sheet is the meals — what goes on the fridge —
+  // and the list is printed from its own panel, where it is already grouped and
+  // tickable. One sheet per job beats one sheet doing both badly.
   weekBody.innerHTML = html;
 }
 
