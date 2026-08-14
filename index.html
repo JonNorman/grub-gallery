@@ -647,7 +647,9 @@ computer, hovering a card previews its main ingredients.</p>
 <p>Press <strong>+</strong> on a card to drop it into the next free day, or drag
 a card onto a particular day. The week starts on Saturday unless you change
 <strong>Starts</strong>. As soon as something is planned the week pins to the
-top of the page, so it stays in reach while you browse.</p>
+top of the page, so it stays in reach while you browse. At the top of the page
+it shows each meal's photo; as it lifts away they fold down to keep it out of
+your way.</p>
 
 <h3>Skipping a day</h3>
 <p>Tap an empty day to mark it <strong>Skipped</strong> — eating out, leftovers,
@@ -832,7 +834,13 @@ function renderPlan() {
     li.draggable = Boolean(rec);
     const label = DAY_NAMES[date.getDay()].slice(0, 3) + ' ' + date.getDate() + ' ' +
       date.toLocaleString('en-GB', { month: 'short' });
-    li.innerHTML = '<span class="day__name">' + label + '</span>';
+    // Every day carries a thumbnail slot, filled or not, so the row heights
+    // agree — otherwise adding a meal makes the whole strip jump.
+    const thumb = rec && rec.image
+      ? '<span class="day__thumb"><img src="img/' + rec.slug +
+        '-card-320.jpg" alt="" loading="lazy"></span>'
+      : '<span class="day__thumb day__thumb--none"></span>';
+    li.innerHTML = thumb + '<span class="day__name">' + label + '</span>';
     if (rec) {
       const a = document.createElement('a');
       a.className = 'day__recipe';
@@ -878,10 +886,11 @@ function renderPlan() {
   });
   const n = state.plan.filter(s => s && s !== SKIPPED).length;
   planN.textContent = n ? n + '/7' : '';
-  // Planning mode: once anything is in the week, the plan pins to the top so
-  // you can keep dropping onto it while scrolling the grid. It compacts when
-  // pinned — a full-height planner would swallow a phone screen.
-  planner.classList.toggle('planner--pinned', n > 0);
+  // Once anything is in the week the panel becomes sticky, so it stays a drop
+  // target while you scroll the grid. Whether it is actually pinned to the top
+  // is a separate thing, tracked by the observer below.
+  planner.classList.toggle('planner--sticky', n > 0);
+  updatePinned();
   cards.forEach((el, slug) => el.classList.toggle('is-planned',
     state.plan.includes(slug)));
   if (!shoppingEl.hidden) renderShopping();
@@ -1411,6 +1420,28 @@ weekModal.addEventListener('click', e => { if (e.target === weekModal) weekModal
 // Fires for the close button, Escape and the backdrop alike.
 weekModal.addEventListener('close',
   () => document.documentElement.classList.remove('printing-week'));
+
+/* --sticky says a plan exists and the panel may stick to the top; is-pinned
+   says it currently is up there, which is what compacts it.
+
+   Read from the panel's own position rather than an IntersectionObserver on a
+   sentinel: a sentinel in the flow stops the surrounding margins collapsing and
+   silently adds a gap above the planner, and observing the planner itself with
+   a threshold breaks once it grows taller than the viewport — which it does the
+   moment the shopping list is open. A sticky panel sits at exactly top:0 once
+   it has lifted, so that is the whole test. */
+let pinnedFrame = null;
+function updatePinned() {
+  pinnedFrame = null;
+  planner.classList.toggle('is-pinned',
+    planner.classList.contains('planner--sticky') &&
+    planner.getBoundingClientRect().top <= 0);
+}
+function queuePinned() {
+  if (pinnedFrame === null) pinnedFrame = requestAnimationFrame(updatePinned);
+}
+addEventListener('scroll', queuePinned, { passive: true });
+addEventListener('resize', queuePinned, { passive: true });
 
 startSel.value = state.startDay;
 // Reflect the restored plan straight away, so the URL is the week on arrival.
