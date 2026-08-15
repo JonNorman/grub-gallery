@@ -266,6 +266,8 @@ a { color: inherit; }
   border: none; border-radius: 999px; cursor: pointer;
 }
 .btn--quiet { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+/* The bar holds an anchor as well as buttons — it must not arrive underlined. */
+a.btn { text-decoration: none; }
 .btn:hover { filter: brightness(1.08); }
 .btn--quiet:hover { color: var(--ink); border-color: var(--accent); filter: none; }
 
@@ -323,13 +325,28 @@ a { color: inherit; }
 .day[role="button"] { cursor: pointer; }
 .day[role="button"]:hover { border-color: var(--accent); }
 .day[role="button"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/*
+ * Sits on the thumbnail, so it needs to carry its own background — a bare grey
+ * glyph is invisible against a photograph, which is what it became when the
+ * thumbnails arrived. Solid circle, same treatment as the + on a recipe card,
+ * so add and remove read as a pair.
+ */
 .day__x {
-  position: absolute; top: 4px; right: 4px;
-  width: 20px; height: 20px; line-height: 1;
-  font-size: 15px; color: var(--muted);
-  background: none; border: none; cursor: pointer;
+  position: absolute; top: 6px; right: 6px; z-index: 1;
+  width: 24px; height: 24px;
+  display: grid; place-items: center;
+  font: 600 16px/1 system-ui, sans-serif;
+  color: var(--ink);
+  background: rgb(255 255 255 / 92%);
+  border: none; border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 22%);
+  transition: background .15s ease, color .15s ease;
 }
-.day__x:hover { color: var(--accent); }
+.day__x:hover { background: var(--accent); color: #fff; }
+.day__x:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) { .day__x { transition: none; } }
 
 /*
  * Planning mode has two states, and they are different things.

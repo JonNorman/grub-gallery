@@ -613,6 +613,8 @@
 <dialog class="modal" id="modal">
   <div class="modal__bar">
     <button type="button" class="btn" id="modalAdd">+ Add to week</button>
+    <a class="btn btn--quiet" id="modalOpen" target="_blank" rel="noopener" aria-label="Full page (opens in a new tab)">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>Full page</a>
     <button type="button" class="btn btn--quiet" id="modalClose">Close</button>
   </div>
   <div class="recipe modal__body" id="modalBody"></div>
@@ -1119,6 +1121,7 @@ grid.addEventListener('click', e => {
 
 const modal = document.getElementById('modal');
 const modalBody = document.getElementById('modalBody');
+const modalOpen = document.getElementById('modalOpen');
 let modalSlug = null;
 
 function openModal(slug) {
@@ -1130,6 +1133,8 @@ function openModal(slug) {
   // Named on open rather than via aria-labelledby: the heading only exists once
   // the body has been injected, and the label changes with every recipe.
   modal.setAttribute('aria-label', rec.name);
+  // Set per recipe: the bar is static, the recipe shown in it is not.
+  modalOpen.href = rec.slug + '.html';
   modal.showModal();
 }
 
