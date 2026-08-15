@@ -659,6 +659,11 @@ your way.</p>
 away. Tap again to free it. <strong>+</strong> then fills the next day that is
 neither planned nor skipped, so a skipped Friday stays skipped.</p>
 
+<h3>The same meal twice</h3>
+<p>A meal planned on two days is marked, and each day says where the other one
+is. It is not stopped — cooking something twice in a week is a fair thing to
+want — but it is usually a slip.</p>
+
 <h3>Moving meals around</h3>
 <p>Drag a planned day onto another to move it. If that day is already taken the
 two swap places, so nothing gets quietly overwritten. <strong>×</strong> clears
@@ -942,13 +947,23 @@ function weekStart() {
 function renderPlan() {
   const start = weekStart();
   daysEl.innerHTML = '';
+  /* A meal planned twice in one week is nearly always a slip — the same recipe
+     added from two different searches, or dropped onto a day that already had
+     it elsewhere. Flagged rather than prevented: cooking something twice in a
+     week is a legitimate thing to want, just rarely what you meant. */
+  const seen = new Map();
+  for (const slug of state.plan) {
+    if (slug && slug !== SKIPPED) seen.set(slug, (seen.get(slug) || 0) + 1);
+  }
   state.plan.forEach((slug, i) => {
     const date = new Date(start);
     date.setDate(start.getDate() + i);
     const skipped = slug === SKIPPED;
     const rec = slug && !skipped ? BY_SLUG.get(slug) : null;
+    const repeated = rec && seen.get(slug) > 1;
     const li = document.createElement('li');
-    li.className = 'day' + (rec ? ' day--full' : skipped ? ' day--skipped' : '');
+    li.className = 'day' + (rec ? ' day--full' : skipped ? ' day--skipped' : '') +
+      (repeated ? ' day--repeat' : '');
     li.dataset.i = i;
     li.draggable = Boolean(rec);
     const label = DAY_NAMES[date.getDay()].slice(0, 3) + ' ' + date.getDate() + ' ' +
@@ -972,6 +987,12 @@ function renderPlan() {
         openModal(rec.slug);
       });
       li.appendChild(a);
+      if (repeated) {
+        const note = document.createElement('span');
+        note.className = 'day__repeat';
+        note.textContent = 'Also on ' + otherDays(slug, i, start).join(' and ');
+        li.appendChild(note);
+      }
       const x = document.createElement('button');
       x.className = 'day__x';
       x.type = 'button';
@@ -1013,6 +1034,19 @@ function renderPlan() {
   cards.forEach((el, slug) => el.classList.toggle('is-planned',
     state.plan.includes(slug)));
   if (!shoppingEl.hidden) renderShopping();
+}
+
+// Which other days hold the same meal, named rather than counted — "Also on
+// Tue" tells you where to go and look; "planned twice" does not.
+function otherDays(slug, self, start) {
+  const names = [];
+  state.plan.forEach((other, i) => {
+    if (i === self || other !== slug) return;
+    const date = new Date(start);
+    date.setDate(start.getDate() + i);
+    names.push(DAY_NAMES[date.getDay()].slice(0, 3));
+  });
+  return names;
 }
 
 function addToPlan(slug) {
