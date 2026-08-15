@@ -94,6 +94,10 @@ a { color: inherit; }
 .suggest li:hover, .suggest li.on { background: var(--accent-soft); color: var(--accent); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+/* Time sits on its own row: it is a different question from diet or meal, and
+   the buckets are one-of rather than any-of. */
+.chips--time { margin-top: 8px; }
+.chip--time { font-size: 13px; }
 .chip {
   font: inherit;
   font-size: 14px;

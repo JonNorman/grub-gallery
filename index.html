@@ -22,7 +22,8 @@
          aria-autocomplete="list" aria-label="Filter by ingredient">
   <ul class="suggest" id="suggest" role="listbox" hidden></ul>
 </div>
-<div class="chips"><button class="chip" data-tag="breakfast">breakfast</button><button class="chip" data-tag="lunch">lunch</button><button class="chip" data-tag="dinner">dinner</button><button class="chip" data-tag="snack">snack</button><button class="chip" data-tag="dessert">dessert</button><button class="chip" data-tag="one-pot">one-pot</button><button class="chip" data-tag="vegan">vegan</button><button class="chip" data-tag="vegetarian">vegetarian</button><button class="chip" data-tag="pescatarian">pescatarian</button></div>
+<div class="chips"><button class="chip" data-tag="breakfast" aria-pressed="false">breakfast</button><button class="chip" data-tag="lunch" aria-pressed="false">lunch</button><button class="chip" data-tag="dinner" aria-pressed="false">dinner</button><button class="chip" data-tag="snack" aria-pressed="false">snack</button><button class="chip" data-tag="dessert" aria-pressed="false">dessert</button><button class="chip" data-tag="one-pot" aria-pressed="false">one-pot</button><button class="chip" data-tag="vegan" aria-pressed="false">vegan</button><button class="chip" data-tag="vegetarian" aria-pressed="false">vegetarian</button><button class="chip" data-tag="pescatarian" aria-pressed="false">pescatarian</button></div>
+<div class="chips chips--time"><button class="chip chip--time" data-bucket="quick" aria-pressed="false">30 min or less</button><button class="chip chip--time" data-bucket="medium" aria-pressed="false">under an hour</button><button class="chip chip--time" data-bucket="long" aria-pressed="false">an hour or more</button><button class="chip chip--time" data-nowait="1" aria-pressed="false">no waiting</button></div>
 <p class="count" id="count"></p>
 </header>
 
@@ -100,7 +101,7 @@
 <div class="card__img"><img loading="lazy" decoding="async" width="640" height="640" src="img/butterfly-cakes-card-640.jpg" srcset="img/butterfly-cakes-card-320.jpg 320w, img/butterfly-cakes-card-480.jpg 480w, img/butterfly-cakes-card-640.jpg 640w" sizes="(max-width: 560px) calc(50vw - 18px), 230px" alt=""></div>
 <div class="card__body">
 <h2>Butterfly Cakes</h2>
-<p class="card__meta">40m</p>
+<p class="card__meta">40m · +30m wait</p>
 <div class="card__detail"><p class="card__ing">baking powder, butter, eggs, flour, sugar</p></div>
 </div></a>
 <button class="card__add" data-slug="butterfly-cakes" type="button"
@@ -200,7 +201,7 @@
 <div class="card__img"><img loading="lazy" decoding="async" width="640" height="640" src="img/chocolate-bread-and-butter-pudding-card-640.jpg" srcset="img/chocolate-bread-and-butter-pudding-card-320.jpg 320w, img/chocolate-bread-and-butter-pudding-card-480.jpg 480w, img/chocolate-bread-and-butter-pudding-card-640.jpg 640w" sizes="(max-width: 560px) calc(50vw - 18px), 230px" alt=""></div>
 <div class="card__body">
 <h2>Chocolate Bread and Butter Pudding</h2>
-<p class="card__meta">1h5m</p>
+<p class="card__meta">1h5m · +50h wait</p>
 <div class="card__detail"><p class="card__ing">bread, butter, cinnamon, dark chocolate, dark rum, double cream, eggs, sugar</p></div>
 </div></a>
 <button class="card__add" data-slug="chocolate-bread-and-butter-pudding" type="button"
@@ -210,7 +211,7 @@
 <div class="card__img"><img loading="lazy" decoding="async" width="640" height="640" src="img/chocolate-snowballs-card-640.jpg" srcset="img/chocolate-snowballs-card-320.jpg 320w, img/chocolate-snowballs-card-480.jpg 480w, img/chocolate-snowballs-card-640.jpg 640w" sizes="(max-width: 560px) calc(50vw - 18px), 230px" alt=""></div>
 <div class="card__body">
 <h2>Chocolate Snowballs</h2>
-<p class="card__meta">20m</p>
+<p class="card__meta">20m · +1h wait</p>
 <div class="card__detail"><p class="card__ing">butter, cocoa powder, digestive biscuits, milk, sugar</p></div>
 </div></a>
 <button class="card__add" data-slug="chocolate-snowballs" type="button"
@@ -370,7 +371,7 @@
 <div class="card__img"><div class="noimg"></div></div>
 <div class="card__body">
 <h2>Kale Salad (BK)</h2>
-<p class="card__meta">Serves 6-8 · 15m</p>
+<p class="card__meta">Serves 6-8 · 15m · +30m wait</p>
 <div class="card__detail"><p class="card__ing">breadcrumbs, chilli flakes, garlic, kale, lemon, parmesan</p></div>
 </div></a>
 <button class="card__add" data-slug="kale-salad-bk" type="button"
@@ -380,7 +381,7 @@
 <div class="card__img"><img loading="lazy" decoding="async" width="640" height="640" src="img/masala-baked-beans-with-pickled-red-onion-fresh-coriander-card-640.jpg" srcset="img/masala-baked-beans-with-pickled-red-onion-fresh-coriander-card-320.jpg 320w, img/masala-baked-beans-with-pickled-red-onion-fresh-coriander-card-480.jpg 480w, img/masala-baked-beans-with-pickled-red-onion-fresh-coriander-card-640.jpg 640w" sizes="(max-width: 560px) calc(50vw - 18px), 230px" alt=""></div>
 <div class="card__body">
 <h2>Masala Baked Beans with Pickled Red Onion + Fresh Coriander</h2>
-<p class="card__meta">Serves 2 · 10m</p>
+<p class="card__meta">Serves 2 · 10m · +30m wait</p>
 <div class="card__detail"><p class="card__ing">agave, baked beans, bread, coriander, honey, onion, vinegar</p></div>
 </div></a>
 <button class="card__add" data-slug="masala-baked-beans-with-pickled-red-onion-fresh-coriander" type="button"
@@ -400,7 +401,7 @@
 <div class="card__img"><div class="noimg"></div></div>
 <div class="card__body">
 <h2>Mum&#x27;s Baked Lemon Cheesecake</h2>
-<p class="card__meta">1h20m</p>
+<p class="card__meta">1h20m · +3h wait</p>
 <div class="card__detail"><p class="card__ing">butter, digestive biscuits, eggs, flour, lemon, quark, soured cream, sugar, vanilla extract</p></div>
 </div></a>
 <button class="card__add" data-slug="mums-baked-lemon-cheesecake" type="button"
@@ -430,7 +431,7 @@
 <div class="card__img"><div class="noimg"></div></div>
 <div class="card__body">
 <h2>Mum&#x27;s German Cheesecake</h2>
-<p class="card__meta">55m</p>
+<p class="card__meta">55m · +2h30m wait</p>
 <div class="card__detail"><p class="card__ing">butter, digestive biscuits, eggs, quark, sugar, vanilla extract</p></div>
 </div></a>
 <button class="card__add" data-slug="mums-german-cheesecake" type="button"
@@ -440,7 +441,7 @@
 <div class="card__img"><div class="noimg"></div></div>
 <div class="card__body">
 <h2>Mum&#x27;s Lemon Drizzle Cake</h2>
-<p class="card__meta">1h</p>
+<p class="card__meta">1h · +30m wait</p>
 <div class="card__detail"><p class="card__ing">baking powder, butter, eggs, flour, lemon, milk, sugar</p></div>
 </div></a>
 <button class="card__add" data-slug="mums-lemon-drizzle-cake" type="button"
@@ -450,7 +451,7 @@
 <div class="card__img"><img loading="lazy" decoding="async" width="640" height="640" src="img/mums-lemon-trifle-card-640.jpg" srcset="img/mums-lemon-trifle-card-320.jpg 320w, img/mums-lemon-trifle-card-480.jpg 480w, img/mums-lemon-trifle-card-640.jpg 640w" sizes="(max-width: 560px) calc(50vw - 18px), 230px" alt=""></div>
 <div class="card__body">
 <h2>Mum&#x27;s Lemon Trifle</h2>
-<p class="card__meta">30m</p>
+<p class="card__meta">30m · +12h wait</p>
 <div class="card__detail"><p class="card__ing">butter, double cream, eggs, lemon, sugar, trifle sponges</p></div>
 </div></a>
 <button class="card__add" data-slug="mums-lemon-trifle" type="button"
@@ -520,7 +521,7 @@
 <div class="card__img"><img loading="lazy" decoding="async" width="640" height="640" src="img/roasted-chickpea-and-kale-salad-with-a-creamy-tahini-yoghurt-dressing-card-640.jpg" srcset="img/roasted-chickpea-and-kale-salad-with-a-creamy-tahini-yoghurt-dressing-card-320.jpg 320w, img/roasted-chickpea-and-kale-salad-with-a-creamy-tahini-yoghurt-dressing-card-480.jpg 480w, img/roasted-chickpea-and-kale-salad-with-a-creamy-tahini-yoghurt-dressing-card-640.jpg 640w" sizes="(max-width: 560px) calc(50vw - 18px), 230px" alt=""></div>
 <div class="card__body">
 <h2>Roasted Chickpea and Kale Salad with a Creamy Tahini + Yoghurt Dressing</h2>
-<p class="card__meta">35m</p>
+<p class="card__meta">35m · +1h wait</p>
 <div class="card__detail"><p class="card__ing">chickpeas, cumin, garlic, kale, lemon, onion powder, parmesan, tahini, yoghurt</p></div>
 </div></a>
 <button class="card__add" data-slug="roasted-chickpea-and-kale-salad-with-a-creamy-tahini-yoghurt-dressing" type="button"
@@ -530,7 +531,7 @@
 <div class="card__img"><div class="noimg"></div></div>
 <div class="card__body">
 <h2>Ruby Chicken</h2>
-<p class="card__meta">Serves 4 · 1h15m</p>
+<p class="card__meta">Serves 4 · 1h15m · +6-24h wait</p>
 <div class="card__detail"><p class="card__ing">bay leaves, butter, cardamom, chicken, chilli powder, cinnamon, coriander, cumin, dill</p></div>
 </div></a>
 <button class="card__add" data-slug="ruby-chicken" type="button"
@@ -640,6 +641,11 @@ with and shared.</p>
 narrow together, so <code>chickpeas feta</code> shows only recipes needing both.
 The tag buttons filter by meal and diet, and combine with whatever you have
 typed.</p>
+<p>The second row filters by how long a recipe takes. Those are one-at-a-time,
+since no recipe is both under half an hour and over an hour.
+<strong>No waiting</strong> is separate, and worth knowing about: a trifle is
+thirty minutes of work and a night in the fridge, so it counts as quick without
+being something you can start at seven and eat at half past.</p>
 
 <h3>Reading a recipe</h3>
 <p>Click or tap any card to open the recipe over the page, so you never lose
@@ -715,6 +721,8 @@ const startSel = document.getElementById('startDay');
 const planN = document.getElementById('planN');
 const cards = new Map([...grid.children].map(el => [el.dataset.slug, el]));
 let activeTags = new Set();
+let activeBucket = null;   // single-select: the buckets are mutually exclusive
+let noWaiting = false;
 
 /* ── filtering ─────────────────────────────────────────────────────────── */
 
@@ -738,19 +746,30 @@ const HAYSTACK = new Map(DATA.map(rec => [
 ]));
 const ALL_TERMS = Object.keys(VOCAB).sort();
 
+const BUCKETS = {"quick": [0, 30], "medium": [31, 59], "long": [60, 1000000]};
+
 function apply() {
   const words = q.value.toLowerCase().split(/[\s,]+/).filter(Boolean);
+  const range = activeBucket ? BUCKETS[activeBucket] : null;
   let shown = 0;
   for (const rec of DATA) {
     const hay = HAYSTACK.get(rec.slug);
     const okWords = words.every(w => hay.includes(w));
     const okTags = [...activeTags].every(t => rec.tags.includes(t));
-    const show = okWords && okTags;
+    // A recipe with no time recorded is excluded from a time filter rather than
+    // assumed quick — every recipe has one today, but a new note might not.
+    const okTime = !range ||
+      (typeof rec.mins === 'number' && rec.mins >= range[0] && rec.mins <= range[1]);
+    /* Waiting is filtered separately from duration. A trifle is 30 minutes of
+       work and twelve hours in the fridge — genuinely quick, and not something
+       you can start at seven and eat at half past. */
+    const okWait = !noWaiting || !rec.wait;
+    const show = okWords && okTags && okTime && okWait;
     cards.get(rec.slug).hidden = !show;
     if (show) shown++;
   }
-  count.textContent = (words.length || activeTags.size)
-    ? shown + ' of ' + DATA.length : '';
+  const filtering = words.length || activeTags.size || activeBucket || noWaiting;
+  count.textContent = filtering ? shown + ' of ' + DATA.length : '';
   empty.hidden = shown !== 0;
 }
 
@@ -851,13 +870,35 @@ q.addEventListener('keydown', e => {
 q.addEventListener('blur', hideSuggestions);
 
 q.addEventListener('input', () => { showSuggestions(); apply(); });
-document.querySelectorAll('.chip').forEach(chip => {
+document.querySelectorAll('.chip[data-tag]').forEach(chip => {
   chip.addEventListener('click', () => {
     const t = chip.dataset.tag;
     activeTags.has(t) ? activeTags.delete(t) : activeTags.add(t);
-    chip.classList.toggle('on');
+    chip.setAttribute('aria-pressed', String(chip.classList.toggle('on')));
     apply();
   });
+});
+
+document.querySelectorAll('.chip[data-bucket]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const key = chip.dataset.bucket;
+    const wasOn = activeBucket === key;
+    activeBucket = wasOn ? null : key;
+    // Selecting one clears the others: two ranges at once match nothing.
+    document.querySelectorAll('.chip[data-bucket]').forEach(c => {
+      const on = !wasOn && c === chip;
+      c.classList.toggle('on', on);
+      c.setAttribute('aria-pressed', String(on));
+    });
+    apply();
+  });
+});
+
+document.querySelector('.chip[data-nowait]').addEventListener('click', e => {
+  noWaiting = !noWaiting;
+  e.currentTarget.classList.toggle('on', noWaiting);
+  e.currentTarget.setAttribute('aria-pressed', String(noWaiting));
+  apply();
 });
 
 /* ── week plan ─────────────────────────────────────────────────────────── */
