@@ -545,6 +545,10 @@ ol.method strong { font-weight: 620; }
             color: var(--muted); margin: 0 0 10px; }
 .notes p { margin: 0 0 10px; }
 .notes p:last-child { margin-bottom: 0; }
+.notes ul { margin: 0; padding-left: 20px; }
+.notes li { margin-bottom: 10px; }
+.notes li:last-child { margin-bottom: 0; }
+.notes li::marker { color: var(--accent); }
 
 .source { color: var(--muted); font-size: 13px; margin-top: 24px; word-break: break-word; }
 
