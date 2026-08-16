@@ -597,6 +597,13 @@ ol.method strong { font-weight: 620; }
   font-size: .9em; padding: 1px 5px; border-radius: 5px;
   background: var(--accent-soft); color: var(--accent);
 }
+/* The heavier bottom edge reads as a keycap, which distinguishes a key to press
+   from the `code` above it, standing for something you type. */
+.help kbd {
+  font: inherit; font-size: .85em; padding: 2px 7px; white-space: nowrap;
+  border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px;
+  background: var(--surface); color: var(--ink);
+}
 
 .card__link { -webkit-user-drag: none; }
 .card[draggable="true"] { cursor: grab; }
