@@ -634,21 +634,21 @@
     <button type="button" class="btn" id="modalAdd">+ Add to week</button>
     <a class="btn btn--quiet" id="modalOpen" target="_blank" rel="noopener" aria-label="Full page (opens in a new tab)">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>Full page</a>
-    <button type="button" class="btn btn--quiet" id="modalClose">Close</button>
+    <button type="button" class="icon-btn modal__close" id="modalClose" aria-label="Close"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
   </div>
   <div class="recipe modal__body" id="modalBody"></div>
 </dialog>
 
 <dialog class="modal modal--week" id="weekModal" aria-label="The week as a picture">
   <div class="modal__bar">
-    <button type="button" class="btn btn--quiet" id="weekClose">Close</button>
+    <button type="button" class="icon-btn modal__close" id="weekClose" aria-label="Close"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
   </div>
   <div class="modal__body week-sheet" id="weekSheet"></div>
 </dialog>
 
 <dialog class="modal modal--help" id="helpModal" aria-labelledby="helpTitle">
   <div class="modal__bar">
-    <button type="button" class="btn btn--quiet" id="helpClose">Close</button>
+    <button type="button" class="icon-btn modal__close" id="helpClose" aria-label="Close"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
   </div>
   <div class="modal__body help">
 <h2 id="helpTitle">About Grub Gallery</h2>
@@ -1049,9 +1049,9 @@ function renderPlan() {
         li.appendChild(note);
       }
       const x = document.createElement('button');
-      x.className = 'day__x';
+      x.className = 'icon-btn day__x';
       x.type = 'button';
-      x.textContent = '×';
+      x.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>';
       x.setAttribute('aria-label', 'Remove ' + rec.name);
       x.addEventListener('click', () => { state.plan[i] = null; save(); renderPlan(); });
       li.appendChild(x);

@@ -268,6 +268,37 @@ a.btn { text-decoration: none; }
 .icon { width: 14px; height: 14px; flex: none; }
 
 /*
+ * The round cross, shared by every dismissal on the site: removing a meal from
+ * a day, and closing a modal. One class so the two cannot drift into different
+ * crosses. Callers supply only what their surroundings dictate — the day cross
+ * sits over a photo so it carries its own opaque background, the modal one sits
+ * on the bar and borrows the quiet button's border.
+ */
+.icon-btn {
+  width: 24px; height: 24px;
+  display: grid; place-items: center;
+  border: none; border-radius: 50%;
+  background: transparent; color: var(--muted);
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+/*
+ * Bigger and heavier than a label icon. At the shared 14px/stroke-2 the cross
+ * came out around a 1.2px line, which reads as faint beside the weight of the
+ * card's + — a dismissal has to be legible at rest, not only under the cursor.
+ */
+.icon-btn .icon { width: 16px; height: 16px; stroke-width: 2.5; }
+
+.icon-btn:hover { background: var(--accent); color: #fff; }
+.icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) { .icon-btn { transition: none; } }
+
+/* 28px so it stands level with the pills it shares the bar with. */
+.modal__close { width: 28px; height: 28px; border: 1px solid var(--line); }
+.modal__close:hover { border-color: var(--accent); }
+
+/*
  * Shopping list is a disclosure, not an action, so it carries a chevron that
  * turns rather than the accent fill an action button gets — the colour was
  * reading as "this is the important one" when it only expands a panel.
@@ -327,20 +358,10 @@ a.btn { text-decoration: none; }
  */
 .day__x {
   position: absolute; top: 6px; right: 6px; z-index: 1;
-  width: 24px; height: 24px;
-  display: grid; place-items: center;
-  font: 600 16px/1 system-ui, sans-serif;
   color: var(--ink);
-  background: rgb(255 255 255 / 92%);
-  border: none; border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 22%);
-  transition: background .15s ease, color .15s ease;
+  background: #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 35%);
 }
-.day__x:hover { background: var(--accent); color: #fff; }
-.day__x:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-@media (prefers-reduced-motion: reduce) { .day__x { transition: none; } }
 
 /*
  * Planning mode has two states, and they are different things.
@@ -569,7 +590,7 @@ ol.method strong { font-weight: 620; }
 
 .modal__bar {
   position: sticky; top: 0; z-index: 2;
-  display: flex; justify-content: flex-end; gap: 8px;
+  display: flex; justify-content: flex-end; align-items: center; gap: 8px;
   padding: 10px 14px;
   background: var(--bg);
   border-bottom: 1px solid var(--line);
