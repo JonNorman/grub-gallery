@@ -143,12 +143,6 @@ a { color: inherit; }
   object-position: center;
   display: block;
 }
-.noimg {
-  width: 100%; height: 100%;
-  background:
-    repeating-linear-gradient(45deg, var(--accent-soft) 0 12px, transparent 12px 24px);
-}
-
 .card__body {
   position: absolute;
   inset: auto 0 0 0;
@@ -394,8 +388,8 @@ a.btn { text-decoration: none; }
 /*
  * The thumbnail is the thing that collapses. Height rather than display, so it
  * animates; overflow hidden so it clips rather than squashing the photo. An
- * empty or skipped day keeps a placeholder of the same height, otherwise the
- * row heights disagree and the whole strip jitters as meals are added.
+ * empty or skipped day keeps a slot of the same height, otherwise the row
+ * heights disagree and the whole strip jitters as meals are added.
  */
 .day__thumb {
   display: block;
