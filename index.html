@@ -800,7 +800,7 @@ function apply() {
        you can start at seven and eat at half past. */
     const okWait = !noWaiting || !rec.wait;
     const show = okWords && okTags && okTime && okWait;
-    cards.get(rec.slug).hidden = !show;
+    cards.get(rec.slug).classList.toggle('is-out', !show);
     if (show) shown++;
   }
   // Always stated, filtered or not: the total is the one number worth knowing

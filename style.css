@@ -108,7 +108,11 @@ a { color: inherit; }
   top: calc(100% + 6px); left: 0; right: 0;
   margin: 0; padding: 6px;
   list-style: none;
-  background: var(--surface);
+  /* Translucent, so the week plan it opens over is still legible behind it.
+     Blurred rather than merely faded: over a row of photographs, plain
+     transparency turns the suggestions into a mess to read. */
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  backdrop-filter: blur(10px) saturate(1.2);
   border: 1px solid var(--line);
   border-radius: 14px;
   box-shadow: var(--shadow-lift);
@@ -158,8 +162,20 @@ a { color: inherit; }
   overflow: hidden;
   background: var(--accent-soft);
   box-shadow: var(--shadow);
-  transition: transform .18s ease, box-shadow .18s ease;
+  transition: transform .18s ease, box-shadow .18s ease,
+              opacity .16s ease, display .16s allow-discrete;
 }
+/*
+ * Filtered out by a class rather than the hidden attribute, so the card can
+ * fade before it goes. display is discrete and cannot tween, but it can be
+ * held back until the fade finishes — which is what allow-discrete does, and
+ * what @starting-style undoes on the way back in.
+ *
+ * The grid still closes the gap in one step once a card is gone; this softens
+ * the disappearance, not the reflow.
+ */
+.card.is-out { opacity: 0; display: none; }
+@starting-style { .card { opacity: 0; } }
 .card__link { display: block; height: 100%; text-decoration: none; color: #fff; }
 
 .card__img { position: absolute; inset: 0; }
@@ -232,6 +248,7 @@ a { color: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
   .card, .card__detail, .card__add { transition: none; }
+  .card.is-out { transition: none; }
 }
 
 /*
