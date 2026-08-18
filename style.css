@@ -17,6 +17,15 @@
    */
   --on-photo: #fff;
   --on-photo-ink: #23201c;
+  /*
+   * The three states a day can be in, told by colour rather than counted in a
+   * heading. Sage for planned rather than green: it has to sit beside a warm
+   * cream and a terracotta without shouting. Nothing red — an unplanned
+   * Thursday is not a mistake, and red would nag about it every time.
+   */
+  --day-planned: #e4ede0;
+  --day-free: transparent;
+  --day-skipped: #eae5dc;
   --shadow: 0 1px 2px rgb(35 32 28 / 8%), 0 8px 24px rgb(35 32 28 / 6%);
   --shadow-lift: 0 2px 6px rgb(35 32 28 / 10%), 0 18px 40px rgb(35 32 28 / 14%);
 }
@@ -30,6 +39,8 @@
     --line: #332e26;
     --accent: #f0855a;
     --accent-soft: #3a251c;
+    --day-planned: #232d21;
+    --day-skipped: #262219;
     --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 30%);
     --shadow-lift: 0 2px 6px rgb(0 0 0 / 45%), 0 18px 40px rgb(0 0 0 / 45%);
   }
@@ -259,7 +270,6 @@ a { color: inherit; }
   margin-bottom: 12px;
 }
 .planner__head h2 { font-size: 15px; margin: 0; flex: 1 1 auto; }
-.planner__n { color: var(--muted); font-weight: 400; }
 .planner__start { font-size: 13px; color: var(--muted); }
 .planner__start select {
   font: inherit; font-size: 13px; padding: 4px 6px;
@@ -341,7 +351,7 @@ a.btn { text-decoration: none; }
   display: grid; gap: 8px;
   grid-template-columns: repeat(7, minmax(0, 1fr));
 }
-@media (max-width: 780px) { .days { grid-template-columns: repeat(2, 1fr); } }
+
 
 .day {
   position: relative;
@@ -351,7 +361,7 @@ a.btn { text-decoration: none; }
   border-radius: 10px;
   font-size: 13px;
 }
-.day--full { border-style: solid; background: var(--accent-soft); border-color: transparent; }
+.day--full { border-style: solid; background: var(--day-planned); border-color: transparent; }
 .day__name { display: block; color: var(--muted); font-size: 11px;
              text-transform: uppercase; letter-spacing: .05em; }
 .day__recipe { display: block; margin-top: 4px; color: var(--ink);
@@ -364,7 +374,7 @@ a.btn { text-decoration: none; }
    look alike or the toggle has no visible effect. */
 .day--skipped {
   border-style: solid;
-  background: var(--line);
+  background: var(--day-skipped);
   border-color: transparent;
   opacity: .65;
 }
@@ -389,34 +399,67 @@ a.btn { text-decoration: none; }
 }
 
 /*
- * Planning mode has two states, and they are different things.
- *
- * --sticky means a plan exists, so the panel is allowed to stick to the top.
- * is-pinned means it currently is up there, set from the panel's own position
- * on scroll. Only the second one compacts: at rest you get the thumbnails, and
- * they fold away as it lifts off.
+ * The panel follows the reader by coming out of flow and shrinking, with a
+ * slot behind it holding the space. Its position and size are driven from
+ * applyShrink(), which reads the slot — so the panel lands wherever the slot
+ * is, whatever the width or the centring, without the CSS repeating any of it.
  */
-.planner--sticky {
-  position: sticky;
-  top: 0;
+/* The slot carries the panel's spacing, since margins on an out-of-flow
+   panel are invisible to the page around it. */
+.planner-slot { position: relative; margin: 24px 0; }
+.planner--planned {
+  position: fixed;
   z-index: 20;
-  transition: box-shadow .2s ease, border-radius .2s ease;
+  overflow: hidden;
+  margin: 0;
 }
-.planner--sticky.is-pinned {
-  margin-top: 0;
-  border-radius: 0 0 var(--radius) var(--radius);
-  border-top-color: transparent;
-  box-shadow: 0 6px 24px rgb(35 32 28 / 12%);
+
+/*
+ * The collapse itself: one set of rules, driven by --shrink between 0 and 1.
+ * It replaced a second mechanism that snapped between two fixed shapes at a
+ * threshold, changing the document's height as it went — which is what made
+ * the page shove itself around at the boundary. Both described the same six
+ * elements; only one of them could be right.
+ */
+.planner--planned { padding: calc(16px - 6px * var(--shrink, 0)) 18px; }
+
+/* The head folds away: the shopping list, week view and clear are somewhere
+   you go, not something to keep in view while reading recipes. */
+.planner--planned .planner__head {
+  max-height: calc(var(--head-h, 140px) * (1 - var(--shrink, 0)));
+  margin-bottom: calc(12px * (1 - var(--shrink, 0)));
+  opacity: calc(1 - 1.8 * var(--shrink, 0));
+  overflow: hidden;
+  transition: none;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .planner--sticky.is-pinned {
-    box-shadow: 0 6px 24px rgb(0 0 0 / 50%);
-  }
+
+/* The thumbnail shrinks rather than vanishing — it is what makes a day
+   recognisable at a glance, which is the whole reason to keep the panel. */
+.planner--planned .day__thumb {
+  height: calc(66px - 30px * var(--shrink, 0));
+  margin-bottom: calc(6px - 2px * var(--shrink, 0));
+  transition: none;
 }
-.planner--sticky.is-pinned .planner__head { margin-bottom: 9px; }
-.planner--sticky.is-pinned .day { min-height: 0; padding: 6px 8px; }
-.planner--sticky.is-pinned .day__recipe { font-size: 12.5px; }
-.planner--sticky.is-pinned .day__empty { font-size: 15px; line-height: 1; }
+.planner--planned .day {
+  padding: calc(8px - 4px * var(--shrink, 0)) 9px;
+  min-height: calc(74px * (1 - var(--shrink, 0)));
+}
+
+/* A wrapped title is most of the panel's height once the columns are narrow.
+   Two lines open, one compact, both ellipsised. Clamping cannot interpolate,
+   so that last step is a class — it only ever changes what is inside a panel
+   that is out of flow with a driven height, so nothing outside it can move. */
+.planner--planned .day__recipe {
+  display: -webkit-box; -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; overflow: hidden;
+}
+.planner--planned.is-compact .day__recipe { -webkit-line-clamp: 1; }
+/* Which day, not which date, once compact: the month costs more width than
+   the day it qualifies. Narrow screens drop it at every size — see below. */
+.planner--planned.is-compact .day__date { display: none; }
+/* The remove cross is an editing control, so it goes with the head. */
+.planner--planned .day__x { opacity: calc(1 - 1.8 * var(--shrink, 0)); }
+.planner--planned.is-compact .day__x { pointer-events: none; }
 /*
  * The list gets its own scroll rather than extending the panel indefinitely.
  * overscroll-behavior stops that scroll chaining into the page when the list
@@ -448,15 +491,7 @@ a.btn { text-decoration: none; }
    the reader at exactly the boundary they must cross to scroll past it. The
    page ends up shoving itself around as the class flickers on and off. Same
    layout in both states leaves only the thumbnail collapse, about 100px. */
-@media (max-width: 780px) {
-  .planner--sticky .days {
-    grid-template-columns: repeat(7, minmax(88px, 1fr));
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    padding-bottom: 4px;
-  }
-  .planner--sticky .day { scroll-snap-align: start; }
-}
+
 
 /*
  * The thumbnail is the thing that collapses. Height rather than display, so it
@@ -479,14 +514,9 @@ a.btn { text-decoration: none; }
     var(--line) 0 6px, transparent 6px 12px);
   opacity: .5;
 }
-.planner--sticky.is-pinned .day__thumb {
-  height: 0;
-  margin-bottom: 0;
-  opacity: 0;
-}
 
 @media (prefers-reduced-motion: reduce) {
-  .planner--sticky, .day__thumb { transition: none; }
+  .planner--planned, .day__thumb { transition: none; }
 }
 
 /* A repeat is worth noticing, not worth alarming about — an outline and a note,
@@ -502,9 +532,23 @@ a.btn { text-decoration: none; }
  */
 .topbar__row { display: flex; gap: 8px; align-items: center; }
 .topbar__row .find { flex: 1 1 auto; min-width: 0; }
-.topbar__only { display: none; }
+/* Shown only where the chips are collapsed behind it. */
+#toggleFilters { display: none; }
 
 @media (max-width: 780px) {
+  /* Two columns of days at rest; the row of seven below is for the
+     panel once it is following the reader. */
+.days { grid-template-columns: repeat(2, 1fr); }
+
+
+  .planner--planned .days {
+    grid-template-columns: repeat(7, minmax(88px, 1fr));
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding-bottom: 4px;
+  }
+  .planner--planned .day { scroll-snap-align: start; }
+
   .topbar {
     position: sticky; top: 0; z-index: 30;
     background: var(--bg);
@@ -513,7 +557,7 @@ a.btn { text-decoration: none; }
     padding: 8px var(--pad);
     box-shadow: 0 4px 16px rgb(35 32 28 / 7%);
   }
-  .topbar__only { display: inline-flex; }
+  #toggleFilters { display: inline-flex; }
   .topbar .btn { white-space: nowrap; }
   #q { padding: 9px 14px; font-size: 14px; }
 
@@ -537,17 +581,24 @@ a.btn { text-decoration: none; }
   /* The slot carries the space below the panel. On the panel itself it would
      be invisible to the layout, the panel being out of flow, and the recipes
      started flush against it. A gutter's worth, so it matches the page. */
-  .planner-slot { position: relative; margin-bottom: calc(var(--pad) + 6px); }
-  .planner--sticky {
-    position: fixed;
-    /* Out of flow, so the resting 24px bottom margin was doing nothing except
-       sitting in the file looking asymmetric against a zeroed top. */
-    margin: 0;
-    left: var(--pad);
-    right: var(--pad);
-    z-index: 15;
-    overflow: hidden;
-    margin-top: 0;
+  .planner-slot { margin: 0 0 calc(var(--pad) + 6px); }
+
+  /* Tighter than the default: at a fifth of a phone screen the frozen band
+     has no room for padding that is not doing something. */
+  .planner--planned {
+    padding: calc(16px - 11px * var(--shrink, 0))
+             calc(18px - 13px * var(--shrink, 0))
+             calc(10px - 5px * var(--shrink, 0));
+  }
+  .planner--planned .days { gap: calc(8px - 4px * var(--shrink, 0)); }
+  .planner--planned .day {
+    padding: calc(10px - 8px * var(--shrink, 0)) calc(9px - 7px * var(--shrink, 0));
+  }
+  .planner--planned .day__name { font-size: calc(11px - 0.5px * var(--shrink, 0)); }
+  .planner--planned .day__thumb {
+    margin-left: calc(-2px * var(--shrink, 0));
+    margin-right: calc(-2px * var(--shrink, 0));
+    width: calc(100% + 4px * var(--shrink, 0));
   }
   /* The three controls belong on one line. Renaming the print button to Week
      bought most of it; the rest is gap and padding sized for a desktop panel.
@@ -558,89 +609,35 @@ a.btn { text-decoration: none; }
 
   /* Date, then picture, then name — the order you read a day in when you are
      checking what is already planned. */
-  .planner--sticky .day { display: flex; flex-direction: column; }
-  .planner--sticky .day__name   { order: 1; }
-  .planner--sticky .day__thumb  { order: 2; }
-  .planner--sticky .day__recipe { order: 3; }
-  /* An empty or skipped day says so where a title would go, not above the
-     date it belongs to. */
-  /* Centred in what is left, rather than dropped to the bottom of a cell
-     sized by the neighbour with the longest title — an empty day was showing
-     42px of nothing between its date and its label. */
-  .planner--sticky .day__skip,
-  .planner--sticky .day__empty  { order: 3; margin-block: auto; }
-  .planner--sticky .day__repeat { order: 4; }
+  .planner--planned .day { display: flex; flex-direction: column; }
+  .planner--planned .day__name   { order: 1; }
+  .planner--planned .day__thumb  { order: 2; }
+  .planner--planned .day__recipe { order: 3; }
+  /* One line of title at every point in the collapse, not two falling to one
+     part-way down. The step removed 17px of content in an instant while the
+     box carried on shrinking smoothly, so the panel alternately cut its
+     thumbnails and left a gap under them. With the date gone as well, a cell
+     is a day, a picture and a name — all of which shrink continuously. */
+  .planner--planned .day__recipe { -webkit-line-clamp: 1; }
 
-  /* Only the days are worth freezing. The shopping list, print view and clear
-     are things you go to the panel for, not things you need in view while
-     reading recipes, so the head folds away as the panel closes. */
-  .planner--sticky .planner__head {
-    max-height: calc(120px * (1 - var(--shrink, 0)));
-    margin-bottom: calc(14px * (1 - var(--shrink, 0)));
-    opacity: calc(1 - 1.8 * var(--shrink, 0));
-    overflow: hidden;
-    transition: none;
-  }
+  /* The date goes entirely. Across seven columns "SAT 22 AUG" wraps to two
+     lines, so every cell carried a line of height for something nobody
+     scanning for the next free evening needs — the day alone answers it, on
+     one line, at any point in the collapse. */
+  .planner--planned .day__date { display: none; }
 
-  /* The thumbnail is what makes a day recognisable at a glance, so it stays —
-     smaller, not gone. Collapsing it entirely was what left the compact panel
-     tall and wordy, since the titles then had to carry it alone. */
-  .planner--sticky .day__thumb {
-    height: calc(66px - 30px * var(--shrink, 0));
-    margin-bottom: calc(6px - 2px * var(--shrink, 0));
-    transition: none;
-  }
-  /* Every source of padding closes up together as it collapses. At a quarter
-     of a phone screen the frozen band has no room for whitespace that is not
-     doing something, and the thumbnails are what it is for. */
-  /* Less underneath than above: the head needs air over it, the day cells do
-     not need it under them, and what was there read as the panel trailing off
-     rather than ending. The space moves outside, between panel and recipes. */
-  .planner--sticky {
-    padding: calc(16px - 11px * var(--shrink, 0))
-             calc(18px - 13px * var(--shrink, 0))
-             calc(10px - 5px * var(--shrink, 0));
-  }
-  .planner--sticky .days { gap: calc(8px - 4px * var(--shrink, 0)); }
-  .planner--sticky .day {
-    padding: calc(10px - 8px * var(--shrink, 0)) calc(9px - 7px * var(--shrink, 0));
-    min-height: calc(74px * (1 - var(--shrink, 0)));
-  }
-  .planner--sticky .day__name { font-size: calc(11px - 0.5px * var(--shrink, 0)); }
-  /* The thumbnail bleeds into what padding is left, so the picture gets the
-     width rather than the gap around it. */
-  .planner--sticky .day__thumb {
-    margin-left: calc(-2px * var(--shrink, 0));
-    margin-right: calc(-2px * var(--shrink, 0));
-    width: calc(100% + 4px * var(--shrink, 0));
-  }
-
-  /* A wrapped title over seven narrow columns is most of the panel's height:
-     "Cheesy Butter Bean, Tomato + Garlic Pasta Bake" runs to six lines. Two
-     lines at rest, one once compact, both ellipsised. */
-  .planner--sticky .day__recipe {
-    display: -webkit-box; -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2; overflow: hidden;
-  }
-  .planner--sticky.is-compact .day__recipe { -webkit-line-clamp: 1; }
-  /* Which day it is, not which date. Nobody scanning for the next free
-     evening needs to be told the month, and across seven columns the date
-     costs more width than the day it qualifies. */
-  .planner--sticky.is-compact .day__date { display: none; }
-  /* The remove cross is an editing control; it goes with the head. */
-  .planner--sticky .day__x { opacity: calc(1 - 1.8 * var(--shrink, 0)); }
-  .planner--sticky.is-compact .day__x { pointer-events: none; }
-
-
-
-
+  /* Said where a title would go, not above the date it belongs to, and
+     centred in what is left rather than dropped to the bottom of a cell sized
+     by whichever neighbour has the longest title. */
+  .planner--planned .day__skip,
+  .planner--planned .day__empty  { order: 3; margin-block: auto; }
+  .planner--planned .day__repeat { order: 4; }
 }
 
 .day__repeat {
   display: block; margin-top: 3px;
   font-size: 11px; font-weight: 550; color: var(--accent);
 }
-.planner--sticky.is-pinned .day__repeat { display: none; }
 
 .day--over { border-color: var(--accent); border-style: solid; background: var(--accent-soft); }
 .day[draggable="true"] { cursor: grab; }

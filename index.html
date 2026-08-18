@@ -35,7 +35,7 @@
              aria-autocomplete="list" aria-label="Search by ingredient, tag or name">
       <ul class="suggest" id="suggest" role="listbox" hidden></ul>
     </div>
-    <button type="button" id="toggleFilters" class="btn btn--quiet btn--toggle topbar__only"
+    <button type="button" id="toggleFilters" class="btn btn--quiet btn--toggle"
             aria-expanded="false" aria-controls="filters">
       Filter<svg class="icon icon--state" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
   </div>
@@ -49,7 +49,7 @@
 <div class="planner-slot" id="plannerSlot">
 <section class="planner" id="planner" aria-label="Week plan">
   <div class="planner__head">
-    <h2>Week plan <span class="planner__n" id="planN"></span></h2>
+    <h2>Week plan</h2>
     <label class="planner__start">Starts
       <select id="startDay"><option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6" selected>Saturday</option></select>
     </label>
@@ -728,11 +728,11 @@ const count = document.getElementById('count');
 const empty = document.getElementById('empty');
 const planner = document.getElementById('planner');
 const plannerSlot = document.getElementById('plannerSlot');
+const plannerHead = document.querySelector('.planner__head');
 const topbar = document.getElementById('topbar');
 const daysEl = document.getElementById('days');
 const shoppingEl = document.getElementById('shopping');
 const startSel = document.getElementById('startDay');
-const planN = document.getElementById('planN');
 const filtersEl = document.getElementById('filters');
 const toggleFiltersBtn = document.getElementById('toggleFilters');
 const cards = new Map([...grid.children].map(el => [el.dataset.slug, el]));
@@ -1132,12 +1132,11 @@ function renderPlan() {
     daysEl.appendChild(li);
   });
   const n = state.plan.filter(s => s && s !== SKIPPED).length;
-  planN.textContent = n ? n + '/7' : '';
   requestAnimationFrame(measureSlot);
-  // Once anything is in the week the panel becomes sticky, so it stays a drop
-  // target while you scroll the grid. Whether it is actually pinned to the top
-  // is a separate thing, tracked by the observer below.
-  planner.classList.toggle('planner--sticky', n > 0);
+  // Once anything is in the week the panel starts following the reader, so it
+  // stays a drop target while you scroll the grid. How it follows differs by
+  // width — pinned on a wide screen, shrunk out of flow on a narrow one.
+  planner.classList.toggle('planner--planned', n > 0);
   updatePinned();
   cards.forEach((el, slug) => el.classList.toggle('is-planned',
     state.plan.includes(slug)));
@@ -1756,31 +1755,19 @@ weekModal.addEventListener('click', e => { if (e.target === weekModal) weekModal
 weekModal.addEventListener('close',
   () => document.documentElement.classList.remove('printing-week'));
 
-/* --sticky says a plan exists and the panel may stick to the top; is-pinned
-   says it currently is up there, which is what compacts it.
+/* The panel follows the reader by leaving the flow and shrinking, with a slot
+   behind it keeping the space. Nothing it does can move the document, which is
+   what a sticky panel that changed height could not avoid: its slot shrank
+   with it and dragged the recipes up at the very boundary being crossed.
 
-   Read from the panel's own position rather than an IntersectionObserver on a
-   sentinel: a sentinel in the flow stops the surrounding margins collapsing and
-   silently adds a gap above the planner, and observing the planner itself with
-   a threshold breaks once it grows taller than the viewport — which it does the
-   moment the shopping list is open. A sticky panel sits at exactly top:0 once
-   it has lifted, so that is the whole test. */
-/* Narrow screens do not pin at all. The panel is half a phone tall, and a
-   sticky element that changes height mid-scroll rewrites the document under
-   the reader at the one boundary they have to cross. The top bar carries the
-   week chip instead, which is a fixed height and cannot shove anything. */
-const NARROW = matchMedia('(max-width: 780px)');
+   One mechanism at every width. It used to be two — a threshold that snapped
+   between two shapes on a wide screen, and this on a narrow one — described
+   against the same six elements and kept apart by a media query. */
 let pinnedFrame = null;
 function updatePinned() {
   pinnedFrame = null;
   applyShrink();
-  planner.classList.toggle('is-pinned',
-    !NARROW.matches &&
-    planner.classList.contains('planner--sticky') &&
-    !planner.classList.contains('is-shopping') &&
-    planner.getBoundingClientRect().top <= 0);
 }
-NARROW.addEventListener('change', () => { updatePinned(); measureSlot(); });
 
 /* Shrinking the panel as you scroll, without the page moving underneath.
 
@@ -1803,56 +1790,69 @@ let slotFull = 0, slotMin = 0;
 function releasePanel() {
   plannerSlot.style.height = '';
   planner.style.height = '';
+  planner.style.width = '';
+  planner.style.left = '';
   planner.style.top = '';
   planner.style.setProperty('--shrink', '0');
   planner.classList.remove('is-compact');
 }
 
 function measureSlot() {
-  if (!NARROW.matches || !planner.classList.contains('planner--sticky') ||
+  if (!planner.classList.contains('planner--planned') ||
       planner.classList.contains('is-shopping')) {
     releasePanel();
     return;
   }
-  // Measured at both extremes with the panel released, so the numbers come
-  // from the layout rather than from constants that would drift from it.
+  /* Measured at both extremes, in the state each will actually be in, so the
+     numbers come from the layout rather than from constants that drift from
+     it — and at the width it will actually have. Clearing the width let a
+     fixed element with only a left offset shrink to fit its own content, so
+     both figures came from a panel the wrong width, and the driven height was
+     then too small for the content at every point in between. */
   planner.style.height = '';
+  planner.style.width = plannerSlot.getBoundingClientRect().width + 'px';
   planner.classList.remove('is-compact');
   planner.style.setProperty('--shrink', '0');
   slotFull = planner.offsetHeight;
-  // is-compact goes on for the collapsed measurement too, or the floor comes
-  // from two-line titles the compact panel never shows and the panel is left
-  // holding a height its content does not fill.
   planner.classList.add('is-compact');
   planner.style.setProperty('--shrink', '1');
   slotMin = planner.offsetHeight;
   planner.classList.remove('is-compact');
   planner.style.setProperty('--shrink', '0');
+  // Its own height, so the fold is linear from the first pixel of scroll.
+  // A fixed 140px guess did nothing at all until the panel was already
+  // two-fifths collapsed, while the box shrank from the start — which is
+  // what cut the thumbnails and ate the padding under them.
+  planner.style.removeProperty('--head-h');
+  planner.style.setProperty('--head-h', plannerHead.offsetHeight + 'px');
   plannerSlot.style.height = slotFull + 'px';
   applyShrink();
 }
 
 function applyShrink() {
-  if (!NARROW.matches || !slotFull ||
-      !planner.classList.contains('planner--sticky') ||
+  if (!slotFull || !planner.classList.contains('planner--planned') ||
       planner.classList.contains('is-shopping')) return;
-  const slotTop = plannerSlot.getBoundingClientRect().top;
-  const barH = topbar.getBoundingClientRect().height;
+  const slot = plannerSlot.getBoundingClientRect();
+  // Where the panel comes to rest. The top bar is sticky on a narrow screen,
+  // so the panel holds under it; on a wide one the bar scrolls away and its
+  // bottom goes negative, where the viewport top is what the panel wants.
+  const barH = Math.max(0, topbar.getBoundingClientRect().bottom);
   /* Until the slot reaches the bar the panel simply sits in it, full size and
      indistinguishable from being in flow. After that it holds under the bar
      and takes whatever height is left between there and the slot's bottom
-     edge — so the edge the recipes start at is the same line either way, and
-     the panel closes up rather than a gap opening under it. */
-  const top = Math.max(barH, slotTop);
-  const want = Math.min(slotFull, Math.max(slotMin, slotTop + slotFull - top));
+     edge — so the recipes start on the same line either way, and the panel
+     closes up rather than a gap opening beneath it. */
+  const top = Math.max(barH, slot.top);
+  const want = Math.min(slotFull, Math.max(slotMin, slot.top + slotFull - top));
+  // Read off the slot rather than restated in CSS: the slot is already where
+  // the page's gutters and centring put it, at any width.
+  planner.style.left = slot.left + 'px';
+  planner.style.width = slot.width + 'px';
   planner.style.top = top + 'px';
   planner.style.height = want + 'px';
   const range = slotFull - slotMin;
   const shrink = range ? Math.min(1, Math.max(0, (slotFull - want) / range)) : 0;
   planner.style.setProperty('--shrink', String(shrink));
-  // Line clamping cannot be interpolated, so the last of the collapse is a
-  // step. It only ever changes what is inside a panel that is out of flow and
-  // whose height is being driven anyway, so nothing outside it can move.
   planner.classList.toggle('is-compact', shrink > 0.6);
 }
 addEventListener('scroll', () => queuePinned(), { passive: true });
@@ -1860,7 +1860,8 @@ function queuePinned() {
   if (pinnedFrame === null) pinnedFrame = requestAnimationFrame(updatePinned);
 }
 addEventListener('scroll', queuePinned, { passive: true });
-addEventListener('resize', queuePinned, { passive: true });
+addEventListener('resize', () => { measureSlot(); queuePinned(); },
+  { passive: true });
 
 startSel.value = state.startDay;
 // Reflect the restored plan straight away, so the URL is the week on arrival.
