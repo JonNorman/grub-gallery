@@ -481,13 +481,6 @@ a.btn { text-decoration: none; }
 .planner--planned .day__x { opacity: calc(1 - 1.8 * var(--shrink, 0)); }
 .planner--planned.is-compact .day__x { pointer-events: none; }
 /*
- * The list gets its own scroll rather than extending the panel indefinitely.
- * overscroll-behavior stops that scroll chaining into the page when the list
- * reaches either end: without it, running out of list hands the gesture to
- * the document, which drags the reader across the pin boundary and sets the
- * panel resizing under a finger that was only trying to read a shopping list.
- */
-/*
  * Opening the shopping list is a change of mode. Whoever opened it is at the
  * shelf, not browsing recipes, so the panel stops behaving like a header it
  * needs to keep above them: it gives up sticking, and the list runs at its
@@ -811,6 +804,10 @@ ol.method strong { font-weight: 620; }
 .modal__body {
   max-height: calc(90vh - 56px);
   overflow-y: auto;
+  /* Reaching either end of a recipe hands the gesture to the document
+     otherwise, which scrolls the grid behind the dialog — so the reader
+     closes the modal onto a page sitting somewhere they never scrolled to. */
+  overscroll-behavior: contain;
   padding: 4px clamp(16px, 4vw, 36px) clamp(20px, 4vw, 36px);
   -webkit-overflow-scrolling: touch;
 }
