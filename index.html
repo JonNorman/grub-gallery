@@ -1421,6 +1421,12 @@ toggleListBtn.addEventListener('click', () => {
   const open = !shoppingEl.hidden;
   toggleListBtn.setAttribute('aria-expanded', String(open));
   toggleListBtn.classList.toggle('is-open', open);
+  // Opening the list is a change of mode, not just of visibility: whoever
+  // opened it has stopped browsing recipes and started shopping.
+  planner.classList.toggle('is-shopping', open);
+  // Drop the pinned styling in the same frame the panel stands down, rather
+  // than leaving it compacted until the next scroll event arrives.
+  updatePinned();
   if (open) renderShopping();
 });
 
@@ -1700,6 +1706,7 @@ function updatePinned() {
   pinnedFrame = null;
   planner.classList.toggle('is-pinned',
     planner.classList.contains('planner--sticky') &&
+    !planner.classList.contains('is-shopping') &&
     planner.getBoundingClientRect().top <= 0);
 }
 function queuePinned() {

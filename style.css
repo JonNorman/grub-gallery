@@ -417,25 +417,20 @@ a.btn { text-decoration: none; }
  * the document, which drags the reader across the pin boundary and sets the
  * panel resizing under a finger that was only trying to read a shopping list.
  */
-.planner--sticky.is-pinned .shopping {
-  max-height: 40vh;
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-}
-
 /*
- * On a phone the cap applies unpinned too. A full list runs to some 4700px,
- * and leaving it uncapped at rest means pinning collapses the panel from
- * around 5100px to 685px — the same document-rewriting jump the day strip
- * above avoids, four thousand pixels worse.
+ * Opening the shopping list is a change of mode. Whoever opened it is at the
+ * shelf, not browsing recipes, so the panel stops behaving like a header it
+ * needs to keep above them: it gives up sticking, and the list runs at its
+ * full height down the page.
+ *
+ * This is what replaced a 40vh scrolling window. Capping the list meant the
+ * panel had to stay pinned over content nobody was reading, gave 51 items a
+ * four-item porthole, and put a second scroll container under the finger —
+ * which chained into the page, dragged the reader across the pin boundary,
+ * and set the panel resizing mid-swipe. Standing the panel down removes the
+ * boundary rather than making it cheaper to cross.
  */
-@media (max-width: 780px) {
-  .planner--sticky .shopping {
-    max-height: 40vh;
-    overflow-y: auto;
-    overscroll-behavior-y: contain;
-  }
-}
+.planner.is-shopping { position: static; }
 
 /* On a narrow screen seven days are one scrollable strip rather than a
    four-row grid that would leave no room for the recipes below.
