@@ -38,8 +38,6 @@
     <button type="button" id="toggleFilters" class="btn btn--quiet btn--toggle topbar__only"
             aria-expanded="false" aria-controls="filters">
       Filter<svg class="icon icon--state" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
-    <button type="button" id="weekChip" class="btn btn--quiet topbar__only" hidden>
-      Week <span id="weekChipN"></span></button>
   </div>
   <div class="filters" id="filters">
     <div class="chips"><button class="chip" data-tag="breakfast" aria-pressed="false">breakfast</button><button class="chip" data-tag="lunch" aria-pressed="false">lunch</button><button class="chip" data-tag="dinner" aria-pressed="false">dinner</button><button class="chip" data-tag="snack" aria-pressed="false">snack</button><button class="chip" data-tag="dessert" aria-pressed="false">dessert</button><button class="chip" data-tag="one-pot" aria-pressed="false">one-pot</button><button class="chip" data-tag="baby-friendly" aria-pressed="false">baby-friendly</button><button class="chip" data-tag="vegan" aria-pressed="false">vegan</button><button class="chip" data-tag="vegetarian" aria-pressed="false">vegetarian</button><button class="chip" data-tag="pescatarian" aria-pressed="false">pescatarian</button></div>
@@ -48,6 +46,7 @@
 </div>
 <p class="count" id="count"></p>
 
+<div class="planner-slot" id="plannerSlot">
 <section class="planner" id="planner" aria-label="Week plan">
   <div class="planner__head">
     <h2>Week plan <span class="planner__n" id="planN"></span></h2>
@@ -59,13 +58,14 @@
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Shopping list<svg class="icon icon--state" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
     </button>
     <button type="button" id="weekView" class="btn btn--quiet">
-      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>Print view</button>
+      Week<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>
     <button type="button" id="clearPlan" class="btn btn--quiet">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5"/></svg>Clear</button>
   </div>
   <ol class="days" id="days"></ol>
   <div class="shopping" id="shopping" hidden></div>
 </section>
+</div>
 
 <div class="grid" id="grid"><article class="card" data-slug="asparagus-risotto" draggable="true">
 <a class="card__link" href="asparagus-risotto.html" draggable="false">
@@ -727,12 +727,12 @@ const q = document.getElementById('q');
 const count = document.getElementById('count');
 const empty = document.getElementById('empty');
 const planner = document.getElementById('planner');
+const plannerSlot = document.getElementById('plannerSlot');
+const topbar = document.getElementById('topbar');
 const daysEl = document.getElementById('days');
 const shoppingEl = document.getElementById('shopping');
 const startSel = document.getElementById('startDay');
 const planN = document.getElementById('planN');
-const weekChip = document.getElementById('weekChip');
-const weekChipN = document.getElementById('weekChipN');
 const filtersEl = document.getElementById('filters');
 const toggleFiltersBtn = document.getElementById('toggleFilters');
 const cards = new Map([...grid.children].map(el => [el.dataset.slug, el]));
@@ -1065,8 +1065,9 @@ function renderPlan() {
       (repeated ? ' day--repeat' : '');
     li.dataset.i = i;
     li.draggable = Boolean(rec);
-    const label = DAY_NAMES[date.getDay()].slice(0, 3) + ' ' + date.getDate() + ' ' +
-      date.toLocaleString('en-GB', { month: 'short' });
+    const dow = DAY_NAMES[date.getDay()].slice(0, 3);
+    const when = date.getDate() + ' ' + date.toLocaleString('en-GB', { month: 'short' });
+    const label = dow + ' ' + when;
     // Every day carries a thumbnail slot, filled or not, so the row heights
     // agree — otherwise adding a meal makes the whole strip jump.
     let thumb;
@@ -1079,7 +1080,8 @@ function renderPlan() {
     } else {
       thumb = '<span class="day__thumb day__thumb--none"></span>';
     }
-    li.innerHTML = thumb + '<span class="day__name">' + label + '</span>';
+    li.innerHTML = thumb + '<span class="day__name">' + dow +
+      '<span class="day__date"> ' + when + '</span></span>';
     if (rec) {
       const a = document.createElement('a');
       a.className = 'day__recipe';
@@ -1131,10 +1133,7 @@ function renderPlan() {
   });
   const n = state.plan.filter(s => s && s !== SKIPPED).length;
   planN.textContent = n ? n + '/7' : '';
-  // The chip in the top bar is the planner's stand-in once it has scrolled
-  // away. Nothing to stand in for until a plan exists, so it stays hidden.
-  weekChipN.textContent = n + '/7';
-  weekChip.hidden = n === 0;
+  requestAnimationFrame(measureSlot);
   // Once anything is in the week the panel becomes sticky, so it stays a drop
   // target while you scroll the grid. Whether it is actually pinned to the top
   // is a separate thing, tracked by the observer below.
@@ -1477,10 +1476,6 @@ toggleFiltersBtn.addEventListener('click', () => {
   toggleFiltersBtn.classList.toggle('is-open', open);
 });
 
-// The chip stands in for the panel, so it opens the same picture of the week
-// the panel's own button does rather than scrolling back to it.
-weekChip.addEventListener('click', () => document.getElementById('weekView').click());
-
 const toggleListBtn = document.getElementById('toggleList');
 toggleListBtn.addEventListener('click', () => {
   shoppingEl.hidden = !shoppingEl.hidden;
@@ -1495,6 +1490,7 @@ toggleListBtn.addEventListener('click', () => {
   // Drop the pinned styling in the same frame the panel stands down, rather
   // than leaving it compacted until the next scroll event arrives.
   updatePinned();
+  measureSlot();
   if (open) renderShopping();
 });
 
@@ -1777,13 +1773,89 @@ const NARROW = matchMedia('(max-width: 780px)');
 let pinnedFrame = null;
 function updatePinned() {
   pinnedFrame = null;
+  applyShrink();
   planner.classList.toggle('is-pinned',
     !NARROW.matches &&
     planner.classList.contains('planner--sticky') &&
     !planner.classList.contains('is-shopping') &&
     planner.getBoundingClientRect().top <= 0);
 }
-NARROW.addEventListener('change', updatePinned);
+NARROW.addEventListener('change', () => { updatePinned(); measureSlot(); });
+
+/* Shrinking the panel as you scroll, without the page moving underneath.
+
+   The panel used to shrink in flow, which is why it fought: its slot in the
+   document shrank with it, so the recipes below were dragged up under the
+   reader at the very boundary they were crossing. Making that gradual only
+   spreads the same 322px of reflow across the whole gesture.
+   
+   So the panel comes out of flow and the slot stays behind at full size.
+   Nothing the panel does can move the document now. The height is then driven
+   to be exactly the distance still to scroll, so the panel's bottom edge sits
+   on the slot's bottom edge the whole way down and the grid appears welded to
+   it — a shrink rather than a hole opening up. */
+let slotFull = 0, slotMin = 0;
+
+/* Everything the shrink imposes has to come off when the panel is released:
+   a driven height with overflow hidden clips a shopping list to the size of
+   the collapsed strip, and a slot still holding the old height leaves the
+   list overlapping the recipes rather than pushing them down. */
+function releasePanel() {
+  plannerSlot.style.height = '';
+  planner.style.height = '';
+  planner.style.top = '';
+  planner.style.setProperty('--shrink', '0');
+  planner.classList.remove('is-compact');
+}
+
+function measureSlot() {
+  if (!NARROW.matches || !planner.classList.contains('planner--sticky') ||
+      planner.classList.contains('is-shopping')) {
+    releasePanel();
+    return;
+  }
+  // Measured at both extremes with the panel released, so the numbers come
+  // from the layout rather than from constants that would drift from it.
+  planner.style.height = '';
+  planner.classList.remove('is-compact');
+  planner.style.setProperty('--shrink', '0');
+  slotFull = planner.offsetHeight;
+  // is-compact goes on for the collapsed measurement too, or the floor comes
+  // from two-line titles the compact panel never shows and the panel is left
+  // holding a height its content does not fill.
+  planner.classList.add('is-compact');
+  planner.style.setProperty('--shrink', '1');
+  slotMin = planner.offsetHeight;
+  planner.classList.remove('is-compact');
+  planner.style.setProperty('--shrink', '0');
+  plannerSlot.style.height = slotFull + 'px';
+  applyShrink();
+}
+
+function applyShrink() {
+  if (!NARROW.matches || !slotFull ||
+      !planner.classList.contains('planner--sticky') ||
+      planner.classList.contains('is-shopping')) return;
+  const slotTop = plannerSlot.getBoundingClientRect().top;
+  const barH = topbar.getBoundingClientRect().height;
+  /* Until the slot reaches the bar the panel simply sits in it, full size and
+     indistinguishable from being in flow. After that it holds under the bar
+     and takes whatever height is left between there and the slot's bottom
+     edge — so the edge the recipes start at is the same line either way, and
+     the panel closes up rather than a gap opening under it. */
+  const top = Math.max(barH, slotTop);
+  const want = Math.min(slotFull, Math.max(slotMin, slotTop + slotFull - top));
+  planner.style.top = top + 'px';
+  planner.style.height = want + 'px';
+  const range = slotFull - slotMin;
+  const shrink = range ? Math.min(1, Math.max(0, (slotFull - want) / range)) : 0;
+  planner.style.setProperty('--shrink', String(shrink));
+  // Line clamping cannot be interpolated, so the last of the collapse is a
+  // step. It only ever changes what is inside a panel that is out of flow and
+  // whose height is being driven anyway, so nothing outside it can move.
+  planner.classList.toggle('is-compact', shrink > 0.6);
+}
+addEventListener('scroll', () => queuePinned(), { passive: true });
 function queuePinned() {
   if (pinnedFrame === null) pinnedFrame = requestAnimationFrame(updatePinned);
 }

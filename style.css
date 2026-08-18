@@ -60,7 +60,14 @@ a { color: inherit; }
 
 /* ── Index ─────────────────────────────────────────────────────────────── */
 
-.index { max-width: 1180px; margin: 0 auto; padding: clamp(20px, 4vw, 48px); }
+/* The page gutter, named once. The full-bleed top bar and the out-of-flow
+   panel both have to line up with it, and both were carrying their own copy
+   of the clamp — which quietly stopped matching when the narrow breakpoint
+   below overrode the padding but not them. The bar hung 6px off the page. */
+.index {
+  --pad: clamp(20px, 4vw, 48px);
+  max-width: 1180px; margin: 0 auto; padding: var(--pad);
+}
 
 .masthead { margin-bottom: 28px; }
 .masthead__top {
@@ -229,7 +236,7 @@ a { color: inherit; }
  * meant to override — the columns would change and the type would not.
  */
 @media (max-width: 560px) {
-  .index { padding: 14px; }
+  .index { --pad: 14px; }
   .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .card__body { padding: 26px 9px 9px; }
   .card__body h2 { font-size: 13px; line-height: 1.25; }
@@ -502,8 +509,8 @@ a.btn { text-decoration: none; }
     position: sticky; top: 0; z-index: 30;
     background: var(--bg);
     border-bottom: 1px solid var(--line);
-    margin: 0 calc(clamp(20px, 4vw, 48px) * -1);
-    padding: 8px clamp(20px, 4vw, 48px);
+    margin: 0 calc(var(--pad) * -1);
+    padding: 8px var(--pad);
     box-shadow: 0 4px 16px rgb(35 32 28 / 7%);
   }
   .topbar__only { display: inline-flex; }
@@ -521,8 +528,112 @@ a.btn { text-decoration: none; }
   .masthead h1 { font-size: 26px; margin-bottom: 2px; }
   .masthead .sub { font-size: 13px; margin-bottom: 12px; }
 
-  /* No pinning on a phone — see the note by updatePinned(). */
-  .planner--sticky { position: static; }
+  /*
+   * The panel shrinks as you scroll instead of pinning at a fixed size, and
+   * does it out of flow. The slot behind it keeps the space, so nothing the
+   * panel does can move the recipes below — which is what made the old
+   * in-flow version fight the scroll. See applyShrink().
+   */
+  /* The slot carries the space below the panel. On the panel itself it would
+     be invisible to the layout, the panel being out of flow, and the recipes
+     started flush against it. A gutter's worth, so it matches the page. */
+  .planner-slot { position: relative; margin-bottom: calc(var(--pad) + 6px); }
+  .planner--sticky {
+    position: fixed;
+    /* Out of flow, so the resting 24px bottom margin was doing nothing except
+       sitting in the file looking asymmetric against a zeroed top. */
+    margin: 0;
+    left: var(--pad);
+    right: var(--pad);
+    z-index: 15;
+    overflow: hidden;
+    margin-top: 0;
+  }
+  /* The three controls belong on one line. Renaming the print button to Week
+     bought most of it; the rest is gap and padding sized for a desktop panel.
+     327px of buttons into a 312px head on a 390px phone was two rows for the
+     sake of fifteen pixels. */
+  .planner__head { gap: 8px; }
+  .planner__head .btn { padding: 6px 10px; }
+
+  /* Date, then picture, then name — the order you read a day in when you are
+     checking what is already planned. */
+  .planner--sticky .day { display: flex; flex-direction: column; }
+  .planner--sticky .day__name   { order: 1; }
+  .planner--sticky .day__thumb  { order: 2; }
+  .planner--sticky .day__recipe { order: 3; }
+  /* An empty or skipped day says so where a title would go, not above the
+     date it belongs to. */
+  /* Centred in what is left, rather than dropped to the bottom of a cell
+     sized by the neighbour with the longest title — an empty day was showing
+     42px of nothing between its date and its label. */
+  .planner--sticky .day__skip,
+  .planner--sticky .day__empty  { order: 3; margin-block: auto; }
+  .planner--sticky .day__repeat { order: 4; }
+
+  /* Only the days are worth freezing. The shopping list, print view and clear
+     are things you go to the panel for, not things you need in view while
+     reading recipes, so the head folds away as the panel closes. */
+  .planner--sticky .planner__head {
+    max-height: calc(120px * (1 - var(--shrink, 0)));
+    margin-bottom: calc(14px * (1 - var(--shrink, 0)));
+    opacity: calc(1 - 1.8 * var(--shrink, 0));
+    overflow: hidden;
+    transition: none;
+  }
+
+  /* The thumbnail is what makes a day recognisable at a glance, so it stays —
+     smaller, not gone. Collapsing it entirely was what left the compact panel
+     tall and wordy, since the titles then had to carry it alone. */
+  .planner--sticky .day__thumb {
+    height: calc(66px - 30px * var(--shrink, 0));
+    margin-bottom: calc(6px - 2px * var(--shrink, 0));
+    transition: none;
+  }
+  /* Every source of padding closes up together as it collapses. At a quarter
+     of a phone screen the frozen band has no room for whitespace that is not
+     doing something, and the thumbnails are what it is for. */
+  /* Less underneath than above: the head needs air over it, the day cells do
+     not need it under them, and what was there read as the panel trailing off
+     rather than ending. The space moves outside, between panel and recipes. */
+  .planner--sticky {
+    padding: calc(16px - 11px * var(--shrink, 0))
+             calc(18px - 13px * var(--shrink, 0))
+             calc(10px - 5px * var(--shrink, 0));
+  }
+  .planner--sticky .days { gap: calc(8px - 4px * var(--shrink, 0)); }
+  .planner--sticky .day {
+    padding: calc(10px - 8px * var(--shrink, 0)) calc(9px - 7px * var(--shrink, 0));
+    min-height: calc(74px * (1 - var(--shrink, 0)));
+  }
+  .planner--sticky .day__name { font-size: calc(11px - 0.5px * var(--shrink, 0)); }
+  /* The thumbnail bleeds into what padding is left, so the picture gets the
+     width rather than the gap around it. */
+  .planner--sticky .day__thumb {
+    margin-left: calc(-2px * var(--shrink, 0));
+    margin-right: calc(-2px * var(--shrink, 0));
+    width: calc(100% + 4px * var(--shrink, 0));
+  }
+
+  /* A wrapped title over seven narrow columns is most of the panel's height:
+     "Cheesy Butter Bean, Tomato + Garlic Pasta Bake" runs to six lines. Two
+     lines at rest, one once compact, both ellipsised. */
+  .planner--sticky .day__recipe {
+    display: -webkit-box; -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2; overflow: hidden;
+  }
+  .planner--sticky.is-compact .day__recipe { -webkit-line-clamp: 1; }
+  /* Which day it is, not which date. Nobody scanning for the next free
+     evening needs to be told the month, and across seven columns the date
+     costs more width than the day it qualifies. */
+  .planner--sticky.is-compact .day__date { display: none; }
+  /* The remove cross is an editing control; it goes with the head. */
+  .planner--sticky .day__x { opacity: calc(1 - 1.8 * var(--shrink, 0)); }
+  .planner--sticky.is-compact .day__x { pointer-events: none; }
+
+
+
+
 }
 
 .day__repeat {
