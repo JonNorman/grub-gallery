@@ -24,17 +24,29 @@
 <h1>Grub Gallery</h1>
 <button type="button" id="helpBtn" class="btn btn--quiet">Help</button>
 </div>
-<p class="sub">Type what you have in — or pick a tag.</p>
-<div class="find">
-  <input id="q" type="search" placeholder="chickpeas feta&hellip;" autocomplete="off"
-         role="combobox" aria-expanded="false" aria-controls="suggest"
-         aria-autocomplete="list" aria-label="Filter by ingredient">
-  <ul class="suggest" id="suggest" role="listbox" hidden></ul>
-</div>
-<div class="chips"><button class="chip" data-tag="breakfast" aria-pressed="false">breakfast</button><button class="chip" data-tag="lunch" aria-pressed="false">lunch</button><button class="chip" data-tag="dinner" aria-pressed="false">dinner</button><button class="chip" data-tag="snack" aria-pressed="false">snack</button><button class="chip" data-tag="dessert" aria-pressed="false">dessert</button><button class="chip" data-tag="one-pot" aria-pressed="false">one-pot</button><button class="chip" data-tag="baby-friendly" aria-pressed="false">baby-friendly</button><button class="chip" data-tag="vegan" aria-pressed="false">vegan</button><button class="chip" data-tag="vegetarian" aria-pressed="false">vegetarian</button><button class="chip" data-tag="pescatarian" aria-pressed="false">pescatarian</button></div>
-<div class="chips chips--time"><button class="chip chip--time" data-bucket="quick" aria-pressed="false">30 min or less</button><button class="chip chip--time" data-bucket="medium" aria-pressed="false">under an hour</button><button class="chip chip--time" data-bucket="long" aria-pressed="false">an hour or more</button><button class="chip chip--time" data-nowait="1" aria-pressed="false">no waiting</button></div>
-<p class="count" id="count"></p>
+<p class="sub">Type what you have in — an ingredient, a tag or a name.</p>
 </header>
+
+<div class="topbar" id="topbar">
+  <div class="topbar__row">
+    <div class="find">
+      <input id="q" type="search" placeholder="chickpeas feta&hellip;" autocomplete="off"
+             role="combobox" aria-expanded="false" aria-controls="suggest"
+             aria-autocomplete="list" aria-label="Search by ingredient, tag or name">
+      <ul class="suggest" id="suggest" role="listbox" hidden></ul>
+    </div>
+    <button type="button" id="toggleFilters" class="btn btn--quiet btn--toggle topbar__only"
+            aria-expanded="false" aria-controls="filters">
+      Filter<svg class="icon icon--state" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+    <button type="button" id="weekChip" class="btn btn--quiet topbar__only" hidden>
+      Week <span id="weekChipN"></span></button>
+  </div>
+  <div class="filters" id="filters">
+    <div class="chips"><button class="chip" data-tag="breakfast" aria-pressed="false">breakfast</button><button class="chip" data-tag="lunch" aria-pressed="false">lunch</button><button class="chip" data-tag="dinner" aria-pressed="false">dinner</button><button class="chip" data-tag="snack" aria-pressed="false">snack</button><button class="chip" data-tag="dessert" aria-pressed="false">dessert</button><button class="chip" data-tag="one-pot" aria-pressed="false">one-pot</button><button class="chip" data-tag="baby-friendly" aria-pressed="false">baby-friendly</button><button class="chip" data-tag="vegan" aria-pressed="false">vegan</button><button class="chip" data-tag="vegetarian" aria-pressed="false">vegetarian</button><button class="chip" data-tag="pescatarian" aria-pressed="false">pescatarian</button></div>
+    <div class="chips chips--time"><button class="chip chip--time" data-bucket="quick" aria-pressed="false">30 min or less</button><button class="chip chip--time" data-bucket="medium" aria-pressed="false">under an hour</button><button class="chip chip--time" data-bucket="long" aria-pressed="false">an hour or more</button><button class="chip chip--time" data-nowait="1" aria-pressed="false">no waiting</button></div>
+  </div>
+</div>
+<p class="count" id="count"></p>
 
 <section class="planner" id="planner" aria-label="Week plan">
   <div class="planner__head">
@@ -719,6 +731,10 @@ const daysEl = document.getElementById('days');
 const shoppingEl = document.getElementById('shopping');
 const startSel = document.getElementById('startDay');
 const planN = document.getElementById('planN');
+const weekChip = document.getElementById('weekChip');
+const weekChipN = document.getElementById('weekChipN');
+const filtersEl = document.getElementById('filters');
+const toggleFiltersBtn = document.getElementById('toggleFilters');
 const cards = new Map([...grid.children].map(el => [el.dataset.slug, el]));
 let activeTags = new Set();
 let activeBucket = null;   // single-select: the buckets are mutually exclusive
@@ -726,25 +742,44 @@ let noWaiting = false;
 
 /* ── filtering ─────────────────────────────────────────────────────────── */
 
-/* Each recipe is searched against its terms *and their aliases*, so a query
-   lands whether it uses the canonical name or a form the recipes actually
-   contain — "queen chickpeas" and "chickpea" both reach chickpeas, "red onion"
-   reaches onion. The vocabulary already held those forms; the filter simply was
-   not looking at them.
+/* A recipe is searched against the lines it actually contains, plus the
+   canonical name of each, so both directions work and neither lies:
 
-   Aliases are forms found in recipes, not other dialects' words: recipes name
-   ingredients in British English, so there is nothing to translate.
+     "lemon"      -> every lemon recipe, via the canonical term
+     "lemon zest" -> only the one that says lemon zest
 
-   Built once at load from the shared VOCAB rather than shipped per recipe,
-   which would repeat the same alias lists 56 times. */
+   Expanding each term into its whole alias list was what broke the second.
+   Aliases attach to a term, not to an occurrence, so a recipe holding nothing
+   but zest still claimed lemons, lemon juice and unwaxed lemon: all three
+   phrases returned the same nineteen recipes, and asking for a specific form
+   quietly got the generic set. The lines were already on the page for the
+   shopping list; they simply were not being searched. */
 const VOCAB = window.VOCAB || {};
+/* Tags join the haystack so one box answers both questions a cook asks —
+   "what can I make with these chickpeas" and "what is vegan". They were
+   reachable only by the chips before, which meant typing "vegan" returned
+   nothing at all and read as an empty collection rather than a filter that
+   was not looking. Lowercased because the query is, and titles are not. */
 const HAYSTACK = new Map(DATA.map(rec => [
   rec.slug,
-  (rec.terms.join(' ') + ' ' +
-   rec.terms.map(t => VOCAB[t] || '').join(' ') + ' ' +
-   rec.title).replace(/\s+/g, ' '),
+  (rec.items.map(i => i.t).join(' ') + ' ' +
+   rec.terms.join(' ') + ' ' +
+   rec.tags.join(' ') + ' ' +
+   rec.title).replace(/\s+/g, ' ').toLowerCase(),
 ]));
-const ALL_TERMS = Object.keys(VOCAB).sort();
+/* Every distinct form is offered, not just the name each is filed under —
+   "ze" should reach lemon zest, and "le" should show what forms of lemon the
+   collection actually holds. Collapsing them to the canonical term answered a
+   question nobody asked and looked like a bug besides.
+
+   Tags join them: a curated word nobody can guess is no better than no word
+   at all, and the tags were exactly that until they became searchable. */
+const ALL_TAGS = [...new Set(DATA.flatMap(r => r.tags))].filter(t => t !== 'recipe');
+const ALL_TERMS = [...new Set([
+  ...Object.keys(VOCAB),
+  ...Object.values(VOCAB).flat(),
+  ...ALL_TAGS,
+])].sort();
 
 const BUCKETS = {"quick": [0, 30], "medium": [31, 59], "long": [60, 1000000]};
 
@@ -797,11 +832,7 @@ function matchesFor(word) {
   for (const term of ALL_TERMS) {
     if (term === word) continue;
     if (term.startsWith(word)) starts.push(term);
-    // Matching an alias offers the canonical term, so a partial or alternate
-    // form of a name still leads to the one the collection files it under.
-    else if (term.includes(word) || (VOCAB[term] || '').includes(word)) {
-      contains.push(term);
-    }
+    else if (term.includes(word)) contains.push(term);
   }
   return [...starts, ...contains].slice(0, 8);
 }
@@ -861,8 +892,22 @@ q.addEventListener('keydown', e => {
   // Handled before the guard below, so escape still works once the suggestion
   // list has gone: it drops the list and the focus together, which is the way
   // back out of the box for anyone who arrived by shortcut.
+  //
+  // Two presses, two jobs. The first takes back the suggestion list, which is
+  // what escape is reaching for while it is open, and leaves a typed query
+  // alone. Only once the list has gone does escape mean abandon the search:
+  // clear the box and hand back the focus, the way out for anyone who
+  // arrived here by shortcut.
+  //
+  // Both stages are ours, because the native behaviour cannot be staged — a
+  // search input empties itself on the first escape, and fires no input event
+  // for it, which left the query gone and the grid still filtered on a word
+  // no longer on screen. preventDefault stops it doing its half separately.
   if (e.key === 'Escape') {
-    hideSuggestions();
+    e.preventDefault();
+    if (!suggest.hidden) { hideSuggestions(); return; }
+    q.value = '';
+    apply();
     q.blur();
     return;
   }
@@ -878,6 +923,11 @@ q.addEventListener('keydown', e => {
 q.addEventListener('blur', hideSuggestions);
 
 q.addEventListener('input', () => { showSuggestions(); apply(); });
+/* The clear widget a search input draws for itself empties the box without an
+   input event, which would strand the grid on a word no longer on screen. The
+   search event is what fires for it, so the filter is reapplied from there
+   too — the box and the grid agree however the box came to be empty. */
+q.addEventListener('search', () => { hideSuggestions(); apply(); });
 document.querySelectorAll('.chip[data-tag]').forEach(chip => {
   chip.addEventListener('click', () => {
     const t = chip.dataset.tag;
@@ -1081,6 +1131,10 @@ function renderPlan() {
   });
   const n = state.plan.filter(s => s && s !== SKIPPED).length;
   planN.textContent = n ? n + '/7' : '';
+  // The chip in the top bar is the planner's stand-in once it has scrolled
+  // away. Nothing to stand in for until a plan exists, so it stays hidden.
+  weekChipN.textContent = n + '/7';
+  weekChip.hidden = n === 0;
   // Once anything is in the week the panel becomes sticky, so it stays a drop
   // target while you scroll the grid. Whether it is actually pinned to the top
   // is a separate thing, tracked by the observer below.
@@ -1413,6 +1467,20 @@ shoppingEl.addEventListener('click', e => {
 window.addEventListener('afterprint',
   () => document.documentElement.classList.remove('printing-list'));
 
+/* The chips are a class rather than the hidden attribute so the wide layout
+   can keep them permanently open: [hidden] is declared !important, and would
+   beat any rule trying to show them again. */
+toggleFiltersBtn.addEventListener('click', () => {
+  const open = !filtersEl.classList.contains('is-open');
+  filtersEl.classList.toggle('is-open', open);
+  toggleFiltersBtn.setAttribute('aria-expanded', String(open));
+  toggleFiltersBtn.classList.toggle('is-open', open);
+});
+
+// The chip stands in for the panel, so it opens the same picture of the week
+// the panel's own button does rather than scrolling back to it.
+weekChip.addEventListener('click', () => document.getElementById('weekView').click());
+
 const toggleListBtn = document.getElementById('toggleList');
 toggleListBtn.addEventListener('click', () => {
   shoppingEl.hidden = !shoppingEl.hidden;
@@ -1701,14 +1769,21 @@ weekModal.addEventListener('close',
    a threshold breaks once it grows taller than the viewport — which it does the
    moment the shopping list is open. A sticky panel sits at exactly top:0 once
    it has lifted, so that is the whole test. */
+/* Narrow screens do not pin at all. The panel is half a phone tall, and a
+   sticky element that changes height mid-scroll rewrites the document under
+   the reader at the one boundary they have to cross. The top bar carries the
+   week chip instead, which is a fixed height and cannot shove anything. */
+const NARROW = matchMedia('(max-width: 780px)');
 let pinnedFrame = null;
 function updatePinned() {
   pinnedFrame = null;
   planner.classList.toggle('is-pinned',
+    !NARROW.matches &&
     planner.classList.contains('planner--sticky') &&
     !planner.classList.contains('is-shopping') &&
     planner.getBoundingClientRect().top <= 0);
 }
+NARROW.addEventListener('change', updatePinned);
 function queuePinned() {
   if (pinnedFrame === null) pinnedFrame = requestAnimationFrame(updatePinned);
 }
