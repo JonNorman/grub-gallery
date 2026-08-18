@@ -585,21 +585,20 @@ a.btn { text-decoration: none; }
 
   /* Tighter than the default: at a fifth of a phone screen the frozen band
      has no room for padding that is not doing something. */
+  /* Only the vertical padding closes up. Height is what the collapse is for;
+     narrowing the sides as well bought nothing and slid the whole panel
+     inward as you scrolled, which read as the layout being unsure of itself.
+     The sides are simply thinner than a resting panel would want, and stay
+     there. */
   .planner--planned {
-    padding: calc(16px - 11px * var(--shrink, 0))
-             calc(18px - 13px * var(--shrink, 0))
+    padding: calc(16px - 11px * var(--shrink, 0)) 12px
              calc(10px - 5px * var(--shrink, 0));
   }
-  .planner--planned .days { gap: calc(8px - 4px * var(--shrink, 0)); }
-  .planner--planned .day {
-    padding: calc(10px - 8px * var(--shrink, 0)) calc(9px - 7px * var(--shrink, 0));
-  }
+  /* Constant too: the days are one row here, so this gap is only ever
+     horizontal, and closing it slid every cell sideways for no height. */
+  .planner--planned .days { gap: 5px; }
+  .planner--planned .day { padding: calc(10px - 8px * var(--shrink, 0)) 5px; }
   .planner--planned .day__name { font-size: calc(11px - 0.5px * var(--shrink, 0)); }
-  .planner--planned .day__thumb {
-    margin-left: calc(-2px * var(--shrink, 0));
-    margin-right: calc(-2px * var(--shrink, 0));
-    width: calc(100% + 4px * var(--shrink, 0));
-  }
   /* The three controls belong on one line. Renaming the print button to Week
      bought most of it; the rest is gap and padding sized for a desktop panel.
      327px of buttons into a 312px head on a 390px phone was two rows for the
