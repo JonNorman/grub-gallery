@@ -113,9 +113,9 @@ a { color: inherit; }
      underneath into colour, and text stays crisp against colour where it
      would not against detail. Which is why the radius rises with the
      transparency rather than staying put — more see-through needs more
-     smoothing, not less. */
-  background: color-mix(in srgb, var(--surface) 68%, transparent);
-  backdrop-filter: blur(18px) saturate(1.3);
+     smoothing, not less. Tried at 86, 76, 68 and 60. */
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  backdrop-filter: blur(22px) saturate(1.3);
   border: 1px solid var(--line);
   border-radius: 14px;
   box-shadow: var(--shadow-lift);
