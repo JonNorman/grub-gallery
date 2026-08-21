@@ -692,6 +692,14 @@ a.btn { text-decoration: none; }
                        columns: 2; column-gap: 32px; }
 .shopping__done .shopping__group > label { color: var(--muted); }
 .shopping__from { opacity: .7; font-size: 11.5px; }
+/* A line offering a choice appears under each thing it offers, so it needs to
+   say it is one of several rather than another thing to buy. Marked rather
+   than dimmed: at the shelf you are deciding, not skimming. */
+.shopping__opt {
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em;
+  padding: 1px 5px; border-radius: 999px;
+  border: 1px solid var(--line); color: var(--muted);
+}
 
 /* ── Recipe page ───────────────────────────────────────────────────────── */
 
