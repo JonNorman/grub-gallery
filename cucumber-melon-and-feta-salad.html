@@ -23,9 +23,114 @@
 
 <div class="columns">
 <section class="ing"><h2>Ingredients</h2><ul class="ingredients"><li><label><input type="checkbox"><span>3 tbsp olive oil (use extra virgin if you have it)</span></label></li><li><label><input type="checkbox"><span>1 tbsp red or white wine vinegar</span></label></li><li><label><input type="checkbox"><span>1 tsp clear honey</span></label></li><li><label><input type="checkbox"><span>1 cantaloupe melon</span></label></li><li><label><input type="checkbox"><span>1 cucumber, trimmed</span></label></li><li><label><input type="checkbox"><span>12 mint leaves, finely shredded</span></label></li><li><label><input type="checkbox"><span>100g feta, crumbled</span></label></li><li><label><input type="checkbox"><span>1 mild red chilli, deseeded and finely sliced</span></label></li></ul></section>
-<section class="meth"><h2>Method</h2><ol class="method" start="1"><li>Start by making the dressing. In a large mixing bowl, whisk together the <strong>3 tbsp olive oil</strong>, <strong>1 tbsp wine vinegar</strong> and <strong>1 tsp honey</strong>; season.</li><li>Halve and deseed the <strong>1 cantaloupe melon</strong>, then cut away the skin. Roughly chop the melon into chunks (about 3cm each; don&#x27;t worry if they are odd shapes). Cut the <strong>1 cucumber</strong> in a similar way.</li><li>Add both to the dressing along with most of the <strong>12 mint leaves</strong>, <strong>100g feta</strong> and <strong>1 red chilli</strong>. Toss together, then divide between plates, scattering the remaining mint, feta and chilli over the top. Serve immediately.</li></ol></section>
+<section class="meth"><h2>Method</h2><div class="wake">
+<button class="btn btn--quiet wake__btn" type="button" data-wake aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/><path d="M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><span data-wake-label>Keep screen awake</span></button>
+<p class="wake__hint">Stops your screen dimming and locking while your hands are
+busy. It switches off when you leave this page.</p>
+</div><ol class="method" start="1"><li>Start by making the dressing. In a large mixing bowl, whisk together the <strong>3 tbsp olive oil</strong>, <strong>1 tbsp wine vinegar</strong> and <strong>1 tsp honey</strong>; season.</li><li>Halve and deseed the <strong>1 cantaloupe melon</strong>, then cut away the skin. Roughly chop the melon into chunks (about 3cm each; don&#x27;t worry if they are odd shapes). Cut the <strong>1 cucumber</strong> in a similar way.</li><li>Add both to the dressing along with most of the <strong>12 mint leaves</strong>, <strong>100g feta</strong> and <strong>1 red chilli</strong>. Toss together, then divide between plates, scattering the remaining mint, feta and chilli over the top. Serve immediately.</li></ol></section>
 </div>
 <section class="notes"><h2>Notes</h2><p>Cook&#x27;s tip — adjust the heat: always taste a small piece of chilli before adding to your dish. If it&#x27;s very hot, you may want to use a little less.</p></section>
 <p class="source">Source: Waitrose, July 2023</p></main>
-</body>
+<script>
+/*
+ * Screen Wake Lock — the "keep screen awake" button on every recipe.
+ *
+ * The browser hands back a sentinel it is free to take away: hiding the page,
+ * by switching apps, locking the phone or changing tab, releases the lock and
+ * it does not come back on its own. So intent and lock are tracked separately.
+ * wakeWanted is what the cook asked for, and is what the button paints from;
+ * wakeSentinel is what we actually hold at this instant.
+ */
+let wakeWanted = false;
+let wakeSentinel = null;
+let wakeAcquiring = false;
+
+if ('wakeLock' in navigator) {
+  /*
+   * Marked on the root rather than on each button. The modal injects its own
+   * copy of the recipe markup long after this runs, so a reveal that walked the
+   * buttons present now would miss it — and reaching into openModal() would put
+   * knowledge of the modal in a file that otherwise has none.
+   */
+  document.documentElement.classList.add('has-wakelock');
+}
+
+function paintWake() {
+  document.querySelectorAll('[data-wake]').forEach(btn => {
+    btn.setAttribute('aria-pressed', String(wakeWanted));
+    btn.querySelector('[data-wake-label]').textContent =
+      wakeWanted ? 'Screen staying awake' : 'Keep screen awake';
+  });
+}
+
+async function acquireWake() {
+  // A tap and a return to visibility can both ask while a request is still in
+  // flight. A second one would strand the first sentinel: wakeSentinel holds
+  // whichever lands last, and nothing is left holding a reference to release
+  // the other — a screen kept awake by a lock no button can reach.
+  if (wakeAcquiring) return;
+  wakeAcquiring = true;
+  try {
+    wakeSentinel = null;
+    let held = null;
+    try {
+      held = await navigator.wakeLock.request('screen');
+    } catch {
+      // Refused — battery saver, or the page lost visibility mid-request. The
+      // button must not claim a lock we did not get.
+      wakeWanted = false;
+    }
+    // The request is asynchronous, so the button may have been tapped off while
+    // it was in flight. Honour the latest intent, not the one that started it.
+    if (held && !wakeWanted) {
+      try { await held.release(); } catch {}
+      held = null;
+    }
+    wakeSentinel = held;
+    if (held) held.addEventListener('release', onWakeRelease);
+  } finally {
+    wakeAcquiring = false;
+    paintWake();
+  }
+}
+
+async function releaseWake() {
+  wakeWanted = false;
+  const held = wakeSentinel;
+  wakeSentinel = null;
+  paintWake();
+  if (held) {
+    held.removeEventListener('release', onWakeRelease);
+    try { await held.release(); } catch {}
+  }
+}
+
+function onWakeRelease() {
+  wakeSentinel = null;
+  /*
+   * Hidden means the OS took the lock while the cook was elsewhere: the intent
+   * stands and visibilitychange asks for it back. Visible means we lost it with
+   * the page in front of them, and a button still reading "on" would be
+   * promising a screen we are no longer holding awake.
+   */
+  if (document.visibilityState === 'visible') {
+    wakeWanted = false;
+    paintWake();
+  }
+}
+
+// Delegated, so one registration covers the button baked into a recipe page and
+// the one the modal injects later, without either surface being a special case.
+document.addEventListener('click', e => {
+  if (!e.target.closest?.('[data-wake]')) return;
+  if (wakeWanted) releaseWake();
+  else { wakeWanted = true; acquireWake(); }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (wakeWanted && !wakeSentinel && document.visibilityState === 'visible') {
+    acquireWake();
+  }
+});
+</script></body>
 </html>

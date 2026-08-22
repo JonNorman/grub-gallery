@@ -793,8 +793,109 @@ again.</p>
 <p>Tooltips and keyboard shortcuts are shown on the buttons themselves if you hover over.</p>
 </div>
 </dialog>
-
 <script src="recipes-data.js"></script>
+<script>
+/*
+ * Screen Wake Lock — the "keep screen awake" button on every recipe.
+ *
+ * The browser hands back a sentinel it is free to take away: hiding the page,
+ * by switching apps, locking the phone or changing tab, releases the lock and
+ * it does not come back on its own. So intent and lock are tracked separately.
+ * wakeWanted is what the cook asked for, and is what the button paints from;
+ * wakeSentinel is what we actually hold at this instant.
+ */
+let wakeWanted = false;
+let wakeSentinel = null;
+let wakeAcquiring = false;
+
+if ('wakeLock' in navigator) {
+  /*
+   * Marked on the root rather than on each button. The modal injects its own
+   * copy of the recipe markup long after this runs, so a reveal that walked the
+   * buttons present now would miss it — and reaching into openModal() would put
+   * knowledge of the modal in a file that otherwise has none.
+   */
+  document.documentElement.classList.add('has-wakelock');
+}
+
+function paintWake() {
+  document.querySelectorAll('[data-wake]').forEach(btn => {
+    btn.setAttribute('aria-pressed', String(wakeWanted));
+    btn.querySelector('[data-wake-label]').textContent =
+      wakeWanted ? 'Screen staying awake' : 'Keep screen awake';
+  });
+}
+
+async function acquireWake() {
+  // A tap and a return to visibility can both ask while a request is still in
+  // flight. A second one would strand the first sentinel: wakeSentinel holds
+  // whichever lands last, and nothing is left holding a reference to release
+  // the other — a screen kept awake by a lock no button can reach.
+  if (wakeAcquiring) return;
+  wakeAcquiring = true;
+  try {
+    wakeSentinel = null;
+    let held = null;
+    try {
+      held = await navigator.wakeLock.request('screen');
+    } catch {
+      // Refused — battery saver, or the page lost visibility mid-request. The
+      // button must not claim a lock we did not get.
+      wakeWanted = false;
+    }
+    // The request is asynchronous, so the button may have been tapped off while
+    // it was in flight. Honour the latest intent, not the one that started it.
+    if (held && !wakeWanted) {
+      try { await held.release(); } catch {}
+      held = null;
+    }
+    wakeSentinel = held;
+    if (held) held.addEventListener('release', onWakeRelease);
+  } finally {
+    wakeAcquiring = false;
+    paintWake();
+  }
+}
+
+async function releaseWake() {
+  wakeWanted = false;
+  const held = wakeSentinel;
+  wakeSentinel = null;
+  paintWake();
+  if (held) {
+    held.removeEventListener('release', onWakeRelease);
+    try { await held.release(); } catch {}
+  }
+}
+
+function onWakeRelease() {
+  wakeSentinel = null;
+  /*
+   * Hidden means the OS took the lock while the cook was elsewhere: the intent
+   * stands and visibilitychange asks for it back. Visible means we lost it with
+   * the page in front of them, and a button still reading "on" would be
+   * promising a screen we are no longer holding awake.
+   */
+  if (document.visibilityState === 'visible') {
+    wakeWanted = false;
+    paintWake();
+  }
+}
+
+// Delegated, so one registration covers the button baked into a recipe page and
+// the one the modal injects later, without either surface being a special case.
+document.addEventListener('click', e => {
+  if (!e.target.closest?.('[data-wake]')) return;
+  if (wakeWanted) releaseWake();
+  else { wakeWanted = true; acquireWake(); }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (wakeWanted && !wakeSentinel && document.visibilityState === 'visible') {
+    acquireWake();
+  }
+});
+</script>
 <script>
 const DATA = window.RECIPES;
 const BY_SLUG = new Map(DATA.map(r => [r.slug, r]));
@@ -1295,6 +1396,11 @@ document.getElementById('modalAdd').addEventListener('click', () => {
 });
 // Click on the backdrop (the dialog itself, outside its content) closes it.
 modal.addEventListener('click', e => { if (e.target === modal) modal.close(); });
+
+// Every way out of the modal — the close button, the backdrop, Escape — ends at
+// the dialog's own close event. Hung off any one of those handlers instead, a
+// lock taken in the modal would outlive the only control able to release it.
+modal.addEventListener('close', releaseWake);
 
 const helpModal = document.getElementById('helpModal');
 const helpBtn = document.getElementById('helpBtn');
@@ -1965,6 +2071,5 @@ startSel.value = state.startDay;
 if (state.plan.some(Boolean)) syncUrl();
 renderPlan();
 apply();
-</script>
-</body>
+</script></body>
 </html>

@@ -23,9 +23,114 @@
 <p class="before"><strong>Before you start</strong> heat the oven to 200°C fan.</p>
 <div class="columns">
 <section class="ing"><h2>Ingredients</h2><ul class="ingredients"><li><label><input type="checkbox"><span>8 raw baby beetroots, or 4 medium, scrubbed (purple, yellow or a mixture of the two)</span></label></li><li><label><input type="checkbox"><span>1 tbsp za&#x27;atar</span></label></li><li><label><input type="checkbox"><span>1 tbsp sumac</span></label></li><li><label><input type="checkbox"><span>1 tbsp ground cumin</span></label></li><li><label><input type="checkbox"><span>1 x 400g tin of chickpeas, drained and rinsed</span></label></li><li><label><input type="checkbox"><span>2 tbsp olive oil</span></label></li><li><label><input type="checkbox"><span>1 lemon, for 1 tsp zest and 1 tsp juice</span></label></li><li><label><input type="checkbox"><span>200g Greek yoghurt</span></label></li><li><label><input type="checkbox"><span>1 tbsp harissa paste</span></label></li><li><label><input type="checkbox"><span>1 tsp chilli flakes</span></label></li><li><label><input type="checkbox"><span>Mint, roughly chopped, to serve</span></label></li></ul></section>
-<section class="meth"><h2>Method</h2><ol class="method" start="1"><li>Heat the oven to 200°C fan.</li><li>Halve the <strong>8 raw baby beetroots</strong>, or quarter them if you are using medium ones or bigger.</li><li>Mix the <strong>1 tbsp za&#x27;atar</strong>, <strong>1 tbsp sumac</strong> and <strong>1 tbsp ground cumin</strong> together in a small bowl.</li><li>Tip the <strong>400g tin of chickpeas</strong> and the <strong>beetroot</strong> onto a very large baking tray, or two smaller ones, and toss with the <strong>2 tbsp olive oil</strong>.</li><li>Season well with sea salt, sprinkle the mixed spices over and toss again.</li><li>Roast at 200°C fan for 30 minutes, until crisp at the edges.</li><li>Meanwhile, stir the <strong>1 tsp lemon zest</strong>, <strong>1 tsp lemon juice</strong> and a pinch of salt into the <strong>200g Greek yoghurt</strong>.</li><li>Swirl the <strong>1 tbsp harissa paste</strong> through the yoghurt, then spread it thickly over a platter or shallow bowl.</li><li>Top with the roasted <strong>beetroot</strong> and <strong>chickpeas</strong>, then scatter over the <strong>1 tsp chilli flakes</strong> and the <strong>mint</strong>.</li></ol></section>
+<section class="meth"><h2>Method</h2><div class="wake">
+<button class="btn btn--quiet wake__btn" type="button" data-wake aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/><path d="M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><span data-wake-label>Keep screen awake</span></button>
+<p class="wake__hint">Stops your screen dimming and locking while your hands are
+busy. It switches off when you leave this page.</p>
+</div><ol class="method" start="1"><li>Heat the oven to 200°C fan.</li><li>Halve the <strong>8 raw baby beetroots</strong>, or quarter them if you are using medium ones or bigger.</li><li>Mix the <strong>1 tbsp za&#x27;atar</strong>, <strong>1 tbsp sumac</strong> and <strong>1 tbsp ground cumin</strong> together in a small bowl.</li><li>Tip the <strong>400g tin of chickpeas</strong> and the <strong>beetroot</strong> onto a very large baking tray, or two smaller ones, and toss with the <strong>2 tbsp olive oil</strong>.</li><li>Season well with sea salt, sprinkle the mixed spices over and toss again.</li><li>Roast at 200°C fan for 30 minutes, until crisp at the edges.</li><li>Meanwhile, stir the <strong>1 tsp lemon zest</strong>, <strong>1 tsp lemon juice</strong> and a pinch of salt into the <strong>200g Greek yoghurt</strong>.</li><li>Swirl the <strong>1 tbsp harissa paste</strong> through the yoghurt, then spread it thickly over a platter or shallow bowl.</li><li>Top with the roasted <strong>beetroot</strong> and <strong>chickpeas</strong>, then scatter over the <strong>1 tsp chilli flakes</strong> and the <strong>mint</strong>.</li></ol></section>
 </div>
 
 <p class="source">Source: <a href="https://www.bbcgoodfood.com/recipes/roasted-beetroot-zaatar-chickpeas-harissa-yogurt" rel="noreferrer">https://www.bbcgoodfood.com/recipes/roasted-beetroot-zaatar-chickpeas-harissa-yogurt</a></p></main>
-</body>
+<script>
+/*
+ * Screen Wake Lock — the "keep screen awake" button on every recipe.
+ *
+ * The browser hands back a sentinel it is free to take away: hiding the page,
+ * by switching apps, locking the phone or changing tab, releases the lock and
+ * it does not come back on its own. So intent and lock are tracked separately.
+ * wakeWanted is what the cook asked for, and is what the button paints from;
+ * wakeSentinel is what we actually hold at this instant.
+ */
+let wakeWanted = false;
+let wakeSentinel = null;
+let wakeAcquiring = false;
+
+if ('wakeLock' in navigator) {
+  /*
+   * Marked on the root rather than on each button. The modal injects its own
+   * copy of the recipe markup long after this runs, so a reveal that walked the
+   * buttons present now would miss it — and reaching into openModal() would put
+   * knowledge of the modal in a file that otherwise has none.
+   */
+  document.documentElement.classList.add('has-wakelock');
+}
+
+function paintWake() {
+  document.querySelectorAll('[data-wake]').forEach(btn => {
+    btn.setAttribute('aria-pressed', String(wakeWanted));
+    btn.querySelector('[data-wake-label]').textContent =
+      wakeWanted ? 'Screen staying awake' : 'Keep screen awake';
+  });
+}
+
+async function acquireWake() {
+  // A tap and a return to visibility can both ask while a request is still in
+  // flight. A second one would strand the first sentinel: wakeSentinel holds
+  // whichever lands last, and nothing is left holding a reference to release
+  // the other — a screen kept awake by a lock no button can reach.
+  if (wakeAcquiring) return;
+  wakeAcquiring = true;
+  try {
+    wakeSentinel = null;
+    let held = null;
+    try {
+      held = await navigator.wakeLock.request('screen');
+    } catch {
+      // Refused — battery saver, or the page lost visibility mid-request. The
+      // button must not claim a lock we did not get.
+      wakeWanted = false;
+    }
+    // The request is asynchronous, so the button may have been tapped off while
+    // it was in flight. Honour the latest intent, not the one that started it.
+    if (held && !wakeWanted) {
+      try { await held.release(); } catch {}
+      held = null;
+    }
+    wakeSentinel = held;
+    if (held) held.addEventListener('release', onWakeRelease);
+  } finally {
+    wakeAcquiring = false;
+    paintWake();
+  }
+}
+
+async function releaseWake() {
+  wakeWanted = false;
+  const held = wakeSentinel;
+  wakeSentinel = null;
+  paintWake();
+  if (held) {
+    held.removeEventListener('release', onWakeRelease);
+    try { await held.release(); } catch {}
+  }
+}
+
+function onWakeRelease() {
+  wakeSentinel = null;
+  /*
+   * Hidden means the OS took the lock while the cook was elsewhere: the intent
+   * stands and visibilitychange asks for it back. Visible means we lost it with
+   * the page in front of them, and a button still reading "on" would be
+   * promising a screen we are no longer holding awake.
+   */
+  if (document.visibilityState === 'visible') {
+    wakeWanted = false;
+    paintWake();
+  }
+}
+
+// Delegated, so one registration covers the button baked into a recipe page and
+// the one the modal injects later, without either surface being a special case.
+document.addEventListener('click', e => {
+  if (!e.target.closest?.('[data-wake]')) return;
+  if (wakeWanted) releaseWake();
+  else { wakeWanted = true; acquireWake(); }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (wakeWanted && !wakeSentinel && document.visibilityState === 'visible') {
+    acquireWake();
+  }
+});
+</script></body>
 </html>

@@ -23,9 +23,114 @@
 
 <div class="columns">
 <section class="ing"><h2>Ingredients</h2><ul class="ingredients"><li><label><input type="checkbox"><span>3 tbsp olive oil</span></label></li><li><label><input type="checkbox"><span>6 large ripe tomatoes</span></label></li><li><label><input type="checkbox"><span>1 small onion, diced</span></label></li><li><label><input type="checkbox"><span>3 fat garlic cloves, finely chopped</span></label></li><li><label><input type="checkbox"><span>1 tbsp tomato purée</span></label></li><li><label><input type="checkbox"><span>1 tsp dried oregano</span></label></li><li><label><input type="checkbox"><span>1 tsp dried rosemary</span></label></li><li><label><input type="checkbox"><span>A small bunch (roughly 10g) of basil or parsley, finely chopped</span></label></li><li><label><input type="checkbox"><span>1 x 660g jar of Queen Butter Beans, with their liquid</span></label></li><li><label><input type="checkbox"><span>75g mozzarella</span></label></li><li><label><input type="checkbox"><span>75g cheddar, grated</span></label></li></ul><h3>To serve</h3><ul class="ingredients"><li><label><input type="checkbox"><span>Crusty bread</span></label></li><li><label><input type="checkbox"><span>Salad leaves, dressed in lemon juice and olive oil</span></label></li></ul></section>
-<section class="meth"><h2>Method</h2><ol class="method" start="1"><li>Heat the <strong>3 tbsp olive oil</strong> in a large, wide pan over a medium-low heat.</li><li>Cut the tops off the <strong>6 tomatoes</strong> and nestle them cut-side down around the edge of the pan.</li><li>Add the <strong>1 small onion</strong> to the middle of the pan and stir gently so it is coated in the oil.</li><li>Cover and cook for 12-15 minutes, until the tomatoes have softened and the onion has turned translucent, adding a splash of boiling water if anything starts to catch.</li><li>Peel away the <strong>tomato</strong> skins and discard them.</li><li>Crush the <strong>tomatoes</strong> into the pan with the back of a fork, keeping some texture rather than working them smooth.</li><li>Add the <strong>3 garlic cloves</strong>, <strong>1 tbsp tomato purée</strong>, <strong>1 tsp dried oregano</strong> and <strong>1 tsp dried rosemary</strong> with a good pinch of salt and pepper.</li><li>Stir well and simmer for a few minutes, until fragrant.</li><li>Stir through most of the <strong>10g basil or parsley</strong>, saving some to garnish.</li><li>Pour in the <strong>660g jar of butter beans</strong> with their liquid, stir to combine and cook for 2 minutes until warmed through.</li><li>Tear in the <strong>75g mozzarella</strong> and add the <strong>75g cheddar</strong>, stirring until they melt into the sauce and it turns rich and creamy.</li><li>Serve hot, scattered with the remaining <strong>basil or parsley</strong>, with <strong>crusty bread</strong> for dunking and the dressed <strong>salad leaves</strong> alongside.</li></ol></section>
+<section class="meth"><h2>Method</h2><div class="wake">
+<button class="btn btn--quiet wake__btn" type="button" data-wake aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/><path d="M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><span data-wake-label>Keep screen awake</span></button>
+<p class="wake__hint">Stops your screen dimming and locking while your hands are
+busy. It switches off when you leave this page.</p>
+</div><ol class="method" start="1"><li>Heat the <strong>3 tbsp olive oil</strong> in a large, wide pan over a medium-low heat.</li><li>Cut the tops off the <strong>6 tomatoes</strong> and nestle them cut-side down around the edge of the pan.</li><li>Add the <strong>1 small onion</strong> to the middle of the pan and stir gently so it is coated in the oil.</li><li>Cover and cook for 12-15 minutes, until the tomatoes have softened and the onion has turned translucent, adding a splash of boiling water if anything starts to catch.</li><li>Peel away the <strong>tomato</strong> skins and discard them.</li><li>Crush the <strong>tomatoes</strong> into the pan with the back of a fork, keeping some texture rather than working them smooth.</li><li>Add the <strong>3 garlic cloves</strong>, <strong>1 tbsp tomato purée</strong>, <strong>1 tsp dried oregano</strong> and <strong>1 tsp dried rosemary</strong> with a good pinch of salt and pepper.</li><li>Stir well and simmer for a few minutes, until fragrant.</li><li>Stir through most of the <strong>10g basil or parsley</strong>, saving some to garnish.</li><li>Pour in the <strong>660g jar of butter beans</strong> with their liquid, stir to combine and cook for 2 minutes until warmed through.</li><li>Tear in the <strong>75g mozzarella</strong> and add the <strong>75g cheddar</strong>, stirring until they melt into the sauce and it turns rich and creamy.</li><li>Serve hot, scattered with the remaining <strong>basil or parsley</strong>, with <strong>crusty bread</strong> for dunking and the dressed <strong>salad leaves</strong> alongside.</li></ol></section>
 </div>
 <section class="notes"><h2>Notes</h2><p>Peeling the tomato skins is worth the effort: the juices break down into something silky rather than stringy.</p></section>
 <p class="source">Source: <a href="https://boldbeanco.com/blogs/beanspo-recipes/bubbling-one-pan-cheesy-tomato-butter-beans" rel="noreferrer">https://boldbeanco.com/blogs/beanspo-recipes/bubbling-one-pan-cheesy-tomato-butter-beans</a></p></main>
-</body>
+<script>
+/*
+ * Screen Wake Lock — the "keep screen awake" button on every recipe.
+ *
+ * The browser hands back a sentinel it is free to take away: hiding the page,
+ * by switching apps, locking the phone or changing tab, releases the lock and
+ * it does not come back on its own. So intent and lock are tracked separately.
+ * wakeWanted is what the cook asked for, and is what the button paints from;
+ * wakeSentinel is what we actually hold at this instant.
+ */
+let wakeWanted = false;
+let wakeSentinel = null;
+let wakeAcquiring = false;
+
+if ('wakeLock' in navigator) {
+  /*
+   * Marked on the root rather than on each button. The modal injects its own
+   * copy of the recipe markup long after this runs, so a reveal that walked the
+   * buttons present now would miss it — and reaching into openModal() would put
+   * knowledge of the modal in a file that otherwise has none.
+   */
+  document.documentElement.classList.add('has-wakelock');
+}
+
+function paintWake() {
+  document.querySelectorAll('[data-wake]').forEach(btn => {
+    btn.setAttribute('aria-pressed', String(wakeWanted));
+    btn.querySelector('[data-wake-label]').textContent =
+      wakeWanted ? 'Screen staying awake' : 'Keep screen awake';
+  });
+}
+
+async function acquireWake() {
+  // A tap and a return to visibility can both ask while a request is still in
+  // flight. A second one would strand the first sentinel: wakeSentinel holds
+  // whichever lands last, and nothing is left holding a reference to release
+  // the other — a screen kept awake by a lock no button can reach.
+  if (wakeAcquiring) return;
+  wakeAcquiring = true;
+  try {
+    wakeSentinel = null;
+    let held = null;
+    try {
+      held = await navigator.wakeLock.request('screen');
+    } catch {
+      // Refused — battery saver, or the page lost visibility mid-request. The
+      // button must not claim a lock we did not get.
+      wakeWanted = false;
+    }
+    // The request is asynchronous, so the button may have been tapped off while
+    // it was in flight. Honour the latest intent, not the one that started it.
+    if (held && !wakeWanted) {
+      try { await held.release(); } catch {}
+      held = null;
+    }
+    wakeSentinel = held;
+    if (held) held.addEventListener('release', onWakeRelease);
+  } finally {
+    wakeAcquiring = false;
+    paintWake();
+  }
+}
+
+async function releaseWake() {
+  wakeWanted = false;
+  const held = wakeSentinel;
+  wakeSentinel = null;
+  paintWake();
+  if (held) {
+    held.removeEventListener('release', onWakeRelease);
+    try { await held.release(); } catch {}
+  }
+}
+
+function onWakeRelease() {
+  wakeSentinel = null;
+  /*
+   * Hidden means the OS took the lock while the cook was elsewhere: the intent
+   * stands and visibilitychange asks for it back. Visible means we lost it with
+   * the page in front of them, and a button still reading "on" would be
+   * promising a screen we are no longer holding awake.
+   */
+  if (document.visibilityState === 'visible') {
+    wakeWanted = false;
+    paintWake();
+  }
+}
+
+// Delegated, so one registration covers the button baked into a recipe page and
+// the one the modal injects later, without either surface being a special case.
+document.addEventListener('click', e => {
+  if (!e.target.closest?.('[data-wake]')) return;
+  if (wakeWanted) releaseWake();
+  else { wakeWanted = true; acquireWake(); }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (wakeWanted && !wakeSentinel && document.visibilityState === 'visible') {
+    acquireWake();
+  }
+});
+</script></body>
 </html>

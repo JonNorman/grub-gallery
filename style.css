@@ -727,6 +727,28 @@ a.btn { text-decoration: none; }
   display: block;
 }
 
+/*
+ * The screen wake toggle, shown above the method on every recipe. Hidden unless
+ * site/wake.js has marked the root as supporting the API: the modal injects its
+ * own copy of this markup after load, so support has to be a standing fact
+ * about the document rather than something applied to the buttons on it. A page
+ * whose script never runs keeps the button hidden, which is the honest outcome
+ * — the rest of a recipe works with no JavaScript at all.
+ */
+.wake { margin: 20px 0 0; }
+html:not(.has-wakelock) .wake { display: none; }
+/*
+ * On follows .btn--toggle.is-open rather than the accent fill a .btn carries:
+ * white on --accent is 2.56:1 against the dark palette, and a control whose
+ * whole job is to be trusted at a glance cannot be the least legible thing on
+ * the page. The soft fill does the work the border alone was too quiet for.
+ */
+.wake__btn[aria-pressed="true"],
+.wake__btn[aria-pressed="true"]:hover {
+  background: var(--accent-soft); color: var(--ink); border-color: var(--accent);
+}
+.wake__hint { font-size: 12px; color: var(--muted); margin: 6px 0 0; max-width: 46ch; }
+
 .before {
   background: var(--accent-soft);
   border-left: 3px solid var(--accent);
@@ -925,7 +947,7 @@ ol.method strong { font-weight: 620; }
 }
 
 @media print {
-  .back, .chips, #q, .hero { display: none; }
+  .back, .chips, #q, .hero, .wake { display: none; }
   .columns { grid-template-columns: 1fr 1.6fr; }
   body { background: #fff; }
 }

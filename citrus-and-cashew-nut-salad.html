@@ -23,9 +23,114 @@
 
 <div class="columns">
 <section class="ing"><h2>Ingredients</h2><ul class="ingredients"><li><label><input type="checkbox"><span>1 grapefruit</span></label></li><li><label><input type="checkbox"><span>1 large orange</span></label></li><li><label><input type="checkbox"><span>250g red cabbage</span></label></li><li><label><input type="checkbox"><span>150g fennel</span></label></li><li><label><input type="checkbox"><span>150g celeriac</span></label></li><li><label><input type="checkbox"><span>250g beetroot</span></label></li></ul><h3>For the dressing</h3><ul class="ingredients"><li><label><input type="checkbox"><span>2 tbsp red wine vinegar</span></label></li><li><label><input type="checkbox"><span>3 tbsp lime juice</span></label></li><li><label><input type="checkbox"><span>75ml olive oil</span></label></li><li><label><input type="checkbox"><span>1 tbsp light soy sauce</span></label></li><li><label><input type="checkbox"><span>35g ginger root, peeled and grated</span></label></li><li><label><input type="checkbox"><span>3 tbsp light muscovado sugar</span></label></li><li><label><input type="checkbox"><span>2 small hot chillies, deseeded, finely chopped</span></label></li><li><label><input type="checkbox"><span>75g cashews, roasted and salted, plus a few to finish</span></label></li><li><label><input type="checkbox"><span>20 mint leaves, finely shredded</span></label></li><li><label><input type="checkbox"><span>20 coriander leaves</span></label></li></ul></section>
-<section class="meth"><h2>Method</h2><ol class="method" start="1"><li>Make the dressing: put the <strong>2 tbsp red wine vinegar</strong>, <strong>3 tbsp lime juice</strong>, <strong>75ml olive oil</strong> and <strong>1 tbsp light soy sauce</strong> in a mixing bowl. Add the <strong>35g peeled ginger root</strong> to the liquids with the <strong>3 tbsp light muscovado sugar</strong>. Stir in the <strong>2 small hot chillies</strong> and stir in.</li><li>Crush the <strong>75g cashews</strong> to a coarse, nubbly powder with a pestle and mortar (or the end of a rolling pin), then add to the dressing with the <strong>20 mint leaves</strong> and the <strong>20 coriander leaves</strong>, torn up a little if they are particularly large. Stir the dressing and set aside.</li><li>Remove the peel and white pith from the <strong>1 grapefruit</strong> and <strong>1 large orange</strong>, saving as much juice as you can. Separate the segments with a sharp knife and add them to the dressing with any juice.</li><li>Finely shred the <strong>250g red cabbage</strong> and <strong>150g fennel</strong> and add to the dressing. Peel the <strong>150g celeriac</strong> and <strong>250g beetroot</strong>, slice thinly, then cut into long, thin matchsticks. Toss with the dressing, check the seasoning and set aside for 30 minutes or more before serving. Add the reserved whole <strong>cashews</strong> just before bringing the salad to the table.</li></ol></section>
+<section class="meth"><h2>Method</h2><div class="wake">
+<button class="btn btn--quiet wake__btn" type="button" data-wake aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/><path d="M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><span data-wake-label>Keep screen awake</span></button>
+<p class="wake__hint">Stops your screen dimming and locking while your hands are
+busy. It switches off when you leave this page.</p>
+</div><ol class="method" start="1"><li>Make the dressing: put the <strong>2 tbsp red wine vinegar</strong>, <strong>3 tbsp lime juice</strong>, <strong>75ml olive oil</strong> and <strong>1 tbsp light soy sauce</strong> in a mixing bowl. Add the <strong>35g peeled ginger root</strong> to the liquids with the <strong>3 tbsp light muscovado sugar</strong>. Stir in the <strong>2 small hot chillies</strong> and stir in.</li><li>Crush the <strong>75g cashews</strong> to a coarse, nubbly powder with a pestle and mortar (or the end of a rolling pin), then add to the dressing with the <strong>20 mint leaves</strong> and the <strong>20 coriander leaves</strong>, torn up a little if they are particularly large. Stir the dressing and set aside.</li><li>Remove the peel and white pith from the <strong>1 grapefruit</strong> and <strong>1 large orange</strong>, saving as much juice as you can. Separate the segments with a sharp knife and add them to the dressing with any juice.</li><li>Finely shred the <strong>250g red cabbage</strong> and <strong>150g fennel</strong> and add to the dressing. Peel the <strong>150g celeriac</strong> and <strong>250g beetroot</strong>, slice thinly, then cut into long, thin matchsticks. Toss with the dressing, check the seasoning and set aside for 30 minutes or more before serving. Add the reserved whole <strong>cashews</strong> just before bringing the salad to the table.</li></ol></section>
 </div>
 <section class="notes"><h2>Notes</h2><p>The dressing sounds like a lot of trouble. It isn&#x27;t. Everything just needs a quick blast in the blender or food processor – although I find the texture of the cashew nuts most pleasing when I grind them using a pestle and mortar, leaving them as a rough, gravelly powder. Once made, it is probably best to eat it the same day.</p></section>
 </main>
-</body>
+<script>
+/*
+ * Screen Wake Lock — the "keep screen awake" button on every recipe.
+ *
+ * The browser hands back a sentinel it is free to take away: hiding the page,
+ * by switching apps, locking the phone or changing tab, releases the lock and
+ * it does not come back on its own. So intent and lock are tracked separately.
+ * wakeWanted is what the cook asked for, and is what the button paints from;
+ * wakeSentinel is what we actually hold at this instant.
+ */
+let wakeWanted = false;
+let wakeSentinel = null;
+let wakeAcquiring = false;
+
+if ('wakeLock' in navigator) {
+  /*
+   * Marked on the root rather than on each button. The modal injects its own
+   * copy of the recipe markup long after this runs, so a reveal that walked the
+   * buttons present now would miss it — and reaching into openModal() would put
+   * knowledge of the modal in a file that otherwise has none.
+   */
+  document.documentElement.classList.add('has-wakelock');
+}
+
+function paintWake() {
+  document.querySelectorAll('[data-wake]').forEach(btn => {
+    btn.setAttribute('aria-pressed', String(wakeWanted));
+    btn.querySelector('[data-wake-label]').textContent =
+      wakeWanted ? 'Screen staying awake' : 'Keep screen awake';
+  });
+}
+
+async function acquireWake() {
+  // A tap and a return to visibility can both ask while a request is still in
+  // flight. A second one would strand the first sentinel: wakeSentinel holds
+  // whichever lands last, and nothing is left holding a reference to release
+  // the other — a screen kept awake by a lock no button can reach.
+  if (wakeAcquiring) return;
+  wakeAcquiring = true;
+  try {
+    wakeSentinel = null;
+    let held = null;
+    try {
+      held = await navigator.wakeLock.request('screen');
+    } catch {
+      // Refused — battery saver, or the page lost visibility mid-request. The
+      // button must not claim a lock we did not get.
+      wakeWanted = false;
+    }
+    // The request is asynchronous, so the button may have been tapped off while
+    // it was in flight. Honour the latest intent, not the one that started it.
+    if (held && !wakeWanted) {
+      try { await held.release(); } catch {}
+      held = null;
+    }
+    wakeSentinel = held;
+    if (held) held.addEventListener('release', onWakeRelease);
+  } finally {
+    wakeAcquiring = false;
+    paintWake();
+  }
+}
+
+async function releaseWake() {
+  wakeWanted = false;
+  const held = wakeSentinel;
+  wakeSentinel = null;
+  paintWake();
+  if (held) {
+    held.removeEventListener('release', onWakeRelease);
+    try { await held.release(); } catch {}
+  }
+}
+
+function onWakeRelease() {
+  wakeSentinel = null;
+  /*
+   * Hidden means the OS took the lock while the cook was elsewhere: the intent
+   * stands and visibilitychange asks for it back. Visible means we lost it with
+   * the page in front of them, and a button still reading "on" would be
+   * promising a screen we are no longer holding awake.
+   */
+  if (document.visibilityState === 'visible') {
+    wakeWanted = false;
+    paintWake();
+  }
+}
+
+// Delegated, so one registration covers the button baked into a recipe page and
+// the one the modal injects later, without either surface being a special case.
+document.addEventListener('click', e => {
+  if (!e.target.closest?.('[data-wake]')) return;
+  if (wakeWanted) releaseWake();
+  else { wakeWanted = true; acquireWake(); }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (wakeWanted && !wakeSentinel && document.visibilityState === 'visible') {
+    acquireWake();
+  }
+});
+</script></body>
 </html>

@@ -23,9 +23,114 @@
 <p class="before"><strong>Before you start</strong> heat the oven to 180°C fan.</p>
 <div class="columns">
 <section class="ing"><h2>Ingredients</h2><ul class="ingredients"><li><label><input type="checkbox"><span>750g assorted tomatoes</span></label></li><li><label><input type="checkbox"><span>3 garlic cloves, peeled and crushed</span></label></li><li><label><input type="checkbox"><span>3 tbsp olive oil</span></label></li><li><label><input type="checkbox"><span>1 medium red onion</span></label></li><li><label><input type="checkbox"><span>2 tsp cumin seeds, lightly crushed</span></label></li><li><label><input type="checkbox"><span>2 tsp coriander seeds, coarsely crushed</span></label></li><li><label><input type="checkbox"><span>1 tbsp harissa paste</span></label></li></ul><h3>For the couscous</h3><ul class="ingredients"><li><label><input type="checkbox"><span>500ml vegetable stock</span></label></li><li><label><input type="checkbox"><span>200g quick-cooking couscous</span></label></li><li><label><input type="checkbox"><span>10g mint</span></label></li><li><label><input type="checkbox"><span>15g parsley</span></label></li></ul></section>
-<section class="meth"><h2>Method</h2><ol class="method" start="1"><li>Cut the larger <strong>750g tomatoes</strong> in half and place in a roasting tin, tucking in the smaller ones. Add the <strong>3 garlic cloves</strong> and <strong>3 tbsp olive oil</strong>. Peel and slice the <strong>1 medium red onion</strong> and add it to the tomatoes with a seasoning of <strong>salt and black pepper</strong>.</li><li>Scatter the crushed <strong>2 tsp cumin seeds</strong> and <strong>2 tsp coriander seeds</strong> over the tomatoes and onions. Roast at 180°C fan for 35-40 minutes until the tomatoes are soft and the skins lightly browned.</li><li>Bring the <strong>500ml vegetable stock</strong> to the boil. Place the <strong>200g couscous</strong> in a heat-proof bowl, then pour the boiling stock over, cover and leave for 15 minutes. Remove the leaves from the <strong>10g mint</strong> and <strong>15g parsley</strong> and roughly chop.</li><li>Use a fork to lightly crush the tomatoes so the juices bleed into the pan, then stir in the <strong>1 tbsp harissa paste</strong>. Run a fork through the couscous to separate the grains, then stir in the chopped herbs. Serve the roast tomatoes and their juices on top of the couscous.</li></ol></section>
+<section class="meth"><h2>Method</h2><div class="wake">
+<button class="btn btn--quiet wake__btn" type="button" data-wake aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/><path d="M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><span data-wake-label>Keep screen awake</span></button>
+<p class="wake__hint">Stops your screen dimming and locking while your hands are
+busy. It switches off when you leave this page.</p>
+</div><ol class="method" start="1"><li>Cut the larger <strong>750g tomatoes</strong> in half and place in a roasting tin, tucking in the smaller ones. Add the <strong>3 garlic cloves</strong> and <strong>3 tbsp olive oil</strong>. Peel and slice the <strong>1 medium red onion</strong> and add it to the tomatoes with a seasoning of <strong>salt and black pepper</strong>.</li><li>Scatter the crushed <strong>2 tsp cumin seeds</strong> and <strong>2 tsp coriander seeds</strong> over the tomatoes and onions. Roast at 180°C fan for 35-40 minutes until the tomatoes are soft and the skins lightly browned.</li><li>Bring the <strong>500ml vegetable stock</strong> to the boil. Place the <strong>200g couscous</strong> in a heat-proof bowl, then pour the boiling stock over, cover and leave for 15 minutes. Remove the leaves from the <strong>10g mint</strong> and <strong>15g parsley</strong> and roughly chop.</li><li>Use a fork to lightly crush the tomatoes so the juices bleed into the pan, then stir in the <strong>1 tbsp harissa paste</strong>. Run a fork through the couscous to separate the grains, then stir in the chopped herbs. Serve the roast tomatoes and their juices on top of the couscous.</li></ol></section>
 </div>
 <section class="notes"><h2>Notes</h2><p>Harissa pastes can vary slightly in heat so I suggest starting with a tablespoon then going on from there, to suit your taste. Making this with as many varieties of tomato as I can get hold of, the vibrant scarlets and oranges bring much cheer to a grey winter day. The couscous, though softly cosseting when soaked with rust-red juices could be swapped for rice if you prefer.</p></section>
 </main>
-</body>
+<script>
+/*
+ * Screen Wake Lock — the "keep screen awake" button on every recipe.
+ *
+ * The browser hands back a sentinel it is free to take away: hiding the page,
+ * by switching apps, locking the phone or changing tab, releases the lock and
+ * it does not come back on its own. So intent and lock are tracked separately.
+ * wakeWanted is what the cook asked for, and is what the button paints from;
+ * wakeSentinel is what we actually hold at this instant.
+ */
+let wakeWanted = false;
+let wakeSentinel = null;
+let wakeAcquiring = false;
+
+if ('wakeLock' in navigator) {
+  /*
+   * Marked on the root rather than on each button. The modal injects its own
+   * copy of the recipe markup long after this runs, so a reveal that walked the
+   * buttons present now would miss it — and reaching into openModal() would put
+   * knowledge of the modal in a file that otherwise has none.
+   */
+  document.documentElement.classList.add('has-wakelock');
+}
+
+function paintWake() {
+  document.querySelectorAll('[data-wake]').forEach(btn => {
+    btn.setAttribute('aria-pressed', String(wakeWanted));
+    btn.querySelector('[data-wake-label]').textContent =
+      wakeWanted ? 'Screen staying awake' : 'Keep screen awake';
+  });
+}
+
+async function acquireWake() {
+  // A tap and a return to visibility can both ask while a request is still in
+  // flight. A second one would strand the first sentinel: wakeSentinel holds
+  // whichever lands last, and nothing is left holding a reference to release
+  // the other — a screen kept awake by a lock no button can reach.
+  if (wakeAcquiring) return;
+  wakeAcquiring = true;
+  try {
+    wakeSentinel = null;
+    let held = null;
+    try {
+      held = await navigator.wakeLock.request('screen');
+    } catch {
+      // Refused — battery saver, or the page lost visibility mid-request. The
+      // button must not claim a lock we did not get.
+      wakeWanted = false;
+    }
+    // The request is asynchronous, so the button may have been tapped off while
+    // it was in flight. Honour the latest intent, not the one that started it.
+    if (held && !wakeWanted) {
+      try { await held.release(); } catch {}
+      held = null;
+    }
+    wakeSentinel = held;
+    if (held) held.addEventListener('release', onWakeRelease);
+  } finally {
+    wakeAcquiring = false;
+    paintWake();
+  }
+}
+
+async function releaseWake() {
+  wakeWanted = false;
+  const held = wakeSentinel;
+  wakeSentinel = null;
+  paintWake();
+  if (held) {
+    held.removeEventListener('release', onWakeRelease);
+    try { await held.release(); } catch {}
+  }
+}
+
+function onWakeRelease() {
+  wakeSentinel = null;
+  /*
+   * Hidden means the OS took the lock while the cook was elsewhere: the intent
+   * stands and visibilitychange asks for it back. Visible means we lost it with
+   * the page in front of them, and a button still reading "on" would be
+   * promising a screen we are no longer holding awake.
+   */
+  if (document.visibilityState === 'visible') {
+    wakeWanted = false;
+    paintWake();
+  }
+}
+
+// Delegated, so one registration covers the button baked into a recipe page and
+// the one the modal injects later, without either surface being a special case.
+document.addEventListener('click', e => {
+  if (!e.target.closest?.('[data-wake]')) return;
+  if (wakeWanted) releaseWake();
+  else { wakeWanted = true; acquireWake(); }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (wakeWanted && !wakeSentinel && document.visibilityState === 'visible') {
+    acquireWake();
+  }
+});
+</script></body>
 </html>
