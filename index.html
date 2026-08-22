@@ -726,21 +726,21 @@
     <button type="button" class="btn" id="modalAdd">+ Add to week</button>
     <a class="btn btn--quiet" id="modalOpen" target="_blank" rel="noopener" aria-label="Full page (opens in a new tab)">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>Full page</a>
-    <button type="button" class="icon-btn modal__close" id="modalClose" aria-label="Close"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    <button type="button" class="icon-btn modal__close" command="close" commandfor="modal" aria-label="Close"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
   </div>
   <div class="recipe modal__body" id="modalBody"></div>
 </dialog>
 
 <dialog class="modal modal--week" id="weekModal" aria-label="The week as a picture">
   <div class="modal__bar">
-    <button type="button" class="icon-btn modal__close" id="weekClose" aria-label="Close"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    <button type="button" class="icon-btn modal__close" command="close" commandfor="weekModal" aria-label="Close"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
   </div>
   <div class="modal__body week-sheet" id="weekSheet"></div>
 </dialog>
 
 <dialog class="modal modal--help" id="helpModal" aria-labelledby="helpTitle">
   <div class="modal__bar">
-    <button type="button" class="icon-btn modal__close" id="helpClose" aria-label="Close"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    <button type="button" class="icon-btn modal__close" command="close" commandfor="helpModal" aria-label="Close"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
   </div>
   <div class="modal__body help">
 <h2 id="helpTitle">About Grub Gallery</h2>
@@ -1388,7 +1388,6 @@ function openModal(slug) {
   modal.showModal();
 }
 
-document.getElementById('modalClose').addEventListener('click', () => modal.close());
 // Adding from the modal is a decision made, so it closes — but only when the
 // meal actually landed. A full week alerts instead, and the modal stays put.
 document.getElementById('modalAdd').addEventListener('click', () => {
@@ -1414,7 +1413,6 @@ function openHelp() {
 }
 
 helpBtn.addEventListener('click', openHelp);
-document.getElementById('helpClose').addEventListener('click', () => helpModal.close());
 helpModal.addEventListener('click', e => { if (e.target === helpModal) helpModal.close(); });
 
 /* ── keyboard shortcuts ────────────────────────────────────────────────────
@@ -1952,7 +1950,6 @@ document.getElementById('weekView').addEventListener('click', async () => {
   weekModal.showModal();
 });
 
-document.getElementById('weekClose').addEventListener('click', () => weekModal.close());
 weekModal.addEventListener('click', e => { if (e.target === weekModal) weekModal.close(); });
 // Fires for the close button, Escape and the backdrop alike.
 weekModal.addEventListener('close',
