@@ -1390,11 +1390,11 @@ function openModal(slug) {
   const rec = BY_SLUG.get(slug);
   if (!rec) return;
   modalSlug = slug;
+  // Before showModal: the dialog's aria-labelledby points at the h1 this line
+  // injects, and the name is computed when the dialog is exposed. Opening
+  // first would announce a nameless dialog, then quietly resolve a tick later.
   modalBody.innerHTML = rec.html;
   modalBody.scrollTop = 0;
-  // Named on open rather than via aria-labelledby: the heading only exists once
-  // the body has been injected, and the label changes with every recipe.
-  modal.setAttribute('aria-label', rec.name);
   // Set per recipe: the bar is static, the recipe shown in it is not.
   modalOpen.href = rec.slug + '.html';
   modal.showModal();

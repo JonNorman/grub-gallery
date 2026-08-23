@@ -869,6 +869,11 @@ ol.method strong { font-weight: 620; }
   padding: 4px clamp(16px, 4vw, 36px) clamp(20px, 4vw, 36px);
   -webkit-overflow-scrolling: touch;
 }
+/* The fragment is shared with the standalone page, which needs a way back to
+   the index. Inside a dialog the close button already is one. display:none
+   rather than a visual hide, so it leaves the tab order too — a focus stop
+   that navigates away would lose the week plan the modal exists to protect. */
+.modal__body .back { display: none; }
 .modal__body h1 { margin-top: 8px; }
 .modal__body .hero { max-height: 300px; }
 .modal__body .ing { position: static; }
