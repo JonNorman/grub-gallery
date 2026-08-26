@@ -519,12 +519,14 @@ a.btn { text-decoration: none; }
 /* On a narrow screen seven days are one scrollable strip rather than a
    four-row grid that would leave no room for the recipes below.
 
-   The strip applies whether or not the panel is pinned, which matters more
-   than it looks: pinning used to switch the grid from four rows to one, and
-   a sticky panel that changes height by 456px rewrites the document under
-   the reader at exactly the boundary they must cross to scroll past it. The
-   page ends up shoving itself around as the class flickers on and off. Same
-   layout in both states leaves only the thumbnail collapse, about 100px. */
+   The strip applies whether or not the week is planned, and whether or not
+   the panel is pinned. Every time that has been made conditional the page has
+   shoved itself around at the moment the condition flipped: pinning once
+   switched the grid from four rows to one under a reader mid-scroll (456px),
+   and the strip arriving with the first meal moved the recipes 441px up the
+   page just as someone was aiming at a second card. planner--planned governs
+   whether the panel leaves the flow and follows the reader. It does not
+   govern what the panel looks like. */
 
 
 /*
@@ -575,18 +577,18 @@ a.btn { text-decoration: none; }
 #toggleFilters { display: none; }
 
 @media (max-width: 780px) {
-  /* Two columns of days at rest; the row of seven below is for the
-     panel once it is following the reader. */
-.days { grid-template-columns: repeat(2, 1fr); }
-
-
-  .planner--planned .days {
+  /* One strip of seven, planned or not. The days used to wrap into two
+     columns until something was in them, so the emptiest the week ever gets
+     was also the tallest — and adding a first meal jumped the recipes 441px
+     up the page. A planner is the same object either way; only whether it
+     follows the reader changes with it. */
+  .days {
     grid-template-columns: repeat(7, minmax(88px, 1fr));
     overflow-x: auto;
     scroll-snap-type: x proximity;
     padding-bottom: 4px;
   }
-  .planner--planned .day { scroll-snap-align: start; }
+  .day { scroll-snap-align: start; }
 
   .topbar {
     position: sticky; top: 0; z-index: 30;
@@ -632,15 +634,19 @@ a.btn { text-decoration: none; }
      inward as you scrolled, which read as the layout being unsure of itself.
      The sides are simply thinner than a resting panel would want, and stay
      there. */
-  .planner--planned {
+  /* The slot carries the spacing here, so the panel's own margin would be
+     counted twice — and being a margin it collapses out of the slot, leaving
+     the recipes 27px lower before a meal is added than after. */
+  .planner {
+    margin: 0;
     padding: calc(16px - 11px * var(--shrink, 0)) 12px
              calc(10px - 5px * var(--shrink, 0));
   }
   /* Constant too: the days are one row here, so this gap is only ever
      horizontal, and closing it slid every cell sideways for no height. */
-  .planner--planned .days { gap: 5px; }
-  .planner--planned .day { padding: calc(10px - 8px * var(--shrink, 0)) 5px; }
-  .planner--planned .day__name { font-size: calc(11px - 0.5px * var(--shrink, 0)); }
+  .days { gap: 5px; }
+  .day { padding: calc(10px - 8px * var(--shrink, 0)) 5px; }
+  .day__name { font-size: calc(11px - 0.5px * var(--shrink, 0)); }
   /* The three controls belong on one line. Renaming the print button to Week
      bought most of it; the rest is gap and padding sized for a desktop panel.
      327px of buttons into a 312px head on a 390px phone was two rows for the
@@ -650,29 +656,29 @@ a.btn { text-decoration: none; }
 
   /* Date, then picture, then name — the order you read a day in when you are
      checking what is already planned. */
-  .planner--planned .day { display: flex; flex-direction: column; }
-  .planner--planned .day__name   { order: 1; }
-  .planner--planned .day__thumb  { order: 2; }
-  .planner--planned .day__recipe { order: 3; }
+  .day { display: flex; flex-direction: column; }
+  .day__name   { order: 1; }
+  .day__thumb  { order: 2; }
+  .day__recipe { order: 3; }
   /* One line of title at every point in the collapse, not two falling to one
      part-way down. The step removed 17px of content in an instant while the
      box carried on shrinking smoothly, so the panel alternately cut its
      thumbnails and left a gap under them. With the date gone as well, a cell
      is a day, a picture and a name — all of which shrink continuously. */
-  .planner--planned .day__recipe { -webkit-line-clamp: 1; }
+  .day__recipe { -webkit-line-clamp: 1; }
 
   /* The date goes entirely. Across seven columns "SAT 22 AUG" wraps to two
      lines, so every cell carried a line of height for something nobody
      scanning for the next free evening needs — the day alone answers it, on
      one line, at any point in the collapse. */
-  .planner--planned .day__date { display: none; }
+  .day__date { display: none; }
 
   /* Said where a title would go, not above the date it belongs to, and
      centred in what is left rather than dropped to the bottom of a cell sized
      by whichever neighbour has the longest title. */
-  .planner--planned .day__skip,
-  .planner--planned .day__empty  { order: 3; margin-block: auto; }
-  .planner--planned .day__repeat { order: 4; }
+  .day__skip,
+  .day__empty  { order: 3; margin-block: auto; }
+  .day__repeat { order: 4; }
 }
 
 .day__repeat {
