@@ -915,7 +915,6 @@ const DATA = window.RECIPES;
 const BY_SLUG = new Map(DATA.map(r => [r.slug, r]));
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const SKIPPED = '-';  // a day deliberately left without a meal
-const STORE = 'recipe-plan-v2';  // v1 held JSON; this holds a query string
 
 const grid = document.getElementById('grid');
 const q = document.getElementById('q');
@@ -1168,11 +1167,6 @@ document.querySelector('.chip[data-nowait]').addEventListener('click', e => {
 
 /* ── week plan ─────────────────────────────────────────────────────────── */
 
-/* The URL is the plan. localStorage holds nothing but the last query string —
-   it is a memory of the URL you had, not a second copy of the week, so the two
-   cannot disagree and there is nothing to reconcile. On a bare arrival the
-   remembered query is put back before anything reads it, so from that point on
-   there is exactly one source of truth and one parser. */
 function planFromUrl() {
   const params = new URLSearchParams(location.search);
   if (!params.has('plan')) return null;
@@ -1197,29 +1191,6 @@ function planFromUrl() {
   };
 }
 
-// Arriving with no plan in the URL — a bookmark, the bare domain, a home-screen
-// icon — restores the last one, so you come back to where you left off. A link
-// with ?plan= is simply used: nothing to compare, nothing to ask.
-/* Storage access can throw outright, not just return null — private browsing
-   and blocked site data both do it. These run at the top level, so an unguarded
-   throw would take the whole page's JavaScript with it and leave no filter, no
-   planner and no modals. Remember nothing rather than break everything. */
-const remember = {
-  read() {
-    try { return localStorage.getItem(STORE); } catch (e) { return null; }
-  },
-  write(value) {
-    try { localStorage.setItem(STORE, value); } catch (e) { /* not fatal */ }
-  },
-};
-
-if (!new URLSearchParams(location.search).has('plan')) {
-  const remembered = remember.read();
-  if (remembered) {
-    history.replaceState(null, '', location.pathname + remembered + location.hash);
-  }
-}
-
 let state = planFromUrl() || { startDay: 6, plan: Array(7).fill(null) };
 
 function save() { syncUrl(); }
@@ -1227,10 +1198,7 @@ function save() { syncUrl(); }
 /* The address bar mirrors the plan, so the link is always the current week and
    the mechanism is visible rather than hidden behind a button. replaceState,
    never pushState: adding a meal should not put an entry in the back stack.
-
-   The remembered value is the query string itself rather than a serialised
-   plan. Storing the same thing twice in two shapes is what created every
-   reconciliation bug this had. */
+*/
 function syncUrl() {
   const url = new URL(location.href);
   // An empty week gets a clean URL rather than "?plan=,,,,,,&start=6".
@@ -1238,7 +1206,6 @@ function syncUrl() {
     ? '?plan=' + state.plan.map(s => s || '').join(',') + '&start=' + state.startDay
     : '';
   history.replaceState(null, '', url.toString());
-  remember.write(url.search);
 }
 
 // First occurrence of the chosen weekday on or after today, so the plan always
@@ -1722,10 +1689,7 @@ toggleListBtn.addEventListener('click', () => {
    summed. Every line is grouped under its shared ingredient instead, with the
    recipe it came from, which is what you need at the shelf. Shared by the
    on-page list and the printable summary so the two cannot diverge. */
-// Filtered after the lookup, not before it. A stored plan can hold a slug for a
-// recipe since renamed or removed — a remembered URL is taken at its word,
-// unlike planFromUrl() — and filtering the slugs alone lets an undefined
-// through to be dereferenced.
+// Filtered after the lookup, not before it.
 function plannedRecipes() {
   return state.plan.filter(Boolean).map(s => BY_SLUG.get(s)).filter(Boolean);
 }
