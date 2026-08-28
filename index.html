@@ -36,12 +36,6 @@
              aria-autocomplete="list" aria-label="Search by ingredient, tag or name">
       <ul class="suggest" id="suggest" role="listbox" hidden></ul>
     </div>
-    <label class="sort">Sort
-      <select id="sortBy">
-        <option value="name">A&ndash;Z</option>
-        <option value="newest">Newest first</option>
-      </select>
-    </label>
     <button type="button" id="toggleFilters" class="btn btn--quiet btn--toggle"
             aria-expanded="false" aria-controls="filters">
       Filter<svg class="icon icon--state" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
@@ -51,10 +45,18 @@
     <div class="chips chips--time"><button class="chip chip--time" data-bucket="quick" aria-pressed="false">30 min or less</button><button class="chip chip--time" data-bucket="medium" aria-pressed="false">under an hour</button><button class="chip chip--time" data-bucket="long" aria-pressed="false">an hour or more</button><button class="chip chip--time" data-nowait="1" aria-pressed="false">no waiting</button></div>
   </div>
 </search>
-<!-- role=status, so a search that changes nothing but this line still
-     reaches a reader who cannot see the grid reflow. Implicitly polite
-     and atomic: the whole sentence is read, and not over a keystroke. -->
-<p class="count" id="count" role="status"></p>
+<div class="results-bar">
+  <!-- role=status, so a search that changes nothing but this line still
+       reaches a reader who cannot see the grid reflow. Implicitly polite
+       and atomic: the whole sentence is read, and not over a keystroke. -->
+  <p class="count" id="count" role="status"></p>
+  <label class="sort">Sort
+    <select id="sortBy">
+      <option value="name">A&ndash;Z</option>
+      <option value="newest">Newest first</option>
+    </select>
+  </label>
+</div>
 
 <div class="planner-slot" id="plannerSlot">
 <section class="planner" id="planner" aria-label="Week plan">

@@ -165,7 +165,11 @@ a { color: inherit; }
 .chip:hover { color: var(--ink); border-color: var(--accent); }
 .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-.count { color: var(--muted); font-size: 14px; margin: 14px 0 0; min-height: 1.2em; }
+.results-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px 12px; margin: 14px 0 0;
+}
+.count { color: var(--muted); font-size: 14px; margin: 0; min-height: 1.2em; }
 .empty { color: var(--muted); text-align: center; padding: 60px 0; }
 
 .grid {
