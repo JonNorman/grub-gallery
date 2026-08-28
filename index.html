@@ -10,8 +10,8 @@
 <meta property="og:title" content="Grub Gallery">
 <meta property="og:url" content="https://jonnorman.github.io/grub-gallery/">
 <meta property="og:type" content="website">
-<meta property="og:description" content="70 recipes, weekly plans and shopping lists.">
-<meta name="description" content="70 recipes, weekly plans and shopping lists.">
+<meta property="og:description" content="71 recipes, weekly plans and shopping lists.">
+<meta name="description" content="71 recipes, weekly plans and shopping lists.">
 <meta property="og:image" content="https://jonnorman.github.io/grub-gallery/og-card.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -36,6 +36,12 @@
              aria-autocomplete="list" aria-label="Search by ingredient, tag or name">
       <ul class="suggest" id="suggest" role="listbox" hidden></ul>
     </div>
+    <label class="sort">Sort
+      <select id="sortBy">
+        <option value="name">A&ndash;Z</option>
+        <option value="newest">Newest first</option>
+      </select>
+    </label>
     <button type="button" id="toggleFilters" class="btn btn--quiet btn--toggle"
             aria-expanded="false" aria-controls="filters">
       Filter<svg class="icon icon--state" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
@@ -411,6 +417,16 @@
 </div></a>
 <button class="card__add" data-slug="gorgonzola-risotto" type="button"
         aria-label="Add Gorgonzola Risotto to the week plan"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+</article><article class="card" data-slug="harissa-beef-mince-with-garlicky-yoghurt" draggable="true">
+<a class="card__link" href="harissa-beef-mince-with-garlicky-yoghurt.html" draggable="false">
+<div class="card__img"><picture><source type="image/avif" srcset="img/harissa-beef-mince-with-garlicky-yoghurt-card-320.avif 320w, img/harissa-beef-mince-with-garlicky-yoghurt-card-480.avif 480w, img/harissa-beef-mince-with-garlicky-yoghurt-card-640.avif 640w" sizes="(max-width: 560px) calc(50vw - 18px), 230px"><img loading="lazy" decoding="async" width="640" height="640" src="img/harissa-beef-mince-with-garlicky-yoghurt-card-640.jpg" srcset="img/harissa-beef-mince-with-garlicky-yoghurt-card-320.jpg 320w, img/harissa-beef-mince-with-garlicky-yoghurt-card-480.jpg 480w, img/harissa-beef-mince-with-garlicky-yoghurt-card-640.jpg 640w" sizes="(max-width: 560px) calc(50vw - 18px), 230px" alt=""></picture></div>
+<div class="card__body">
+<h2>Harissa Beef Mince with Garlicky Yoghurt</h2>
+<p class="card__meta">25m</p>
+<div class="card__detail"><p class="card__ing">beef, cucumber, flatbread, garlic, harissa, lemon, parsley, pomegranate, radish</p></div>
+</div></a>
+<button class="card__add" data-slug="harissa-beef-mince-with-garlicky-yoghurt" type="button"
+        aria-label="Add Harissa Beef Mince with Garlicky Yoghurt to the week plan"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
 </article><article class="card" data-slug="harissa-chickpeas" draggable="true">
 <a class="card__link" href="harissa-chickpeas.html" draggable="false">
 <div class="card__img"><img loading="lazy" decoding="async" width="640" height="640" src="placeholder.jpg" alt=""></div>
@@ -969,6 +985,7 @@ const shoppingEl = document.getElementById('shopping');
 const startSel = document.getElementById('startDay');
 const filtersEl = document.getElementById('filters');
 const toggleFiltersBtn = document.getElementById('toggleFilters');
+const sortSel = document.getElementById('sortBy');
 const cards = new Map([...grid.children].map(el => [el.dataset.slug, el]));
 let activeTags = new Set();
 let activeBucket = null;   // single-select: the buckets are mutually exclusive
@@ -1047,6 +1064,18 @@ function apply() {
   count.textContent = 'Showing ' + shown + ' of ' + DATA.length + ' recipes';
   empty.hidden = shown !== 0;
 }
+
+/* Separate from apply(): that toggles which cards show, on every keystroke;
+   this changes what order they show in, only when the sort pick changes.
+   The grid starts in the server-rendered order (name, A-Z), which is also
+   this function's 'name' branch, so the initial page needs no reorder pass. */
+function reorder() {
+  const sorted = [...DATA].sort((a, b) => sortSel.value === 'newest'
+    ? b.modified - a.modified
+    : a.name.localeCompare(b.name));
+  for (const rec of sorted) grid.appendChild(cards.get(rec.slug));
+}
+sortSel.addEventListener('change', reorder);
 
 /* ── suggestions ───────────────────────────────────────────────────────────
    The vocabulary is curated, which makes it precise and invisible: nothing tells

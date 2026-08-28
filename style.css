@@ -573,6 +573,12 @@ a.btn { text-decoration: none; }
 .topbar { display: block; }
 .topbar__row { display: flex; gap: 8px; align-items: center; }
 .topbar__row .find { flex: 1 1 auto; min-width: 0; }
+.sort { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; flex: none; }
+.sort select {
+  font: inherit; font-size: 13px; padding: 4px 6px;
+  color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 7px;
+}
 /* Shown only where the chips are collapsed behind it. */
 #toggleFilters { display: none; }
 
