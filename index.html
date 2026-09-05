@@ -1107,7 +1107,41 @@ function reorder() {
     : a.name.localeCompare(b.name));
   for (const rec of sorted) grid.appendChild(cards.get(rec.slug));
 }
-sortSel.addEventListener('change', reorder);
+/* The sort pick is a viewing preference, not part of the plan, so it is kept in
+   localStorage rather than in the query string.
+
+   The URL is deliberately the plan — it is the thing you copy and send — so a
+   sort riding along in it would hand your reading order to whoever you shared
+   a week with, and would leave the address dirty where an empty plan currently
+   clears it. It also would not do the job being asked of it: a query parameter
+   only survives if you come back through that exact link, and does nothing for
+   someone opening the bare address, which is what "persists between sessions"
+   means here.
+
+   A cookie would work and is worth not using: it is sent up with every request
+   to a static site that has no server to read it. */
+const SORT_KEY = 'grub-gallery:sort';
+
+const savedSort = (() => {
+  // Safari with cookies blocked throws on access rather than returning null.
+  try { return localStorage.getItem(SORT_KEY); } catch { return null; }
+})();
+
+/* Checked against the options actually rendered, so a value left over from an
+   older build falls back to the server-rendered order rather than sorting by a
+   key that no longer exists. */
+if (savedSort && [...sortSel.options].some(o => o.value === savedSort)) {
+  sortSel.value = savedSort;
+  // The grid arrives in name order, so only the other branch needs a pass.
+  if (savedSort !== 'name') reorder();
+}
+
+sortSel.addEventListener('change', () => {
+  reorder();
+  // Storage being full or blocked must not cost you the sort you just picked,
+  // which has already been applied above.
+  try { localStorage.setItem(SORT_KEY, sortSel.value); } catch { /* ignore */ }
+});
 
 /* ── suggestions ───────────────────────────────────────────────────────────
    The vocabulary is curated, which makes it precise and invisible: nothing tells
