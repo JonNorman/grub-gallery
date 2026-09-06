@@ -480,7 +480,17 @@ a.btn { text-decoration: none; }
 
 /* The thumbnail shrinks rather than vanishing — it is what makes a day
    recognisable at a glance, which is the whole reason to keep the panel. */
-.planner--planned .day__thumb {
+.planner--planned /* Transient planner feedback. :empty rather than [hidden] so the element can
+   be filled and cleared by text alone, and takes no vertical room in between —
+   a reserved empty line would push the day strip down permanently. */
+.planner__note {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.planner__note:empty { display: none; }
+
+.day__thumb {
   height: calc(66px - 30px * var(--shrink, 0));
   margin-bottom: calc(6px - 2px * var(--shrink, 0));
   transition: none;

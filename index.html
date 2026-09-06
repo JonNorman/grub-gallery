@@ -75,6 +75,13 @@
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5"/></svg>Clear</button>
   </div>
   <ol class="days" id="days"></ol>
+  <!-- Transient feedback for the planner. A live region so it is announced
+       rather than only seen, and empty by default so it takes no room until
+       there is something to say. It replaced two alert() calls, which froze
+       the page and, on iOS, announced themselves as "jonnorman.github.io
+       says" — the browser warning you about a site, which is the wrong voice
+       for "your week is full". -->
+  <p class="planner__note" id="plannerNote" role="status"></p>
   <div class="shopping" id="shopping" hidden></div>
 </section>
 </div>
@@ -1013,6 +1020,8 @@ const plannerSlot = document.getElementById('plannerSlot');
 const plannerHead = document.querySelector('.planner__head');
 const topbar = document.getElementById('topbar');
 const daysEl = document.getElementById('days');
+const plannerNote = document.getElementById('plannerNote');
+const weekViewBtn = document.getElementById('weekView');
 const shoppingEl = document.getElementById('shopping');
 const startSel = document.getElementById('startDay');
 const filtersEl = document.getElementById('filters');
@@ -1474,6 +1483,11 @@ function renderPlan() {
   // stays a drop target while you scroll the grid. How it follows differs by
   // width — pinned on a wide screen, shrunk out of flow on a narrow one.
   planner.classList.toggle('planner--planned', n > 0);
+  /* Nothing to photograph without a meal in the week. Disabled rather than
+     answered with a message after the fact: the button that cannot work is
+     better not offered than explained once it has been pressed. */
+  weekViewBtn.disabled = n === 0;
+  weekViewBtn.title = n === 0 ? 'Add a recipe to the week first' : '';
   updatePinned();
   cards.forEach((el, slug) => el.classList.toggle('is-planned',
     state.plan.includes(slug)));
@@ -1493,12 +1507,26 @@ function otherDays(slug, self, start) {
   return names;
 }
 
+/* Says something in the planner and takes it back. The same shape as the
+   Copied label on the shopping list, given longer because this is a sentence
+   to read rather than a word to glance at.
+
+   A live region rather than alert(): it does not freeze the page, it takes the
+   site's own type and colours including dark mode, and it is announced as part
+   of the page instead of as the browser interrupting on the page's behalf. */
+let noteTimer = null;
+function notify(message) {
+  plannerNote.textContent = message;
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => { plannerNote.textContent = ''; }, 5000);
+}
+
 function addToPlan(slug) {
   // indexOf(null) skips over both filled days and skipped ones, since a skipped
   // day holds SKIPPED rather than null.
   const i = state.plan.indexOf(null);
   if (i === -1) {
-    alert('No free days left — remove a meal or unskip a day first.');
+    notify('No free days left — remove a meal or unskip a day first.');
     return false;
   }
   state.plan[i] = slug;
@@ -2098,11 +2126,10 @@ async function renderWeek() {
 
 let weekCanvas = null;
 
-document.getElementById('weekView').addEventListener('click', async () => {
-  if (!state.plan.some(Boolean)) {
-    alert('Add some recipes to the week first.');
-    return;
-  }
+weekViewBtn.addEventListener('click', async () => {
+  // Belt and braces: the button is disabled with an empty week, so this only
+  // guards a plan emptied between render and click.
+  if (!state.plan.some(Boolean)) return;
   await renderWeek();
   /* Set while the view is open so Cmd-P prints the picture rather than the
      page. Without the guard, printing anywhere else on the index would come
