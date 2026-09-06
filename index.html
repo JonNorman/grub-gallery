@@ -1453,6 +1453,26 @@ function renderPlan() {
       x.setAttribute('aria-label', 'Remove ' + rec.name);
       x.addEventListener('click', () => { state.plan[i] = null; save(); renderPlan(); });
       li.appendChild(x);
+      /* The whole cell is the same trigger as its title — tapping the photo,
+         the day name or the space beside them opens the recipe, because on a
+         phone the title is a thin line of text in a 74px cell and everything
+         around it looked tappable and was not.
+
+         The cell forwards to the anchor rather than becoming a button around
+         it: a <button> wrapping a link and another button is invalid, and it
+         would take the link off the keyboard path. So the anchor stays the
+         accessible element and this only widens where a pointer may land.
+
+         The x is excluded so removing a meal still removes it, and the anchor
+         is excluded because it already handles its own click — without that
+         the modal would be opened twice for one tap. */
+      li.addEventListener('click', ev => {
+        if (ev.target.closest('.day__x, .day__recipe')) return;
+        // A modified click has nowhere to go from the cell background; the
+        // anchor is what carries the href, so leave those to it.
+        if (ev.metaKey || ev.ctrlKey || ev.shiftKey) return;
+        openModal(slug);
+      });
     } else {
       // An unfilled day toggles between free and skipped. A day with a meal in
       // it does not — removing that is what the × is for, so a stray tap cannot

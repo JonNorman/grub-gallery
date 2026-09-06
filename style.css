@@ -406,7 +406,11 @@ a.btn { text-decoration: none; }
   border-radius: 10px;
   font-size: 13px;
 }
-.day--full { border-style: solid; background: var(--day-planned); border-color: transparent; }
+.day--full {
+  border-style: solid; background: var(--day-planned); border-color: transparent;
+  /* The whole cell opens the recipe, so the whole cell says so. */
+  cursor: pointer;
+}
 .day__name { display: block; color: var(--muted); font-size: 11px;
              text-transform: uppercase; letter-spacing: .05em; }
 .day__recipe { display: block; margin-top: 4px; color: var(--ink);
