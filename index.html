@@ -1159,15 +1159,43 @@ function currentWord() {
   return upto.split(/[\s,]+/).pop().toLowerCase();
 }
 
+/* Recipe names are suggested too, which the header has always promised —
+   "an ingredient, a tag or a name" — and the filter has always honoured, since
+   SEARCH_TEXT includes the title. Only the suggestion list did not, so typing
+   "bolognese" filtered correctly while looking like it had matched nothing.
+
+   They get their own reserved slots rather than joining the same pool. The
+   ingredient vocabulary is the reason the box suggests at all: it is curated,
+   so nothing tells you the collection files everything under "chickpeas" until
+   a search comes back empty. Seventy-odd titles thrown in flat would bury that
+   on any common substring — "co" alone is in a third of them. */
+const TITLES = DATA.map(r => r.name);
+const SUGGEST_LIMIT = 8;
+const TITLE_SLOTS = 3;
+
+function rank(pool, word) {
+  const starts = [], contains = [];
+  for (const term of pool) {
+    // Titles carry capitals and apostrophes; the vocabulary does not. Compared
+    // folded, offered as written.
+    const t = term.toLowerCase();
+    if (t === word) continue;
+    if (t.startsWith(word)) starts.push(term);
+    else if (t.includes(word)) contains.push(term);
+  }
+  return [...starts, ...contains];
+}
+
 function matchesFor(word) {
   if (!word) return [];
-  const starts = [], contains = [];
-  for (const term of SUGGESTIONS) {
-    if (term === word) continue;
-    if (term.startsWith(word)) starts.push(term);
-    else if (term.includes(word)) contains.push(term);
-  }
-  return [...starts, ...contains].slice(0, 8);
+  const terms = rank(SUGGESTIONS, word);
+  const titles = rank(TITLES, word);
+  /* Whichever pool is short hands its slots to the other, so a word matching
+     no ingredient still fills the list with recipes, and a word matching no
+     recipe still gets eight ingredients. */
+  const keptTitles = titles.slice(
+    0, Math.max(TITLE_SLOTS, SUGGEST_LIMIT - terms.length));
+  return [...terms.slice(0, SUGGEST_LIMIT - keptTitles.length), ...keptTitles];
 }
 
 function hideSuggestions() {
