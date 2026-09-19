@@ -1798,6 +1798,26 @@ const doneKeys = new Set((() => {
   } catch { return []; }  // blocked storage, or nothing there
 })());
 
+/* A tick for an ingredient the list does not currently hold is unreachable:
+   nothing draws it, so nothing can untick it, and Reset only offers itself
+   when something ticked is on screen. It is invisible state whose only effect
+   is to surface weeks later as an ingredient that starts out in Completed for
+   no reason anyone can see — which is worse than forgetting it, because the
+   only way to clear it is to plan that recipe again just to untick it.
+
+   So the list prunes as it draws: what is not on it is not remembered. Ticks
+   survive a refresh, and survive changing one meal in a week, because their
+   ingredients are still on the list. They do not survive the list moving on. */
+function pruneTicks(keys) {
+  const live = new Set(keys);
+  let dropped = false;
+  for (const key of doneKeys) {
+    if (!live.has(key)) { doneKeys.delete(key); dropped = true; }
+  }
+  // Only when something actually went, so drawing the list is not a write.
+  if (dropped) saveTicks();
+}
+
 function saveTicks() {
   // A tick that cannot be stored is still a tick: the failure costs the refresh,
   // not the click, so it is swallowed rather than surfaced mid-shop.
@@ -2055,10 +2075,15 @@ function formatDate(d, opts) { return d.toLocaleDateString('en-GB', opts); }
 function renderShopping() {
   const planned = plannedRecipes();
   if (!planned.length) {
+    // An empty plan holds no ingredients, so it remembers no ticks. This is
+    // the path Clear plan takes, and starting the next week half ticked off
+    // is exactly the surprise being avoided.
+    pruneTicks([]);
     shoppingEl.innerHTML = '<p class="shopping__empty">Add some recipes first.</p>';
     return;
   }
   const { groups, keys } = shoppingGroups(planned);
+  pruneTicks(keys);
   const todo = keys.filter(k => !doneKeys.has(k));
   const done = keys.filter(k => doneKeys.has(k));
 
