@@ -875,9 +875,13 @@ each amount. Quantities are listed rather than summed up — you can take a view
 as to how much of everything you need. Salt, pepper, oil and
 water are left out.</p>
 <p>Tick items off as you shop and they drop into <strong>Completed</strong> at
-the bottom, so what is left stays short. <strong>Print</strong> gives a paper
-copy, and <strong>Copy</strong> puts it on the clipboard as plain text for a
-message or a notes app.</p>
+the bottom, so what is left stays short. Ticks are remembered on this device, so
+closing the page or locking the phone mid-shop does not lose them.
+<strong>Reset</strong> lifts them all at once and can be undone with
+<kbd data-key="undo">&#8984;Z</kbd> if you did not mean it.</p>
+<p><strong>Print</strong> gives a paper copy, and <strong>Copy</strong> puts the
+list on the clipboard as plain text for a message or a notes app — only the
+items still to get, so what you send is what is left to buy.</p>
 
 <h3>Sending a week plan summary</h3>
 <p><strong>Print view</strong> Provides an image of the week plan that can then
@@ -898,6 +902,8 @@ The tag buttons below filter by things like meal, diet, wait times and baby suit
 anywhere.</p>
 <p><kbd data-key="help">&#8984;/</kbd> opens this help page and closes it
 again.</p>
+<p><kbd data-key="undo">&#8984;Z</kbd> undoes a shopping list
+<strong>Reset</strong>, while the list is open.</p>
 <p><kbd>Esc</kbd> closes whatever is open on the page.</p>
 <p>Tooltips and keyboard shortcuts are shown on the buttons themselves if you hover over.</p>
 </div>
@@ -1619,11 +1625,15 @@ helpModal.addEventListener('click', e => { if (e.target === helpModal) helpModal
    Every shortcut carries the platform's command modifier, so nothing has to
    tell typing apart from a command and the search box needs no special case.
 
-   Only search is bound. It is the one thing done over and over; print view and
-   the shopping list are a single click each, and there is no third letter
-   combination free across browsers -- cmd+L is the address bar, cmd+W closes
-   the tab, cmd+H hides the app where no page can intercept it, and alt+letter
-   is the menu mnemonic on Windows.
+   Only search, help and undo are bound. Search is the one thing done over and
+   over; print view and the shopping list are a single click each, and there is
+   no fourth letter combination free across browsers -- cmd+L is the address
+   bar, cmd+W closes the tab, cmd+H hides the app where no page can intercept
+   it, and alt+letter is the menu mnemonic on Windows.
+
+   Undo is the exception to all of that: it is not our shortcut to choose. It
+   already means undo everywhere, so the only question is whether this page has
+   anything to undo when it is pressed, and it is taken only then.
 
    Matching the platform's own modifier rather than accepting either: ctrl+K
    deletes to end of line in a macOS text field, which is not ours to break.
@@ -1633,6 +1643,7 @@ const IS_MAC = /mac/i.test(
 const KEYS = {
   search: IS_MAC ? '\u2318K' : 'Ctrl+K',
   help: IS_MAC ? '\u2318/' : 'Ctrl+/',
+  undo: IS_MAC ? '\u2318Z' : 'Ctrl+Z',
 };
 const dialogOpen = () => !!document.querySelector('dialog[open]');
 
@@ -1661,8 +1672,24 @@ document.addEventListener('keydown', e => {
     e.preventDefault();
     if (helpModal.open) helpModal.close();
     else if (!dialogOpen()) openHelp();
+  } else if (!e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
+    /* Every condition here is a reason to leave the keystroke alone rather
+       than a reason to act: shift+cmd+Z is redo, a text field has its own undo
+       stack that is far more likely to be what was meant, a dialog is in front
+       of the list, a closed list would swallow the key and change nothing
+       anyone can see, and with an empty stack there is simply nothing of ours
+       to undo. Only past all of those is the key ours to take. */
+    if (isTyping(e.target) || dialogOpen() || shoppingEl.hidden) return;
+    if (!shoppingUndo.length) return;
+    e.preventDefault();
+    undoReset();
   }
 });
+
+function isTyping(el) {
+  return !!el && (el.isContentEditable ||
+    /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
+}
 
 // Written in rather than hardcoded in the markup: the same page is read on a
 // Mac and on Windows, and a shortcut printed with the wrong modifier is worse
@@ -1744,7 +1771,49 @@ document.getElementById('clearPlan').addEventListener('click', () => {
 });
 
 const PRINT_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>';
+const RESET_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5v6h6"/><path d="M3.5 13a9 9 0 1 0 2.2-7.1L3 9"/></svg>';
 const COPY_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+
+/* Ticked ingredients drop into a Completed section so the working list stays
+   short.
+
+   Kept in localStorage rather than in the URL. The URL is the plan — the thing
+   you copy and send — and half a shop already done is nobody else's business;
+   it would also mean a tick rewriting the address on every tap. But it does
+   have to outlive the page: a shop is done one-handed over twenty minutes, and
+   a phone locking the screen or a browser dropping a backgrounded tab is a
+   refresh, which was losing the lot.
+
+   Ticks are stored by ingredient rather than against a particular plan, which
+   is the same grain the list itself works at: change one meal and the twelve
+   things you have already picked up are still in the trolley. */
+const TICKS_KEY = 'grub-gallery:ticked';
+
+const doneKeys = new Set((() => {
+  try {
+    const raw = JSON.parse(localStorage.getItem(TICKS_KEY));
+    // Anything but an array of strings is treated as absent: this is parsing
+    // storage that another version of the page wrote, not our own variable.
+    return Array.isArray(raw) ? raw.filter(k => typeof k === 'string') : [];
+  } catch { return []; }  // blocked storage, or nothing there
+})());
+
+function saveTicks() {
+  // A tick that cannot be stored is still a tick: the failure costs the refresh,
+  // not the click, so it is swallowed rather than surfaced mid-shop.
+  try { localStorage.setItem(TICKS_KEY, JSON.stringify([...doneKeys])); }
+  catch { /* ignore */ }
+}
+
+/* Reset clears every tick at once, which is the one action here that can lose
+   real work — a mis-tapped Reset halfway round a shop throws away an hour of
+   ticking, and nothing else on the page can put it back. So each reset stacks
+   the set it replaced, and the platform's undo shortcut pops it.
+
+   In memory only, unlike the ticks themselves: undo is a second thought about
+   something you just did, and a Reset from last week offering itself back on a
+   fresh page is a trap rather than a safety net. */
+const shoppingUndo = [];
 
 /* The list as plain text, for pasting into a message or a notes app.
 
@@ -1755,11 +1824,18 @@ const COPY_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="cur
    Parmesan" should not print it twice.
 
    Recipe names are dropped here although the panel shows them: at the shelf you
-   need the amount, not which dish it came from, and they double the length. */
+   need the amount, not which dish it came from, and they double the length.
+
+   Only what is still outstanding goes in. The copy is taken to be acted on —
+   sent to whoever is at the shop, or pasted into a notes app to work through —
+   and an already-ticked ingredient in it is something bought twice. Returns
+   nothing at all when the list is clear, which the caller says out loud. */
 function shoppingText() {
   const planned = plannedRecipes();
   if (!planned.length) return '';
   const { groups, keys } = shoppingGroups(planned);
+  const todo = keys.filter(k => !doneKeys.has(k));
+  if (!todo.length) return '';
   const days = plannedDays();
   const first = days[0].date, last = days[6].date;
   const sameMonth = first.getMonth() === last.getMonth();
@@ -1768,7 +1844,7 @@ function shoppingText() {
 
   const lines = ['Shopping list — ' + range +
     ' (' + planned.length + (planned.length === 1 ? ' meal)' : ' meals)'), ''];
-  for (const key of keys) {
+  for (const key of todo) {
     // Every line is kept, including identical ones. Quantities are not summed,
     // so the repetition is the total: two recipes each wanting 45g Parmesan
     // means 90g, and collapsing them to one line says 45g.
@@ -1784,37 +1860,68 @@ function shoppingText() {
   return lines.join('\n');
 }
 
-let copyResetTimer = null;
+// Keyed by button, because a flash left running on one must not be cancelled
+// by a flash on its neighbour and leave the first stuck showing a word.
+const flashTimers = new WeakMap();
+
+/* Answers a click on the button that was clicked: the label becomes a word for
+   a moment, then the icon comes back. */
+function flash(btn, label) {
+  // Stash the pristine label once. Reading it at click time means a second
+  // click inside the feedback window captures "Copied" as the thing to
+  // restore, and the icon never comes back.
+  if (!btn.dataset.label) btn.dataset.label = btn.innerHTML;
+  btn.textContent = label;
+  clearTimeout(flashTimers.get(btn));
+  flashTimers.set(btn, setTimeout(() => { btn.innerHTML = btn.dataset.label; }, 1800));
+}
 
 async function copyList(btn) {
   const text = shoppingText();
-  if (!text) return;
-  const done = () => {
-    // Stash the pristine label once. Reading it at click time means a second
-    // click inside the feedback window captures "Copied" as the thing to
-    // restore, and the icon never comes back.
-    if (!btn.dataset.label) btn.dataset.label = btn.innerHTML;
-    btn.textContent = 'Copied';
-    clearTimeout(copyResetTimer);
-    copyResetTimer = setTimeout(() => { btn.innerHTML = btn.dataset.label; }, 1800);
-  };
+  // Everything is ticked off. Copying a heading with nothing under it looks
+  // exactly like a copy that failed, so nothing goes on the clipboard and the
+  // button says why.
+  if (!text) { flash(btn, 'Nothing left'); return; }
   try {
     await navigator.clipboard.writeText(text);
-    done();
+    flash(btn, 'Copied');
   } catch (e) {
     // clipboard needs a secure context, which file:// is not
     window.prompt('Copy the shopping list:', text);
   }
 }
 
+function resetList() {
+  if (!doneKeys.size) return;
+  /* Ticks still inside their settle window would land after the reset and put
+     their ingredient straight back into Completed. */
+  for (const t of pendingTicks.values()) clearTimeout(t);
+  pendingTicks.clear();
+  shoppingUndo.push(new Set(doneKeys));
+  doneKeys.clear();
+  saveTicks();
+  doneOpen = false;
+  renderShopping();
+}
+
+function undoReset() {
+  const prev = shoppingUndo.pop();
+  if (!prev) return;
+  /* Added to rather than swapped in. Ticking on after a reset and then undoing
+     is rare, but an undo that threw those ticks away would be losing work in
+     the one gesture people reach for to get work back. */
+  for (const key of prev) doneKeys.add(key);
+  saveTicks();
+  // Opened, so the restored ingredients are visible where they went rather
+  // than only implied by a count.
+  doneOpen = true;
+  renderShopping();
+}
+
 /* The list is rebuilt on every open, so its Print button is bound by delegation
    rather than re-wired each time. Print styles are gated on a class, cleared on
    afterprint — without that the class would outlive the dialog and quietly
    blank the next print of anything else. */
-/* Ticked ingredients drop into a Completed section so the working list stays
-   short. Ephemeral by design: this is shopping state, not plan state, and the
-   plan is the thing that gets shared and stored. */
-const doneKeys = new Set();
 const pendingTicks = new Map();
 let doneOpen = false;
 
@@ -1834,6 +1941,7 @@ shoppingEl.addEventListener('change', e => {
   pendingTicks.set(key, setTimeout(() => {
     pendingTicks.delete(key);
     ticked ? doneKeys.add(key) : doneKeys.delete(key);
+    saveTicks();
     renderShopping();
   }, 300));
 });
@@ -1845,6 +1953,7 @@ shoppingEl.addEventListener('toggle', e => {
 shoppingEl.addEventListener('click', e => {
   const copy = e.target.closest('#copyList');
   if (copy) { copyList(copy); return; }
+  if (e.target.closest('#resetList')) { resetList(); return; }
   if (!e.target.closest('#printList')) return;
   // A collapsed <details> prints nothing, and a printed list missing whatever
   // you already ticked is worse than useless.
@@ -1970,7 +2079,15 @@ function renderShopping() {
     '<button type="button" class="btn btn--quiet" id="copyList">' +
     COPY_ICON + 'Copy</button>' +
     '<button type="button" class="btn btn--quiet" id="printList">' +
-    PRINT_ICON + 'Print</button></span></h3>';
+    PRINT_ICON + 'Print</button>' +
+    // Absent rather than disabled while nothing is ticked: it would be a
+    // button that never does anything for anyone who has not started shopping.
+    (done.length
+      ? '<button type="button" class="btn btn--quiet" id="resetList" title="' +
+        'Clear every tick (' + KEYS.undo + ' to undo)">' +
+        RESET_ICON + 'Reset</button>'
+      : '') +
+    '</span></h3>';
 
   html += '<ul>' + todo.map(item).join('') + '</ul>';
   if (!todo.length) html += '<p class="shopping__cleared">Everything ticked off.</p>';
