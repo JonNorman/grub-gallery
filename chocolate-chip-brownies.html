@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chocolate Chip Brownies · Grub Gallery</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A5%98%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<meta property="og:site_name" content="Grub Gallery">
+<meta property="og:title" content="Chocolate Chip Brownies">
+<meta property="og:url" content="https://jonnorman.github.io/grub-gallery/chocolate-chip-brownies.html">
+<meta property="og:type" content="article">
+<meta property="og:image" content="https://jonnorman.github.io/grub-gallery/img/chocolate-chip-brownies-1600.jpg">
+<meta property="og:image:width" content="1600">
+<meta property="og:image:height" content="900">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+<main class="recipe"><header><a class="back" href="index.html">&larr; All recipes</a><h1 id="recipeTitle">Chocolate Chip Brownies</h1><p class="meta">Makes 16 · 45m · plus 1-2h waiting</p><p class="tags"><span class="tag">vegetarian</span><span class="tag">snack</span><span class="tag">dessert</span></p></header>
+<div class="wake">
+<button class="btn btn--quiet wake__btn" type="button" data-wake aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/><path d="M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><span data-wake-label>Keep screen awake</span></button>
+</div>
+<picture><source type="image/avif" srcset="img/chocolate-chip-brownies-800.avif 800w, img/chocolate-chip-brownies-1600.avif 1600w" sizes="(max-width: 500px) calc(100vw - 40px), (max-width: 940px) 92vw, (max-width: 1200px) calc(940px - 8vw), 844px"><img class="hero" width="1600" height="900" fetchpriority="high" src="img/chocolate-chip-brownies-1600.jpg" srcset="img/chocolate-chip-brownies-800.jpg 800w, img/chocolate-chip-brownies-1600.jpg 1600w" sizes="(max-width: 500px) calc(100vw - 40px), (max-width: 940px) 92vw, (max-width: 1200px) calc(940px - 8vw), 844px" decoding="async" alt="Chocolate Chip Brownies"></picture>
+<p class="before"><strong>Before you start</strong> heat the oven to 160°C fan and grease a 28 x 18cm tin. They have to cool completely in the tin before they can be cut.</p>
+<div class="columns">
+<section class="ing"><h2>Ingredients</h2><ul class="ingredients"><li><label><input type="checkbox"><span>100g butter or margarine</span></label></li><li><label><input type="checkbox"><span>50g dark chocolate</span></label></li><li><label><input type="checkbox"><span>175g dark soft brown sugar</span></label></li><li><label><input type="checkbox"><span>2 medium eggs, beaten</span></label></li><li><label><input type="checkbox"><span>½ tsp vanilla extract</span></label></li><li><label><input type="checkbox"><span>100g self-raising flour</span></label></li><li><label><input type="checkbox"><span>Pinch of salt</span></label></li><li><label><input type="checkbox"><span>50g chocolate chips</span></label></li></ul></section>
+<section class="meth"><h2>Method</h2><ol class="method" start="1"><li>Heat the oven to 160°C fan and grease a 28 x 18cm tin.</li><li>Melt the <strong>100g butter or margarine</strong> and the <strong>50g dark chocolate</strong> together over hot water, then take off the heat and leave to cool.</li><li>Stir in the <strong>175g dark soft brown sugar</strong>.</li><li>Mix the <strong>2 beaten eggs</strong> with the <strong>½ tsp vanilla extract</strong>, then add to the mixture.</li><li>Mix in the <strong>100g self-raising flour</strong>, a <strong>pinch of salt</strong> and the <strong>50g chocolate chips</strong>.</li><li>Pour into the tin and bake at 160°C fan for 25-30 minutes, until the top is crispy and the inside still soft.</li><li>Leave in the tin until completely cold before cutting into squares.</li></ol></section>
+</div>
+<section class="notes"><h2>Notes</h2><p>The original uses 50g chopped walnuts where this has chocolate chips.</p></section>
+<p class="source">Source: <a href="https://www.be-ro.co.uk/recipes/brownies/" rel="noreferrer">https://www.be-ro.co.uk/recipes/brownies/</a></p></main>
+<script>
+/*
+ * Screen Wake Lock — the "keep screen awake" button on every recipe.
+ *
+ * The browser hands back a sentinel it is free to take away: hiding the page,
+ * by switching apps, locking the phone or changing tab, releases the lock and
+ * it does not come back on its own. So intent and lock are tracked separately.
+ * wakeWanted is what the cook asked for, and is what the button paints from;
+ * wakeSentinel is what we actually hold at this instant.
+ */
+let wakeWanted = false;
+let wakeSentinel = null;
+let wakeAcquiring = false;
+
+if ('wakeLock' in navigator) {
+  /*
+   * Marked on the root rather than on each button. The modal injects its own
+   * copy of the recipe markup long after this runs, so a reveal that walked the
+   * buttons present now would miss it — and reaching into openModal() would put
+   * knowledge of the modal in a file that otherwise has none.
+   */
+  document.documentElement.classList.add('has-wakelock');
+}
+
+function paintWake() {
+  document.querySelectorAll('[data-wake]').forEach(btn => {
+    btn.setAttribute('aria-pressed', String(wakeWanted));
+    btn.querySelector('[data-wake-label]').textContent =
+      wakeWanted ? 'Screen staying awake' : 'Keep screen awake';
+  });
+}
+
+async function acquireWake() {
+  // A tap and a return to visibility can both ask while a request is still in
+  // flight. A second one would strand the first sentinel: wakeSentinel holds
+  // whichever lands last, and nothing is left holding a reference to release
+  // the other — a screen kept awake by a lock no button can reach.
+  if (wakeAcquiring) return;
+  wakeAcquiring = true;
+  try {
+    wakeSentinel = null;
+    let held = null;
+    try {
+      held = await navigator.wakeLock.request('screen');
+    } catch {
+      // Refused — battery saver, or the page lost visibility mid-request. The
+      // button must not claim a lock we did not get.
+      wakeWanted = false;
+    }
+    // The request is asynchronous, so the button may have been tapped off while
+    // it was in flight. Honour the latest intent, not the one that started it.
+    if (held && !wakeWanted) {
+      try { await held.release(); } catch {}
+      held = null;
+    }
+    wakeSentinel = held;
+    if (held) held.addEventListener('release', onWakeRelease);
+  } finally {
+    wakeAcquiring = false;
+    paintWake();
+  }
+}
+
+async function releaseWake() {
+  wakeWanted = false;
+  const held = wakeSentinel;
+  wakeSentinel = null;
+  paintWake();
+  if (held) {
+    held.removeEventListener('release', onWakeRelease);
+    try { await held.release(); } catch {}
+  }
+}
+
+function onWakeRelease() {
+  wakeSentinel = null;
+  /*
+   * Hidden means the OS took the lock while the cook was elsewhere: the intent
+   * stands and visibilitychange asks for it back. Visible means we lost it with
+   * the page in front of them, and a button still reading "on" would be
+   * promising a screen we are no longer holding awake.
+   */
+  if (document.visibilityState === 'visible') {
+    wakeWanted = false;
+    paintWake();
+  }
+}
+
+// Delegated, so one registration covers the button baked into a recipe page and
+// the one the modal injects later, without either surface being a special case.
+document.addEventListener('click', e => {
+  if (!e.target.closest?.('[data-wake]')) return;
+  if (wakeWanted) releaseWake();
+  else { wakeWanted = true; acquireWake(); }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (wakeWanted && !wakeSentinel && document.visibilityState === 'visible') {
+    acquireWake();
+  }
+});
+</script></body>
+</html>
