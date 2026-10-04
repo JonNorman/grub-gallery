@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sesame and Miso Cookies · Grub Gallery</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A5%98%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<meta property="og:site_name" content="Grub Gallery">
+<meta property="og:title" content="Sesame and Miso Cookies">
+<meta property="og:url" content="https://jonnorman.github.io/grub-gallery/sesame-and-miso-cookies.html">
+<meta property="og:type" content="article">
+<meta property="og:description" content="Chewy cookies with tahini, white miso and white chocolate, rolled in sesame seeds.">
+<meta name="description" content="Chewy cookies with tahini, white miso and white chocolate, rolled in sesame seeds.">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+<main class="recipe"><header><a class="back" href="index.html">&larr; All recipes</a><h1 id="recipeTitle">Sesame and Miso Cookies</h1><p class="meta">Makes 20 · 1h05m · plus 2-12h waiting</p><p class="tags"><span class="tag">vegetarian</span><span class="tag">snack</span><span class="tag">dessert</span></p><p class="lede">Chewy cookies with tahini, white miso and white chocolate, rolled in sesame seeds.</p></header>
+<div class="wake">
+<button class="btn btn--quiet wake__btn" type="button" data-wake aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/><path d="M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><span data-wake-label>Keep screen awake</span></button>
+</div>
+
+<p class="before"><strong>Before you start</strong> needs at least 2 hours chilling, preferably overnight, before baking.</p>
+<div class="columns">
+<section class="ing"><h2>Ingredients</h2><ul class="ingredients"><li><label><input type="checkbox"><span>225g unsalted butter, softened</span></label></li><li><label><input type="checkbox"><span>200g light muscovado sugar</span></label></li><li><label><input type="checkbox"><span>100g caster sugar</span></label></li><li><label><input type="checkbox"><span>2 tbsp tahini</span></label></li><li><label><input type="checkbox"><span>2 tbsp white miso paste</span></label></li><li><label><input type="checkbox"><span>1 medium free-range egg</span></label></li><li><label><input type="checkbox"><span>1 medium free-range egg white</span></label></li><li><label><input type="checkbox"><span>325g plain flour</span></label></li><li><label><input type="checkbox"><span>1 tsp bicarbonate of soda</span></label></li><li><label><input type="checkbox"><span>½ tsp fine sea salt</span></label></li><li><label><input type="checkbox"><span>¼ tsp ground cinnamon</span></label></li><li><label><input type="checkbox"><span>200g white chocolate, roughly chopped</span></label></li><li><label><input type="checkbox"><span>75g sesame seeds</span></label></li><li><label><input type="checkbox"><span>Sea salt flakes, for sprinkling</span></label></li></ul></section>
+<section class="meth"><h2>Method</h2><h3>To make the dough</h3><ol class="method" start="1"><li>In a large bowl, use an electric hand mixer (or a stand mixer) to beat together the <strong>225g unsalted butter</strong>, <strong>200g light muscovado sugar</strong> and <strong>100g caster sugar</strong> for 2-3 minutes until light.</li><li>Add the <strong>2 tbsp tahini</strong>, <strong>2 tbsp white miso paste</strong>, <strong>1 egg</strong> and <strong>1 egg white</strong>, and mix again until smooth.</li><li>Sift in the <strong>325g plain flour</strong>, <strong>1 tsp bicarbonate of soda</strong>, <strong>½ tsp fine sea salt</strong> and <strong>¼ tsp ground cinnamon</strong>, and mix until just combined.</li><li>Stir in the <strong>200g white chocolate</strong> until combined.</li><li>Cover the bowl and chill the dough for at least 2 hours, preferably overnight.</li></ol><h3>To bake</h3><ol class="method" start="6"><li>Heat the oven to 160°C fan and line 2 large baking sheets with baking parchment.</li><li>Roll the chilled dough into even-sized balls of 55-60g each.</li><li>Tip the <strong>75g sesame seeds</strong> onto a tray or into a large shallow bowl and roll each ball in them to coat.</li><li>Place 5-6 balls on each lined sheet, leaving plenty of space for them to spread. Flatten each slightly with your fingers and sprinkle with a pinch of <strong>sea salt flakes</strong>.</li><li>Bake at 160°C fan for 16-18 minutes until golden.</li><li>Sharply tap the underside of each sheet on the work surface to slightly deflate the cookies.</li><li>Leave to cool for 5 minutes on the sheets, then transfer to a cooling rack.</li><li>Repeat with the remaining dough.</li></ol></section>
+</div>
+<section class="notes"><h2>Notes</h2><ul><li>Two sheets of 5-6 take about half the dough, so the 20 cookies bake in two batches — hence the 40 minutes of cooking.</li><li>Transcribed from a Waitrose magazine page (p.104); it gave 180°C, gas mark 4, written here as 160°C fan.</li></ul></section>
+<p class="source">Source: Waitrose, p.104</p></main>
+<script>
+/*
+ * Screen Wake Lock — the "keep screen awake" button on every recipe.
+ *
+ * The browser hands back a sentinel it is free to take away: hiding the page,
+ * by switching apps, locking the phone or changing tab, releases the lock and
+ * it does not come back on its own. So intent and lock are tracked separately.
+ * wakeWanted is what the cook asked for, and is what the button paints from;
+ * wakeSentinel is what we actually hold at this instant.
+ */
+let wakeWanted = false;
+let wakeSentinel = null;
+let wakeAcquiring = false;
+
+if ('wakeLock' in navigator) {
+  /*
+   * Marked on the root rather than on each button. The modal injects its own
+   * copy of the recipe markup long after this runs, so a reveal that walked the
+   * buttons present now would miss it — and reaching into openModal() would put
+   * knowledge of the modal in a file that otherwise has none.
+   */
+  document.documentElement.classList.add('has-wakelock');
+}
+
+function paintWake() {
+  document.querySelectorAll('[data-wake]').forEach(btn => {
+    btn.setAttribute('aria-pressed', String(wakeWanted));
+    btn.querySelector('[data-wake-label]').textContent =
+      wakeWanted ? 'Screen staying awake' : 'Keep screen awake';
+  });
+}
+
+async function acquireWake() {
+  // A tap and a return to visibility can both ask while a request is still in
+  // flight. A second one would strand the first sentinel: wakeSentinel holds
+  // whichever lands last, and nothing is left holding a reference to release
+  // the other — a screen kept awake by a lock no button can reach.
+  if (wakeAcquiring) return;
+  wakeAcquiring = true;
+  try {
+    wakeSentinel = null;
+    let held = null;
+    try {
+      held = await navigator.wakeLock.request('screen');
+    } catch {
+      // Refused — battery saver, or the page lost visibility mid-request. The
+      // button must not claim a lock we did not get.
+      wakeWanted = false;
+    }
+    // The request is asynchronous, so the button may have been tapped off while
+    // it was in flight. Honour the latest intent, not the one that started it.
+    if (held && !wakeWanted) {
+      try { await held.release(); } catch {}
+      held = null;
+    }
+    wakeSentinel = held;
+    if (held) held.addEventListener('release', onWakeRelease);
+  } finally {
+    wakeAcquiring = false;
+    paintWake();
+  }
+}
+
+async function releaseWake() {
+  wakeWanted = false;
+  const held = wakeSentinel;
+  wakeSentinel = null;
+  paintWake();
+  if (held) {
+    held.removeEventListener('release', onWakeRelease);
+    try { await held.release(); } catch {}
+  }
+}
+
+function onWakeRelease() {
+  wakeSentinel = null;
+  /*
+   * Hidden means the OS took the lock while the cook was elsewhere: the intent
+   * stands and visibilitychange asks for it back. Visible means we lost it with
+   * the page in front of them, and a button still reading "on" would be
+   * promising a screen we are no longer holding awake.
+   */
+  if (document.visibilityState === 'visible') {
+    wakeWanted = false;
+    paintWake();
+  }
+}
+
+// Delegated, so one registration covers the button baked into a recipe page and
+// the one the modal injects later, without either surface being a special case.
+document.addEventListener('click', e => {
+  if (!e.target.closest?.('[data-wake]')) return;
+  if (wakeWanted) releaseWake();
+  else { wakeWanted = true; acquireWake(); }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (wakeWanted && !wakeSentinel && document.visibilityState === 'visible') {
+    acquireWake();
+  }
+});
+</script></body>
+</html>
