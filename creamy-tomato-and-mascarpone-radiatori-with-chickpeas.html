@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Creamy Tomato and Mascarpone Radiatori with Chickpeas · Grub Gallery</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A5%98%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<meta property="og:site_name" content="Grub Gallery">
+<meta property="og:title" content="Creamy Tomato and Mascarpone Radiatori with Chickpeas">
+<meta property="og:url" content="https://jonnorman.github.io/grub-gallery/creamy-tomato-and-mascarpone-radiatori-with-chickpeas.html">
+<meta property="og:type" content="article">
+<meta property="og:description" content="Radiatori and chickpeas in a white wine and passata sauce made creamy with mascarpone and Parmesan.">
+<meta name="description" content="Radiatori and chickpeas in a white wine and passata sauce made creamy with mascarpone and Parmesan.">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+<main class="recipe"><header><a class="back" href="index.html">&larr; All recipes</a><h1 id="recipeTitle">Creamy Tomato and Mascarpone Radiatori with Chickpeas</h1><p class="meta">Serves 3-4 · 25m</p><p class="tags"><span class="tag">vegetarian</span><span class="tag">pasta</span><span class="tag">chickpeas</span><span class="tag">cheese</span><span class="tag">dinner</span></p><p class="lede">Radiatori and chickpeas in a white wine and passata sauce made creamy with mascarpone and Parmesan.</p></header>
+<div class="wake">
+<button class="btn btn--quiet wake__btn" type="button" data-wake aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/><path d="M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><span data-wake-label>Keep screen awake</span></button>
+</div>
+
+
+<div class="columns">
+<section class="ing"><h2>Ingredients</h2><ul class="ingredients"><li><label><input type="checkbox"><span>300g radiatori</span></label></li><li><label><input type="checkbox"><span>Olive oil, a good glug</span></label></li><li><label><input type="checkbox"><span>½ red onion, very finely chopped</span></label></li><li><label><input type="checkbox"><span>3 garlic cloves, crushed</span></label></li><li><label><input type="checkbox"><span>A good splash of white wine</span></label></li><li><label><input type="checkbox"><span>400ml passata</span></label></li><li><label><input type="checkbox"><span>125g mascarpone</span></label></li><li><label><input type="checkbox"><span>A handful of basil, chopped</span></label></li><li><label><input type="checkbox"><span>45g Parmesan, grated, plus extra to serve</span></label></li><li><label><input type="checkbox"><span>1 x 400g tin of chickpeas, drained and rinsed</span></label></li><li><label><input type="checkbox"><span>Salt</span></label></li></ul></section>
+<section class="meth"><h2>Method</h2><ol class="method" start="1"><li>Bring a large pan of salted water to the boil for the pasta.</li><li>Warm the <strong>olive oil</strong> in a large frying pan over a medium-low heat and gently soften the <strong>½ red onion</strong> until translucent.</li><li>Add the <strong>3 garlic cloves</strong> and cook for about a minute, until fragrant.</li><li>Pour in the <strong>white wine</strong>, scraping up any browned bits, and let it reduce by about half.</li><li>Add the <strong>400ml passata</strong> and simmer for 5-10 minutes, until the sauce is as thick as you like it.</li><li>Meanwhile, cook the <strong>300g radiatori</strong> until a couple of minutes short of al dente.</li><li>Save a mugful of the pasta water, then drain.</li><li>Stir the <strong>125g mascarpone</strong> into the sauce until smooth.</li><li>Mix in the <strong>basil</strong> and <strong>45g Parmesan</strong>, and season with <strong>salt</strong> to taste.</li><li>Add the <strong>radiatori</strong> and the <strong>400g tin of chickpeas</strong> to the sauce and cook together for a minute or two, adding pasta water a splash at a time until it is the consistency you like.</li><li>Serve topped with extra <strong>Parmesan</strong>.</li></ol></section>
+</div>
+
+<p class="source">Source: <a href="https://montyandsons.co.nz/blogs/recipes/creamy-tomato-and-mascarpone-radiatori-with-chickpeas" rel="noreferrer">https://montyandsons.co.nz/blogs/recipes/creamy-tomato-and-mascarpone-radiatori-with-chickpeas</a></p></main>
+<script>
+/*
+ * Screen Wake Lock — the "keep screen awake" button on every recipe.
+ *
+ * The browser hands back a sentinel it is free to take away: hiding the page,
+ * by switching apps, locking the phone or changing tab, releases the lock and
+ * it does not come back on its own. So intent and lock are tracked separately.
+ * wakeWanted is what the cook asked for, and is what the button paints from;
+ * wakeSentinel is what we actually hold at this instant.
+ */
+let wakeWanted = false;
+let wakeSentinel = null;
+let wakeAcquiring = false;
+
+if ('wakeLock' in navigator) {
+  /*
+   * Marked on the root rather than on each button. The modal injects its own
+   * copy of the recipe markup long after this runs, so a reveal that walked the
+   * buttons present now would miss it — and reaching into openModal() would put
+   * knowledge of the modal in a file that otherwise has none.
+   */
+  document.documentElement.classList.add('has-wakelock');
+}
+
+function paintWake() {
+  document.querySelectorAll('[data-wake]').forEach(btn => {
+    btn.setAttribute('aria-pressed', String(wakeWanted));
+    btn.querySelector('[data-wake-label]').textContent =
+      wakeWanted ? 'Screen staying awake' : 'Keep screen awake';
+  });
+}
+
+async function acquireWake() {
+  // A tap and a return to visibility can both ask while a request is still in
+  // flight. A second one would strand the first sentinel: wakeSentinel holds
+  // whichever lands last, and nothing is left holding a reference to release
+  // the other — a screen kept awake by a lock no button can reach.
+  if (wakeAcquiring) return;
+  wakeAcquiring = true;
+  try {
+    wakeSentinel = null;
+    let held = null;
+    try {
+      held = await navigator.wakeLock.request('screen');
+    } catch {
+      // Refused — battery saver, or the page lost visibility mid-request. The
+      // button must not claim a lock we did not get.
+      wakeWanted = false;
+    }
+    // The request is asynchronous, so the button may have been tapped off while
+    // it was in flight. Honour the latest intent, not the one that started it.
+    if (held && !wakeWanted) {
+      try { await held.release(); } catch {}
+      held = null;
+    }
+    wakeSentinel = held;
+    if (held) held.addEventListener('release', onWakeRelease);
+  } finally {
+    wakeAcquiring = false;
+    paintWake();
+  }
+}
+
+async function releaseWake() {
+  wakeWanted = false;
+  const held = wakeSentinel;
+  wakeSentinel = null;
+  paintWake();
+  if (held) {
+    held.removeEventListener('release', onWakeRelease);
+    try { await held.release(); } catch {}
+  }
+}
+
+function onWakeRelease() {
+  wakeSentinel = null;
+  /*
+   * Hidden means the OS took the lock while the cook was elsewhere: the intent
+   * stands and visibilitychange asks for it back. Visible means we lost it with
+   * the page in front of them, and a button still reading "on" would be
+   * promising a screen we are no longer holding awake.
+   */
+  if (document.visibilityState === 'visible') {
+    wakeWanted = false;
+    paintWake();
+  }
+}
+
+// Delegated, so one registration covers the button baked into a recipe page and
+// the one the modal injects later, without either surface being a special case.
+document.addEventListener('click', e => {
+  if (!e.target.closest?.('[data-wake]')) return;
+  if (wakeWanted) releaseWake();
+  else { wakeWanted = true; acquireWake(); }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (wakeWanted && !wakeSentinel && document.visibilityState === 'visible') {
+    acquireWake();
+  }
+});
+</script></body>
+</html>
