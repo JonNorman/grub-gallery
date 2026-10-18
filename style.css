@@ -146,6 +146,22 @@ a { color: inherit; }
   padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 14px;
 }
 .suggest li:hover, .suggest li.on { background: var(--accent-soft); color: var(--accent); }
+/* Recipes open rather than filter, so they read as a different kind of thing:
+   set apart from the terms above them and tagged on the right. */
+.suggest__recipe { display: flex; align-items: baseline; gap: 12px; }
+.suggest li:not(.suggest__recipe) + .suggest__recipe {
+  margin-top: 4px; position: relative;
+}
+.suggest li:not(.suggest__recipe) + .suggest__recipe::before {
+  content: ''; position: absolute; top: -3px; left: 12px; right: 12px;
+  border-top: 1px solid var(--line);
+}
+.suggest__kind {
+  margin-left: auto; flex-shrink: 0;
+  font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted);
+}
+.suggest li.on .suggest__kind, .suggest li:hover .suggest__kind { color: inherit; opacity: .75; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
 /* Time sits on its own row: it is a different question from diet or meal, and

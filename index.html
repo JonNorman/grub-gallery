@@ -1295,6 +1295,10 @@ function currentWord() {
    a search comes back empty. Seventy-odd titles thrown in flat would bury that
    on any common substring — "co" alone is in a third of them. */
 const TITLES = DATA.map(r => r.name);
+/* A title suggestion is a recipe, not a word to filter on, so picking one opens
+   it — the same modal a tap on its card would. Keyed folded, so a box holding
+   the whole name in any case still finds it on enter. */
+const SLUG_BY_TITLE = new Map(DATA.map(r => [r.name.toLowerCase(), r.slug]));
 const SUGGEST_LIMIT = 8;
 const TITLE_SLOTS = 3;
 
@@ -1320,7 +1324,10 @@ function matchesFor(word) {
      recipe still gets eight ingredients. */
   const keptTitles = titles.slice(
     0, Math.max(TITLE_SLOTS, SUGGEST_LIMIT - terms.length));
-  return [...terms.slice(0, SUGGEST_LIMIT - keptTitles.length), ...keptTitles];
+  return [
+    ...terms.slice(0, SUGGEST_LIMIT - keptTitles.length).map(term => ({ term })),
+    ...keptTitles.map(term => ({ term, slug: SLUG_BY_TITLE.get(term.toLowerCase()) })),
+  ];
 }
 
 function hideSuggestions() {
@@ -1335,9 +1342,15 @@ function showSuggestions() {
   const options = matchesFor(currentWord());
   picked = -1;
   q.removeAttribute('aria-activedescendant');
-  suggest.innerHTML = options.map((term, i) =>
+  /* Recipes are labelled as such, because picking one does something else:
+     a term narrows the grid, a recipe opens. The label is text rather than
+     paint so a screen reader hears the difference too. */
+  suggest.innerHTML = options.map(({ term, slug }, i) =>
     '<li role="option" id="sug' + i + '" aria-selected="false" data-term="' +
-    escapeHtml(term) + '">' + escapeHtml(term) + '</li>').join('');
+    escapeHtml(term) + '"' +
+    (slug ? ' class="suggest__recipe" data-slug="' + escapeHtml(slug) + '"' : '') +
+    '>' + escapeHtml(term) +
+    (slug ? '<span class="suggest__kind">Recipe</span>' : '') + '</li>').join('');
   suggest.hidden = !options.length;
   q.setAttribute('aria-expanded', String(!suggest.hidden));
 }
@@ -1376,10 +1389,22 @@ function accept(term) {
   apply();
 }
 
+/* The query is left as typed: the grid behind the modal stays the search it
+   was opened from, and closing the modal hands focus back to the box. */
+function openFromSearch(slug) {
+  hideSuggestions();
+  openModal(slug);
+}
+
+function choose(option) {
+  if (option.dataset.slug) openFromSearch(option.dataset.slug);
+  else accept(option.dataset.term);
+}
+
 suggest.addEventListener('mousedown', e => {
   // mousedown, not click: blur would hide the list before a click landed.
   const option = e.target.closest('[data-term]');
-  if (option) { e.preventDefault(); accept(option.dataset.term); }
+  if (option) { e.preventDefault(); choose(option); }
 });
 
 q.addEventListener('keydown', e => {
@@ -1405,12 +1430,18 @@ q.addEventListener('keydown', e => {
     q.blur();
     return;
   }
+  // Enter with nothing highlighted, on a box holding a recipe's whole name,
+  // opens it: the name has been typed out, and there is nothing left to narrow.
+  if (e.key === 'Enter' && (suggest.hidden || picked < 0)) {
+    const slug = SLUG_BY_TITLE.get(q.value.trim().toLowerCase());
+    if (slug) { e.preventDefault(); openFromSearch(slug); return; }
+  }
   if (suggest.hidden) return;
   if (e.key === 'ArrowDown') { e.preventDefault(); highlight(picked + 1); }
   else if (e.key === 'ArrowUp') { e.preventDefault(); highlight(picked - 1); }
   else if (e.key === 'Enter' && picked >= 0) {
     e.preventDefault();
-    accept(suggest.children[picked].dataset.term);
+    choose(suggest.children[picked]);
   }
 });
 
