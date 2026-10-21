@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Honey Garlic Salmon · Grub Gallery</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A5%98%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<meta property="og:site_name" content="Grub Gallery">
+<meta property="og:title" content="Honey Garlic Salmon">
+<meta property="og:url" content="https://jonnorman.github.io/grub-gallery/honey-garlic-salmon.html">
+<meta property="og:type" content="article">
+<meta property="og:description" content="Salmon marinated in honey, soy, garlic and ginger, baked and finished with the reduced">
+<meta name="description" content="Salmon marinated in honey, soy, garlic and ginger, baked and finished with the reduced">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+<main class="recipe"><header><a class="back" href="index.html">&larr; All recipes</a><h1 id="recipeTitle">Honey Garlic Salmon</h1><p class="meta">Serves 4 · 35m · plus 15m-4h waiting</p><p class="tags"><span class="tag">pescatarian</span><span class="tag">fish</span><span class="tag">rice</span><span class="tag">dinner</span></p><p class="lede">Salmon marinated in honey, soy, garlic and ginger, baked and finished with the reduced</p></header>
+<div class="wake">
+<button class="btn btn--quiet wake__btn" type="button" data-wake aria-pressed="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/><path d="M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><span data-wake-label>Keep screen awake</span></button>
+</div>
+
+<p class="before"><strong>Before you start</strong> needs 15 minutes to 4 hours marinating.</p>
+<div class="columns">
+<section class="ing"><h2>Ingredients</h2><h3>Salmon</h3><ul class="ingredients"><li><label><input type="checkbox"><span>80ml soy sauce</span></label></li><li><label><input type="checkbox"><span>115g clear honey</span></label></li><li><label><input type="checkbox"><span>1 tbsp sesame oil</span></label></li><li><label><input type="checkbox"><span>3 garlic cloves, minced</span></label></li><li><label><input type="checkbox"><span>1 tsp ginger root, peeled and minced</span></label></li><li><label><input type="checkbox"><span>4 salmon fillets, about 170g each</span></label></li><li><label><input type="checkbox"><span>2 spring onions, chopped, to garnish (optional)</span></label></li><li><label><input type="checkbox"><span>1 tsp sesame seeds, to garnish (optional)</span></label></li></ul><h3>To serve</h3><ul class="ingredients"><li><label><input type="checkbox"><span>300g basmati rice</span></label></li><li><label><input type="checkbox"><span>1 head of broccoli, cut into florets</span></label></li><li><label><input type="checkbox"><span>4 pak choi, halved lengthways</span></label></li></ul></section>
+<section class="meth"><h2>Method</h2><h3>To marinate</h3><ol class="method" start="1"><li>Whisk the <strong>80ml soy sauce</strong>, <strong>115g clear honey</strong>, <strong>1 tbsp sesame oil</strong>, <strong>3 garlic cloves</strong> and <strong>1 tsp ginger root</strong> together in a bowl.</li><li>Put the <strong>4 salmon fillets</strong> in a shallow dish or food bag and pour over half the marinade, keeping the rest back for the glaze. Turn to coat and refrigerate for 15 minutes to 4 hours.</li></ol><h3>To cook</h3><ol class="method" start="3"><li>Heat the oven to 170°C fan and line a baking tray with foil or baking paper.</li><li>Lay the salmon skin-side down on the tray and bake at 170°C fan for 15–20 minutes, about 10 minutes per inch of thickness, until the thickest part reaches 63°C. Grill for the last minute for crisper edges.</li><li>Meanwhile, cook the <strong>300g basmati rice</strong> according to the packet.</li><li>Pour the reserved marinade into a small saucepan, bring to the boil, then simmer for 3–4 minutes until slightly thickened. Watch it closely — it bubbles up and burns quickly.</li><li>Steam the <strong>broccoli</strong> for 4–5 minutes, adding the <strong>4 pak choi</strong> for the last 2–3 minutes, until both are just tender.</li></ol><h3>To serve</h3><ol class="method" start="8"><li>Spoon the glaze over the salmon and scatter with the <strong>spring onions</strong> and <strong>sesame seeds</strong>. Serve with the rice, broccoli and pak choi.</li></ol></section>
+</div>
+<section class="notes"><h2>Notes</h2><ul><li>The rice, broccoli and pak choi are our addition; the original suggests steamed broccoli and rice.</li><li>If you add the used marinade to the glaze as well, boil it hard for several minutes.</li><li>Marinating can stretch to 8 hours at a push. Frozen salmon works if fully thawed.</li><li>Boneless chicken breasts or thighs work instead: marinate for about an hour and bake until cooked through.</li><li>Leftovers keep in the fridge for a few days.</li></ul></section>
+<p class="source">Source: <a href="https://sallysbakingaddiction.com/honey-garlic-salmon/" rel="noreferrer">https://sallysbakingaddiction.com/honey-garlic-salmon/</a></p></main>
+<script>
+/*
+ * Screen Wake Lock — the "keep screen awake" button on every recipe.
+ *
+ * The browser hands back a sentinel it is free to take away: hiding the page,
+ * by switching apps, locking the phone or changing tab, releases the lock and
+ * it does not come back on its own. So intent and lock are tracked separately.
+ * wakeWanted is what the cook asked for, and is what the button paints from;
+ * wakeSentinel is what we actually hold at this instant.
+ */
+let wakeWanted = false;
+let wakeSentinel = null;
+let wakeAcquiring = false;
+
+if ('wakeLock' in navigator) {
+  /*
+   * Marked on the root rather than on each button. The modal injects its own
+   * copy of the recipe markup long after this runs, so a reveal that walked the
+   * buttons present now would miss it — and reaching into openModal() would put
+   * knowledge of the modal in a file that otherwise has none.
+   */
+  document.documentElement.classList.add('has-wakelock');
+}
+
+function paintWake() {
+  document.querySelectorAll('[data-wake]').forEach(btn => {
+    btn.setAttribute('aria-pressed', String(wakeWanted));
+    btn.querySelector('[data-wake-label]').textContent =
+      wakeWanted ? 'Screen staying awake' : 'Keep screen awake';
+  });
+}
+
+async function acquireWake() {
+  // A tap and a return to visibility can both ask while a request is still in
+  // flight. A second one would strand the first sentinel: wakeSentinel holds
+  // whichever lands last, and nothing is left holding a reference to release
+  // the other — a screen kept awake by a lock no button can reach.
+  if (wakeAcquiring) return;
+  wakeAcquiring = true;
+  try {
+    wakeSentinel = null;
+    let held = null;
+    try {
+      held = await navigator.wakeLock.request('screen');
+    } catch {
+      // Refused — battery saver, or the page lost visibility mid-request. The
+      // button must not claim a lock we did not get.
+      wakeWanted = false;
+    }
+    // The request is asynchronous, so the button may have been tapped off while
+    // it was in flight. Honour the latest intent, not the one that started it.
+    if (held && !wakeWanted) {
+      try { await held.release(); } catch {}
+      held = null;
+    }
+    wakeSentinel = held;
+    if (held) held.addEventListener('release', onWakeRelease);
+  } finally {
+    wakeAcquiring = false;
+    paintWake();
+  }
+}
+
+async function releaseWake() {
+  wakeWanted = false;
+  const held = wakeSentinel;
+  wakeSentinel = null;
+  paintWake();
+  if (held) {
+    held.removeEventListener('release', onWakeRelease);
+    try { await held.release(); } catch {}
+  }
+}
+
+function onWakeRelease() {
+  wakeSentinel = null;
+  /*
+   * Hidden means the OS took the lock while the cook was elsewhere: the intent
+   * stands and visibilitychange asks for it back. Visible means we lost it with
+   * the page in front of them, and a button still reading "on" would be
+   * promising a screen we are no longer holding awake.
+   */
+  if (document.visibilityState === 'visible') {
+    wakeWanted = false;
+    paintWake();
+  }
+}
+
+// Delegated, so one registration covers the button baked into a recipe page and
+// the one the modal injects later, without either surface being a special case.
+document.addEventListener('click', e => {
+  if (!e.target.closest?.('[data-wake]')) return;
+  if (wakeWanted) releaseWake();
+  else { wakeWanted = true; acquireWake(); }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (wakeWanted && !wakeSentinel && document.visibilityState === 'visible') {
+    acquireWake();
+  }
+});
+</script></body>
+</html>
